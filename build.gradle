@@ -1,9 +1,13 @@
-
-
 allprojects {
     apply plugin: "java"
     apply plugin: "checkstyle"
     apply plugin: "pmd"
 
+    tasks.withType(JavaCompile).configureEach {
+        configure(options) {
+            options.compilerArgs.add("-Werror");
+        }
+    }
 }
+
 
