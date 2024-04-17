@@ -1,6 +1,4 @@
 plugins {
-	id 'java'
-    id 'checkstyle'
 }
 
 group = 'be.xplore.githubmetrics'

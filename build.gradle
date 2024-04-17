@@ -1,0 +1,9 @@
+
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "checkstyle"
+    apply plugin: "pmd"
+
+}
+
