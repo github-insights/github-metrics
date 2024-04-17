@@ -1,19 +1,25 @@
 plugins {
-	id 'java'
+    id 'java'
 }
 
 group = 'be.xplore.githubmetrics'
 version = '0.0.1-SNAPSHOT'
 
 java {
-  sourceCompatibility = '21'
+    sourceCompatibility = '21'
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
+}
+
+tasks.withType(JavaCompile).configureEach {
+    configure(options) {
+        options.compilerArgs.add("-Werror")
+    }
 }
 
 
