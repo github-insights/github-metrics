@@ -5,14 +5,12 @@ group = 'be.xplore.githubmetrics'
 version = '0.0.1-SNAPSHOT'
 
 java {
-  sourceCompatibility = '21'
+    sourceCompatibility = '21'
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
 }
-
-
