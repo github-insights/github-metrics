@@ -1,13 +1,61 @@
+plugins {
+    id 'jacoco'
+}
+
 allprojects {
     apply plugin: "java"
     apply plugin: "checkstyle"
     apply plugin: "pmd"
+    apply plugin: "jacoco"
+
+    repositories {
+        mavenCentral()
+    }
 
     tasks.withType(JavaCompile).configureEach {
         configure(options) {
-            options.compilerArgs.add("-Werror");
+            options.compilerArgs.add("-Werror")
         }
     }
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.named('test', Test) {
+        useJUnitPlatform()
+
+        maxHeapSize = '1G'
+
+        testLogging {
+            events "passed"
+        }
+    }
+
+    jacocoTestReport {
+        reports {
+            html.required = true
+            xml.required = true
+        }
+    }
+
+    test.finalizedBy(project.tasks.jacocoTestReport)
 }
+
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+    description = 'Generates an aggregate report from all subprojects'
+    dependsOn(subprojects.test)
+
+    additionalSourceDirs.from = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(subprojects.sourceSets.main.output)
+    executionData.from = files(subprojects.jacocoTestReport.executionData)
+
+    reports {
+        xml.required = true
+    }
+}
+
+build.finalizedBy(jacocoRootReport)
 
 
