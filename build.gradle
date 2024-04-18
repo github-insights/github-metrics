@@ -1,20 +1,39 @@
 plugins {
-    id 'jacoco'
+    id "org.sonarqube" version "5.0.0.4638"
 }
+
+
+version = '0.0.1-SNAPSHOT'
 
 allprojects {
     apply plugin: "java"
-    apply plugin: "checkstyle"
-    apply plugin: "pmd"
     apply plugin: "jacoco"
 
     repositories {
         mavenCentral()
     }
+}
+
+subprojects {
+    apply plugin: "checkstyle"
+    apply plugin: "pmd"
+
+    group = 'be.xplore.githubmetrics'
 
     tasks.withType(JavaCompile).configureEach {
         configure(options) {
             options.compilerArgs.add("-Werror")
+        }
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+    }
+
+    sonar {
+        properties {
+            property "sonar.sources", "src/main"
+            property "sonar.tests", "src/test"
         }
     }
     dependencies {
@@ -42,6 +61,17 @@ allprojects {
     test.finalizedBy(project.tasks.jacocoTestReport)
 }
 
+sonar {
+    properties {
+        property "sonar.projectKey", "github-insights_github-metrics"
+        property "sonar.organization", "github-insights"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.qualitygate.wait", "true"
+    }
+}
+
+
 task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
     description = 'Generates an aggregate report from all subprojects'
     dependsOn(subprojects.test)
@@ -57,5 +87,9 @@ task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
 }
 
 build.finalizedBy(jacocoRootReport)
+//build.finalizedBy(sonar)
+
+
+
 
 
