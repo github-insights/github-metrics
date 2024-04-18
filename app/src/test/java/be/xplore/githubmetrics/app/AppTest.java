@@ -8,7 +8,7 @@ public class AppTest {
     @Test
     public void testApp() {
         assertEquals(
-                "Hello Domain WebApi GithubAdapter",
+                "Hello Domain PrometheusExporter GithubAdapter",
                 App.hello()
 
         );
