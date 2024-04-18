@@ -7,8 +7,8 @@ version = '0.0.1-SNAPSHOT'
 
 dependencies {
     implementation project(':domain')
-    implementation project(':githubAdapter')
-    implementation project(':webApi')
+    implementation project(':github-adapter')
+    implementation project(':prometheus-exporter')
 
     implementation 'org.springframework.boot:spring-boot'
 }

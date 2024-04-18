@@ -6,5 +6,5 @@ rootProject.name = 'github-metrics'
 
 include 'app'
 include 'domain'
-include 'webApi'
-include 'githubAdapter'
+include 'prometheus-exporter'
+include 'github-adapter'
