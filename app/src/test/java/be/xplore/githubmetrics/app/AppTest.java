@@ -8,8 +8,9 @@ public class AppTest {
     @Test
     public void testApp() {
         assertEquals(
-                App.hello(),
-                "Hello Domain WebApi GithubAdapter"
+                "Hello Domain WebApi GithubAdapter",
+                App.hello()
+
         );
     }
 
