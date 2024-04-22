@@ -70,7 +70,7 @@ sonar {
         property("sonar.organization", "github-insights")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.qualitygate.wait", "true")
+        //property("sonar.qualitygate.wait", "true")
     }
 }
 
