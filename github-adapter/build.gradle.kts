@@ -11,7 +11,7 @@ dependencies {
     implementation(project(":domain"))
 
 
-    implementation("org.springframework:spring-context:6.1.6")
+    implementation("org.springframework:spring-context")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }

@@ -8,7 +8,7 @@ plugins {
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
-    implementation("org.springframework:spring-context:6.1.6")
+    implementation("org.springframework:spring-context")
 
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")

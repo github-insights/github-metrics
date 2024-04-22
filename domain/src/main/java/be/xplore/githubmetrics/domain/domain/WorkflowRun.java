@@ -20,6 +20,12 @@ public class WorkflowRun {
         };
     }
 
+    public WorkflowRun(int id, String name, RunStatus status) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "WorkflowRun{" +
