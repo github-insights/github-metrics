@@ -6,9 +6,11 @@ plugins {
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
-    "implementation"(project(":domain"))
-    "implementation"(project(":github-adapter"))
-    "implementation"(project(":prometheus-exporter"))
+    implementation(project(":domain"))
+    implementation(project(":github-adapter"))
+    implementation(project(":prometheus-exporter"))
 
-    "implementation"("org.springframework.boot:spring-boot")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot")
+
 }
