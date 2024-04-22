@@ -62,20 +62,21 @@ public class GithubAdapter implements WorkflowRunsQueryPort {
     }
 
     private HttpResponse<String> getResponse() throws IOException, InterruptedException, URISyntaxException {
-        var client = HttpClient.newHttpClient();
-        var parameterMap = new HashMap<String, Object>();
-        parameterMap.put("created", ">=2024-04-10");
-        var request = HttpRequest.newBuilder()
-                .uri(UriComponentsBuilder.newInstance()
-                        .uri(new URI("https://api.github.com/repos/github-insights/github-metrics/actions/runs"))
-                        .uriVariables(parameterMap)
-                        .build().toUri()
-                )
-                .header("X-Github-Api-Version", "2022-11-28")
-                .headers("Authorization", this.config.token())
-                .GET()
-                .build();
+        try (var client = HttpClient.newHttpClient()) {
+            var parameterMap = new HashMap<String, Object>();
+            parameterMap.put("created", ">=2024-04-10");
+            var request = HttpRequest.newBuilder()
+                    .uri(UriComponentsBuilder.newInstance()
+                            .uri(new URI("https://api.github.com/repos/github-insights/github-metrics/actions/runs"))
+                            .uriVariables(parameterMap)
+                            .build().toUri()
+                    )
+                    .header("X-Github-Api-Version", "2022-11-28")
+                    .headers("Authorization", this.config.token())
+                    .GET()
+                    .build();
 
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
     }
 }

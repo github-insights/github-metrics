@@ -18,7 +18,9 @@ public class PrometheusExporter implements WorkflowRunsExportPort {
     }
 
     @Override
-    public void exportWorkflowRunsStatusCounts(Map<WorkflowRun.RunStatus, Integer> statuses) {
+    public void exportWorkflowRunsStatusCounts(
+            Map<WorkflowRun.RunStatus, Integer> statuses
+    ) {
         for (Map.Entry<WorkflowRun.RunStatus, Integer> entry : statuses.entrySet()) {
             Gauge.builder(
                     "workflow_runs." + entry.getKey().toString().toLowerCase(),
@@ -28,4 +30,5 @@ public class PrometheusExporter implements WorkflowRunsExportPort {
         }
 
     }
+
 }

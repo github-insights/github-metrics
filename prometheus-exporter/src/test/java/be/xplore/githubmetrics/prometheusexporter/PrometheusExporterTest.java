@@ -1,14 +1,28 @@
 package be.xplore.githubmetrics.prometheusexporter;
 
-import org.junit.jupiter.api.Assertions;
+import be.xplore.githubmetrics.domain.domain.WorkflowRun;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
-public class PrometheusExporterTest {
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class PrometheusExporterTest {
+
+    private final MeterRegistry registry = new SimpleMeterRegistry();
+
     @Test
-    public void testPrometheusExporter() {
-        Assertions.assertEquals(
-                PrometheusExporterHello.hello(),
-                "PrometheusExporter"
+    void testPrometheusExporter() {
+        PrometheusExporter prometheusExporter = new PrometheusExporter(this.registry);
+        Map workflowRunStatuses = new HashMap();
+        workflowRunStatuses.put(WorkflowRun.RunStatus.DONE, 5);
+        prometheusExporter.exportWorkflowRunsStatusCounts(workflowRunStatuses);
+        assertEquals(
+                5,
+                registry.get("workflow_runs.done").gauge().value()
         );
     }
 
