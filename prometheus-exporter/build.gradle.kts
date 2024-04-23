@@ -9,10 +9,10 @@ version = "0.0.1-SNAPSHOT"
 
 dependencies {
     implementation(project(":domain"))
-    implementation("org.springframework:spring-web")
+    implementation("org.springframework:spring-context")
 
     implementation("io.micrometer:micrometer-registry-atlas")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.slf4j:slf4j-api")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
 }
