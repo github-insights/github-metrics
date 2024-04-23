@@ -13,7 +13,6 @@ dependencies {
 
     implementation("org.springframework:spring-context")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 tasks.getByName<BootJar>("bootJar") {

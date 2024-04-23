@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":github-adapter"))
     implementation(project(":prometheus-exporter"))
 
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
     implementation("org.springframework.boot:spring-boot")
 
 }
