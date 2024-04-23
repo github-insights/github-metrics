@@ -1,26 +1,11 @@
 package be.xplore.githubmetrics.domain.domain;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 public class WorkflowRun {
-    private final int id;
+    private final long id;
     private final String name;
-    private RunStatus status;
+    private final RunStatus status;
 
-    public WorkflowRun(JsonNode json) {
-        this.id = json.get("id").asInt();
-        this.name = json.get("name").toString();
-        this.status = switch (json.get("status").asText()) {
-            case "completed", "success" -> RunStatus.DONE;
-            case "action_required", "cancelled", "failure",
-                 "neutral", "skipped", "stale", "timed_out" -> RunStatus.FAILED;
-            case "in_progress", "queued", "requested",
-                 "waiting", "pending" -> RunStatus.PENDING;
-            default -> throw new IllegalStateException("Unexpected value: " + status);
-        };
-    }
-
-    public WorkflowRun(int id, String name, RunStatus status) {
+    public WorkflowRun(long id, String name, RunStatus status) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -33,10 +18,6 @@ public class WorkflowRun {
                 ", name='" + name + '\'' +
                 ", status=" + status +
                 '}';
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getName() {
