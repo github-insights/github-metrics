@@ -1,9 +1,9 @@
-package be.xplore.githubmetrics.domain.usecases;
+package be.xplore.githubmetrics.domain.providers.ports;
 
 import be.xplore.githubmetrics.domain.domain.Repository;
 
 import java.util.List;
 
-public interface GetAllRepositoriesUseCase {
+public interface RepositoriesProvider {
     List<Repository> getAllRepositories();
 }

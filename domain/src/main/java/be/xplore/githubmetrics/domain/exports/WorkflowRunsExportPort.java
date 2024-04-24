@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.usecases.ports.out;
+package be.xplore.githubmetrics.domain.exports;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 

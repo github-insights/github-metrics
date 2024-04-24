@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.prometheusexporter;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.usecases.ports.out.WorkflowRunsExportPort;
+import be.xplore.githubmetrics.domain.exports.WorkflowRunsExportPort;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
