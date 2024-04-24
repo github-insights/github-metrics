@@ -4,7 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app.github")
 public record GithubConfig(
+        String schema,
         String host,
+        String port,
         String token,
         String org
 ) {

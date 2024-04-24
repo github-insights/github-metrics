@@ -1,9 +1,7 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.usecases.ports.in.WorkflowRunsQueryPort;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRuns;
 import org.slf4j.Logger;
@@ -18,32 +16,32 @@ import java.util.List;
 public class WorkFlowRunsAdapter implements WorkflowRunsQueryPort {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkFlowRunsAdapter.class);
-    private final GithubConfig config;
     private final GithubAdapter githubAdapter;
 
-    public WorkFlowRunsAdapter(GithubConfig config, GithubAdapter githubAdapter) {
-        this.config = config;
+    public WorkFlowRunsAdapter(GithubAdapter githubAdapter) {
         this.githubAdapter = githubAdapter;
     }
 
     @Override
-    public List<WorkflowRun> getLastDaysWorkflows() throws GenericAdapterException {
+    public List<WorkflowRun> getLastDaysWorkflows(String repositoryName) {
         var parameterMap = new HashMap<String, String>();
         parameterMap.put("created", ">=2024-04-10");
-        GHActionRuns actionRuns = githubAdapter.getResponseSpec(
+
+        var responseSpec = githubAdapter.getResponseSpec(
                 MessageFormat.format(
-                        "{0}/repos/{1}/github-metrics/actions/runs",
-                        this.config.host(),
-                        this.config.org()
+                        "repos/{0}/{1}/actions/runs",
+                        this.githubAdapter.getConfig().org(),
+                        repositoryName
                 ),
-                new HashMap<>()
+                parameterMap
         ).body(GHActionRuns.class);
-        if (actionRuns == null) {
+
+        if (responseSpec == null) {
             throw new UnableToParseGHActionRunsException(
                     "Unexpected error in parsing Workflow Runs"
             );
         }
-        List<WorkflowRun> workflowRuns = actionRuns.getWorkFlowRuns();
+        List<WorkflowRun> workflowRuns = responseSpec.getWorkFlowRuns();
         LOGGER.debug("number of unique workflow runs: {}", workflowRuns.size());
         return workflowRuns;
     }

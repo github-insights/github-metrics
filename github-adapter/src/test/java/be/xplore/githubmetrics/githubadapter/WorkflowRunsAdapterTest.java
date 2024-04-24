@@ -16,9 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkflowRunsAdapterTest {
 
-    GithubConfig githubConfig = new GithubConfig("http://localhost:9090", "placeholder-token", "github-insights");
+    private final GithubConfig githubConfig = new GithubConfig(
+            "http", "localhost", "9090", "",
+            "github-insights"
+    );
     private final WorkFlowRunsAdapter workflowRunsAdapter = new WorkFlowRunsAdapter(
-            githubConfig,
             new GithubAdapter(githubConfig)
     );
 
@@ -27,14 +29,18 @@ class WorkflowRunsAdapterTest {
         WireMockServer wireMockServer = new WireMockServer(9090);
         wireMockServer.start();
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs"))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D2024-04-10"))
                 .willReturn(
                         aResponse()
                                 .withHeader("Content-Type", "application/json")
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                 )
         );
-        assertFalse(workflowRunsAdapter.getLastDaysWorkflows().isEmpty());
+        assertFalse(
+                workflowRunsAdapter
+                        .getLastDaysWorkflows("github-metrics")
+                        .isEmpty()
+        );
 
         wireMockServer.stop();
     }
@@ -44,7 +50,7 @@ class WorkflowRunsAdapterTest {
         WireMockServer wireMockServer = new WireMockServer(9090);
         wireMockServer.start();
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs"))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D2024-04-10"))
                 .willReturn(
                         aResponse()
                                 .withHeader("Content-Type", "application/json")
@@ -53,9 +59,8 @@ class WorkflowRunsAdapterTest {
         );
         assertThrows(
                 UnableToParseGHActionRunsException.class,
-                () -> {
-                    workflowRunsAdapter.getLastDaysWorkflows();
-                });
+                () -> workflowRunsAdapter.getLastDaysWorkflows("github-metrics")
+        );
 
         wireMockServer.stop();
     }
