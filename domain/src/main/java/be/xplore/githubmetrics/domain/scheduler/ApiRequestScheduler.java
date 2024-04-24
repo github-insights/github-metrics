@@ -1,6 +1,7 @@
 package be.xplore.githubmetrics.domain.scheduler;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
+import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.usecases.WorkflowRunsUseCase;
 import be.xplore.githubmetrics.domain.usecases.ports.in.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.domain.usecases.ports.out.WorkflowRunsExportPort;
@@ -32,15 +33,19 @@ public class ApiRequestScheduler implements WorkflowRunsUseCase {
                 WorkflowRun.RunStatus.class
         );
 
-        this.workflowRunsQueryPort.getLastDaysWorkflows().forEach(
-                workflowRun -> {
-                    var count = map.getOrDefault(
-                            workflowRun.getStatus(),
-                            0
-                    );
-                    count++;
-                    map.put(workflowRun.getStatus(), count);
-                });
+        try {
+            this.workflowRunsQueryPort.getLastDaysWorkflows().forEach(
+                    workflowRun -> {
+                        var count = map.getOrDefault(
+                                workflowRun.getStatus(),
+                                0
+                        );
+                        count++;
+                        map.put(workflowRun.getStatus(), count);
+                    });
+        } catch (GenericAdapterException e) {
+            LOGGER.error(e.getMessage());
+        }
 
         this.workflowRunsExportPorts.forEach(p ->
                 p.exportWorkflowRunsStatusCounts(map)
