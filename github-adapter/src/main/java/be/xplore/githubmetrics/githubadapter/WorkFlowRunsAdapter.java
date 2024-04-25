@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +27,11 @@ public class WorkFlowRunsAdapter implements WorkflowRunsQueryPort {
     @Override
     public List<WorkflowRun> getLastDaysWorkflows(String repositoryName) {
         var parameterMap = new HashMap<String, String>();
-        parameterMap.put("created", ">=2024-04-10");
+        parameterMap.put(
+                "created",
+                ">=" + LocalDate.now().minusDays(1)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        );
 
         var responseSpec = githubAdapter.getResponseSpec(
                 MessageFormat.format(

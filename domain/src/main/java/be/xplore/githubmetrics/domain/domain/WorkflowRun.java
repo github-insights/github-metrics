@@ -28,6 +28,10 @@ public class WorkflowRun {
         return status;
     }
 
+    public long getId() {
+        return id;
+    }
+
     public enum RunStatus {
         DONE, PENDING, FAILED
     }
