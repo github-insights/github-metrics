@@ -6,4 +6,8 @@ management:
         web:
             exposure:
                 include: [ "prometheus" ]
-app.github.host: "https://api.github.com"
+app:
+    github:
+        schema: https
+        host: "api.github.com"
+        org: "github-insights"

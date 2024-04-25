@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.usecases.ports.in.RepositoriesQueryPort;
+import be.xplore.githubmetrics.domain.queries.RepositoriesQueryPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHRepositoryArrayException;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHRepository;

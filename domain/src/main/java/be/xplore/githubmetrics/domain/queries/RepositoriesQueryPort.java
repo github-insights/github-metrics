@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.usecases.ports.in;
+package be.xplore.githubmetrics.domain.queries;
 
 import be.xplore.githubmetrics.domain.domain.Repository;
 

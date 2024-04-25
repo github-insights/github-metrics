@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.usecases.ports.in.WorkflowRunsQueryPort;
+import be.xplore.githubmetrics.domain.queries.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRuns;
 import org.slf4j.Logger;

@@ -1,10 +1,10 @@
 package be.xplore.githubmetrics.domain.schedulers;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.usecases.GetAllRepositoriesUseCase;
-import be.xplore.githubmetrics.domain.usecases.WorkflowRunsUseCase;
-import be.xplore.githubmetrics.domain.usecases.ports.in.WorkflowRunsQueryPort;
-import be.xplore.githubmetrics.domain.usecases.ports.out.WorkflowRunsExportPort;
+import be.xplore.githubmetrics.domain.exports.WorkflowRunsExportPort;
+import be.xplore.githubmetrics.domain.providers.ports.RepositoriesProvider;
+import be.xplore.githubmetrics.domain.providers.ports.WorkflowRunsProvider;
+import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,22 +12,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class WorkflowRunsRequestScheduler implements WorkflowRunsUseCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunsRequestScheduler.class);
-    private final WorkflowRunsQueryPort workflowRunsQueryPort;
+    private final WorkflowRunsProvider workflowRunsProvider;
     private final List<WorkflowRunsExportPort> workflowRunsExportPorts;
-    private final GetAllRepositoriesUseCase getAllRepositoriesUseCase;
+    private final RepositoriesProvider getAllRepositoriesUseCase;
 
     public WorkflowRunsRequestScheduler(
-            WorkflowRunsQueryPort workflowRunsQueryPort,
+            WorkflowRunsProvider workflowRunsProvider,
             List<WorkflowRunsExportPort> workflowRunsExportPorts,
-            GetAllRepositoriesUseCase getAllRepositoriesUseCase
+            RepositoriesProvider getAllRepositoriesUseCase
     ) {
-        this.workflowRunsQueryPort = workflowRunsQueryPort;
+        this.workflowRunsProvider = workflowRunsProvider;
         this.workflowRunsExportPorts = workflowRunsExportPorts;
         this.getAllRepositoriesUseCase = getAllRepositoriesUseCase;
     }
@@ -39,32 +40,34 @@ public class WorkflowRunsRequestScheduler implements WorkflowRunsUseCase {
 
         var allRepositories = this.getAllRepositoriesUseCase.getAllRepositories();
 
-        var countsMap = new EnumMap<WorkflowRun.RunStatus, Integer>(
+        var workflowRunsPerStatus = new EnumMap<WorkflowRun.RunStatus, Integer>(
                 WorkflowRun.RunStatus.class
         );
 
-        allRepositories.forEach(repository ->
-                this.addActionsToCounts(repository.getName(), countsMap));
+        allRepositories.forEach(repository -> {
+            var workflowRuns = this.workflowRunsProvider.getLastDaysWorkflowRuns(repository.getName());
+            updateStatusCounts(workflowRuns, workflowRunsPerStatus);
+        });
 
-        this.workflowRunsExportPorts.forEach(p ->
-                p.exportWorkflowRunsStatusCounts(countsMap));
+        this.workflowRunsExportPorts.forEach(port ->
+                port.exportWorkflowRunsStatusCounts(workflowRunsPerStatus));
 
         LOGGER.info("Finished scheduled workflow runs task");
     }
 
-    private void addActionsToCounts(
-            String repositoryName,
-            EnumMap<WorkflowRun.RunStatus, Integer> counts
+    private void updateStatusCounts(
+            List<WorkflowRun> workflowRuns,
+            Map<WorkflowRun.RunStatus, Integer> workflowRunsPerStatus
     ) {
-        this.workflowRunsQueryPort.getLastDaysWorkflows(repositoryName).forEach(
-                workflowRun -> {
-                    var count = counts.getOrDefault(
-                            workflowRun.getStatus(),
-                            0
-                    );
-                    count++;
-                    counts.put(workflowRun.getStatus(), count);
-                });
+        workflowRuns.forEach(workflowRun ->
+                workflowRunsPerStatus.put(
+                        workflowRun.getStatus(),
+                        1 + workflowRunsPerStatus.getOrDefault(
+                                workflowRun.getStatus(),
+                                0
+                        )
+                )
+        );
     }
 
 }
