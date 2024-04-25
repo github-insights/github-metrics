@@ -20,7 +20,7 @@ public class GithubAdapter {
                 .defaultHeaders(
                         httpHeaders -> {
                             httpHeaders.set("X-Github-Api-Version", "2022-11-28");
-                            httpHeaders.set("Authorization", this.config.token());
+                            httpHeaders.setBearerAuth(this.config.token());
                         })
                 .build();
     }

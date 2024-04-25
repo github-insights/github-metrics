@@ -11,7 +11,6 @@ dependencies {
     implementation(project(":domain"))
     implementation("org.springframework:spring-context")
 
-    implementation("io.micrometer:micrometer-registry-atlas")
     implementation("org.slf4j:slf4j-api")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
