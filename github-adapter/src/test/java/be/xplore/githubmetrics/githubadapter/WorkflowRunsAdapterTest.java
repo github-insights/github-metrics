@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -22,11 +24,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkflowRunsAdapterTest {
 
+    private final Repository repository;
     private WireMockServer wireMockServer;
     private WorkFlowRunsAdapter workflowRunsAdapter;
 
+    WorkflowRunsAdapterTest() {
+        this.repository = new Repository(123L, "github-metrics", "", new ArrayList<>());
+    }
+
     @BeforeEach
     void setupWireMock() {
+
         this.wireMockServer = new WireMockServer(
                 wireMockConfig().dynamicPort()
         );
@@ -63,7 +71,7 @@ class WorkflowRunsAdapterTest {
         );
         assertFalse(
                 workflowRunsAdapter
-                        .getLastDaysWorkflows("github-metrics")
+                        .getLastDaysWorkflows(repository)
                         .isEmpty()
         );
     }
@@ -80,7 +88,7 @@ class WorkflowRunsAdapterTest {
         );
         assertThrows(
                 UnableToParseGHActionRunsException.class,
-                () -> workflowRunsAdapter.getLastDaysWorkflows("github-metrics")
+                () -> workflowRunsAdapter.getLastDaysWorkflows(repository)
         );
     }
 

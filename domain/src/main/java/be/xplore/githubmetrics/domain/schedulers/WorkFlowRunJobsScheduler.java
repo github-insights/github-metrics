@@ -2,9 +2,7 @@ package be.xplore.githubmetrics.domain.schedulers;
 
 import be.xplore.githubmetrics.domain.domain.Job;
 import be.xplore.githubmetrics.domain.exports.WorkflowRunJobsExportPort;
-import be.xplore.githubmetrics.domain.providers.ports.RepositoriesProvider;
-import be.xplore.githubmetrics.domain.providers.ports.WorkflowRunsProvider;
-import be.xplore.githubmetrics.domain.queries.WorkFlowRunJobsQueryPort;
+import be.xplore.githubmetrics.domain.providers.usecases.GetAllJobsOfLastDayUseCase;
 import be.xplore.githubmetrics.domain.schedulers.ports.JobsUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,20 +19,13 @@ import java.util.stream.Stream;
 public class WorkFlowRunJobsScheduler implements JobsUseCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkFlowRunJobsScheduler.class);
-
-    private final WorkflowRunsProvider workflowRunsProvider;
-    private final RepositoriesProvider repositoriesProvider;
-    private final WorkFlowRunJobsQueryPort workFlowRunJobsQueryPort;
+    private final GetAllJobsOfLastDayUseCase getAllJobsOfLastDayUseCase;
     private final List<WorkflowRunJobsExportPort> workflowRunJobsExportPorts;
 
     public WorkFlowRunJobsScheduler(
-            WorkflowRunsProvider workflowRunsProvider,
-            RepositoriesProvider repositoriesProvider,
-            WorkFlowRunJobsQueryPort workFlowRunJobsQueryPort, List<WorkflowRunJobsExportPort> workflowRunJobsExportPorts
+            GetAllJobsOfLastDayUseCase getAllJobsOfLastDayUseCase, List<WorkflowRunJobsExportPort> workflowRunJobsExportPorts
     ) {
-        this.workflowRunsProvider = workflowRunsProvider;
-        this.repositoriesProvider = repositoriesProvider;
-        this.workFlowRunJobsQueryPort = workFlowRunJobsQueryPort;
+        this.getAllJobsOfLastDayUseCase = getAllJobsOfLastDayUseCase;
         this.workflowRunJobsExportPorts = workflowRunJobsExportPorts;
     }
 
@@ -43,19 +34,9 @@ public class WorkFlowRunJobsScheduler implements JobsUseCase {
     public void retrieveAndExportJobs() {
         LOGGER.info("Running scheduled jobs task");
 
-        var allRepositories = this.repositoriesProvider.getAllRepositories();
+        List<Job> jobs = getAllJobsOfLastDayUseCase.getAllJobsOfLastDay();
 
-        var jobLabelCounts = createJobLabelsCountsMap();
-
-        allRepositories.forEach(repository ->
-                this.workflowRunsProvider.getLastDaysWorkflowRuns(repository.getName())
-                        .forEach(workflowRun ->
-                                updateJobLabelsCounts(
-                                        workFlowRunJobsQueryPort.getWorkFlowRunJobs(
-                                                repository.getName(),
-                                                workflowRun.getId()),
-                                        jobLabelCounts
-                                )));
+        Map<JobLabels, Integer> jobLabelCounts = this.getJobLabelsCounts(jobs);
 
         LOGGER.debug("Job Metrics to export: {}", jobLabelCounts.size());
 
@@ -74,13 +55,15 @@ public class WorkFlowRunJobsScheduler implements JobsUseCase {
                                 new JobLabels(status, conclusion),
                                 0
                         )));
+
         return jobLabelCounts;
     }
 
-    private void updateJobLabelsCounts(
-            List<Job> jobs,
-            Map<JobLabels, Integer> jobLabelsCounts
+    private Map<JobLabels, Integer> getJobLabelsCounts(
+            List<Job> jobs
     ) {
+        Map<JobLabels, Integer> jobLabelsCounts = this.createJobLabelsCountsMap();
+
         jobs.forEach(job -> {
             JobLabels jobLabels = new JobLabels(
                     job.getStatus(),
@@ -91,6 +74,7 @@ public class WorkFlowRunJobsScheduler implements JobsUseCase {
                     1 + jobLabelsCounts.get(jobLabels)
             );
         });
+        return jobLabelsCounts;
     }
 
     public record JobLabels(
