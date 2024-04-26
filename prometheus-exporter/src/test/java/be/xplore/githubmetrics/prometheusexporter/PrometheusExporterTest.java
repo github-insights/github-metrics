@@ -17,7 +17,7 @@ class PrometheusExporterTest {
     @Test
     void testPrometheusExporter() {
         PrometheusExporter prometheusExporter = new PrometheusExporter(this.registry);
-        Map workflowRunStatuses = new HashMap();
+        Map<WorkflowRun.RunStatus, Integer> workflowRunStatuses = new HashMap<>();
         workflowRunStatuses.put(WorkflowRun.RunStatus.DONE, 5);
         prometheusExporter.exportWorkflowRunsStatusCounts(workflowRunStatuses);
         assertEquals(

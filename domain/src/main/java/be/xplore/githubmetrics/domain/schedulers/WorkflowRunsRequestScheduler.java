@@ -33,7 +33,7 @@ public class WorkflowRunsRequestScheduler implements WorkflowRunsUseCase {
         this.getAllRepositoriesUseCase = getAllRepositoriesUseCase;
     }
 
-    @Scheduled(fixedRate = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedRate = 200, timeUnit = TimeUnit.SECONDS)
     @Override
     public void retrieveAndExportWorkflowRuns() {
         LOGGER.info("Running scheduled workflow runs task.");

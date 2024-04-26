@@ -1,0 +1,22 @@
+management:
+    endpoint:
+        prometheus:
+            enabled:
+                true
+    endpoints:
+        web:
+            exposure:
+                include: [ "prometheus" ]
+    metrics:
+        enable:
+            all: false
+            workflow_runs: true
+app:
+    scheduling:
+        enable: false
+    github:
+        schema: http
+        host: "localhost"
+        port: 8081
+        org: "github-insights"
+

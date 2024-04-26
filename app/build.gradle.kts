@@ -1,3 +1,5 @@
+val wiremockVersion: String by project
+
 plugins {
     id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.4"
@@ -12,5 +14,10 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     implementation("org.springframework.boot:spring-boot")
+
+
+    testImplementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.wiremock:wiremock-jetty12:$wiremockVersion")
 
 }
