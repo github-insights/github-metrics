@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/java,gradle,intellij,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,intellij,git
 
+**/.DS_Store
 **/.env
 
 ### Git ###

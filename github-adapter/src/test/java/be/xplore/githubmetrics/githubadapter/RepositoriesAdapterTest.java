@@ -21,7 +21,7 @@ class RepositoriesAdapterTest {
 
     RepositoriesAdapterTest() {
         var config = new GithubConfig(
-                "http", "localhost", "9090", "",
+                "http", "localhost", "8081", "",
                 "github-insights"
         );
         this.repositoriesAdapter = new RepositoriesAdapter(
@@ -31,9 +31,9 @@ class RepositoriesAdapterTest {
 
     @BeforeEach
     void setUp() {
-        this.wireMockServer = new WireMockServer(9090);
+        this.wireMockServer = new WireMockServer(8081);
         this.wireMockServer.start();
-        configureFor(9090);
+        configureFor(8081);
     }
 
     @AfterEach
@@ -46,7 +46,7 @@ class RepositoriesAdapterTest {
         stubFor(get("/orgs/github-insights/repos")
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("100-github-repositories.json")));
+                        .withBodyFile("100RepositoriesTestData.json")));
 
         var list = this.repositoriesAdapter.getAllRepositories();
         assertEquals(100, list.size());
@@ -59,15 +59,15 @@ class RepositoriesAdapterTest {
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:9090/orgs/github-insights/repos?since=369>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:8081/orgs/github-insights/repos?since=369>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("2-github-repository.json")));
+                        .withBodyFile("2RepositoriesTestData.json")));
 
         stubFor(get("/orgs/github-insights/repos?since=369")
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("2-github-repository.json")));
+                        .withBodyFile("2RepositoriesTestData.json")));
 
         var list = this.repositoriesAdapter.getAllRepositories();
         assertEquals(4, list.size());
@@ -92,18 +92,18 @@ class RepositoriesAdapterTest {
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:9090/orgs/github-insights/repos?since=1>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:8081/orgs/github-insights/repos?since=1>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("2-github-repository.json")));
+                        .withBodyFile("2RepositoriesTestData.json")));
         stubFor(get("/orgs/github-insights/repos?since=1")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:9090/orgs/github-insights/repos?since=2>; rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:8081/orgs/github-insights/repos?since=2>; rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("2-github-repository.json")));
+                        .withBodyFile("2RepositoriesTestData.json")));
         var list = this.repositoriesAdapter.getAllRepositories();
         assertEquals(4, list.size());
 

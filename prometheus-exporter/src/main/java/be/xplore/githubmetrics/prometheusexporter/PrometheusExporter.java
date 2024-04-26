@@ -24,11 +24,14 @@ public class PrometheusExporter implements WorkflowRunsExportPort, WorkflowRunJo
             Map<WorkflowRun.RunStatus, Integer> statuses
     ) {
         for (Map.Entry<WorkflowRun.RunStatus, Integer> entry : statuses.entrySet()) {
-            Gauge.builder(
-                    "workflow_runs." + entry.getKey().toString().toLowerCase(),
-                    entry,
-                    Map.Entry::getValue
-            ).register(this.registry);
+            Gauge
+                    .builder(
+                            "workflow_runs." + entry.getKey().toString().toLowerCase(),
+                            entry,
+                            Map.Entry::getValue
+                    )
+                    .strongReference(true)
+                    .register(this.registry);
         }
 
     }

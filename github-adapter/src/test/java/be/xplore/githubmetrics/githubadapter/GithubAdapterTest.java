@@ -19,7 +19,7 @@ class GithubAdapterTest {
     private final GithubAdapter githubAdapter = new GithubAdapter(new GithubConfig(
             "http",
             "localhost",
-            "9090",
+            "8081",
             "",
             "github-insights"
     ));
@@ -27,9 +27,9 @@ class GithubAdapterTest {
 
     @BeforeEach
     void setUp() {
-        this.wireMockServer = new WireMockServer(9090);
+        this.wireMockServer = new WireMockServer(8081);
         this.wireMockServer.start();
-        configureFor(9090);
+        configureFor(8081);
     }
 
     @AfterEach
@@ -89,7 +89,7 @@ class GithubAdapterTest {
                 .willReturn(ok().withBody(expected_body))
         );
         var actual_body = this.githubAdapter
-                .getResponseSpec("http://localhost:9090/test/url")
+                .getResponseSpec("http://localhost:8081/test/url")
                 .body(String.class);
         assertEquals(expected_body, actual_body);
     }
@@ -102,7 +102,7 @@ class GithubAdapterTest {
                 .willReturn(ok().withBody(expected_body))
         );
         var actual_body = this.githubAdapter
-                .getResponseSpec("http://localhost:9090/test/url?param=value")
+                .getResponseSpec("http://localhost:8081/test/url?param=value")
                 .body(String.class);
         assertEquals(expected_body, actual_body);
     }
