@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 import be.xplore.githubmetrics.domain.queries.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
@@ -25,7 +26,7 @@ public class WorkFlowRunsAdapter implements WorkflowRunsQueryPort {
     }
 
     @Override
-    public List<WorkflowRun> getLastDaysWorkflows(String repositoryName) {
+    public List<WorkflowRun> getLastDaysWorkflows(Repository repository) {
         var parameterMap = new HashMap<String, String>();
         parameterMap.put(
                 "created",
@@ -37,7 +38,7 @@ public class WorkFlowRunsAdapter implements WorkflowRunsQueryPort {
                 MessageFormat.format(
                         "repos/{0}/{1}/actions/runs",
                         this.githubAdapter.getConfig().org(),
-                        repositoryName
+                        repository.getName()
                 ),
                 parameterMap
         ).body(GHActionRuns.class);
@@ -47,7 +48,7 @@ public class WorkFlowRunsAdapter implements WorkflowRunsQueryPort {
                     "Unexpected error in parsing Workflow Runs"
             );
         }
-        List<WorkflowRun> workflowRuns = responseSpec.getWorkFlowRuns();
+        List<WorkflowRun> workflowRuns = responseSpec.getWorkFlowRuns(repository);
         LOGGER.debug("number of unique workflow runs: {}", workflowRuns.size());
         return workflowRuns;
     }

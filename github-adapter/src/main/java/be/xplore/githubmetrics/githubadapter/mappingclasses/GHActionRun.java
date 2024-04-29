@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
+import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 
 public record GHActionRun(
@@ -10,11 +11,12 @@ public record GHActionRun(
         String created_at,
         String updated_at
 ) {
-    WorkflowRun getWorkFlowRun() {
+    WorkflowRun getWorkFlowRun(Repository repository) {
         return new WorkflowRun(
                 this.id,
                 this.name,
-                this.convertStatus()
+                this.convertStatus(),
+                repository
         );
     }
 

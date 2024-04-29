@@ -1,6 +1,6 @@
 package be.xplore.githubmetrics.app;
 
-import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
+import be.xplore.githubmetrics.domain.schedulers.ports.JobsUseCase;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.hamcrest.Matchers;
@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -30,42 +29,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = RANDOM_PORT
 )
 @AutoConfigureObservability
-class WorkflowRunsIntegrationTest {
+public class JobCountsIntegrationTest {
 
     @Autowired
-    private WorkflowRunsUseCase workflowRunsUseCase;
+    private JobsUseCase jobsUseCase;
     @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-
         stubFor(WireMock.get("/orgs/github-insights/repos")
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
 
-        stubFor(WireMock.get(urlEqualTo(
-                                "/repos/github-insights/github-metrics/actions/runs?created=%3E%3D"
-                                        + LocalDate.now()
-                                        .minusDays(1)
-                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        ))
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D"
+                                + LocalDate.now()
+                                .minusDays(1)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        )
                         .willReturn(ok()
                                 .withHeader("Content-Type", "application/json")
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                         )
         );
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs")
+                .willReturn(ok()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("JobsValidTestData.json")));
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs")
+                .willReturn(ok()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("JobsValidTestData.json")));
     }
 
     @Test
     void retrieveAndExportShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
-        this.workflowRunsUseCase.retrieveAndExportWorkflowRuns();
+        this.jobsUseCase.retrieveAndExportJobs();
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/actuator/prometheus")
         ).andExpect(
-                content().string(Matchers.containsString("workflow_runs_done 2.0"))
+                content().string(Matchers.containsString("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\",} 2.0"))
         );
     }
 }

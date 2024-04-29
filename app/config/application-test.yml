@@ -11,6 +11,7 @@ management:
         enable:
             all: false
             workflow_runs: true
+            workflow_run_jobs: true
 app:
     scheduling:
         enable: false

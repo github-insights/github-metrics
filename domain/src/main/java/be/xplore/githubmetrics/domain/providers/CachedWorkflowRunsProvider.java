@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.domain.providers;
 
+import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 import be.xplore.githubmetrics.domain.providers.ports.WorkflowRunsProvider;
 import be.xplore.githubmetrics.domain.queries.WorkflowRunsQueryPort;
@@ -19,7 +20,7 @@ public class CachedWorkflowRunsProvider implements WorkflowRunsProvider {
 
     @Override
     @Cacheable("workflowruns.lastday")
-    public List<WorkflowRun> getLastDaysWorkflowRuns(String repository) {
+    public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
         return workflowRunsQueryPort.getLastDaysWorkflows(repository);
     }
 }
