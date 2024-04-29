@@ -24,15 +24,15 @@ import java.util.concurrent.ScheduledFuture;
 @Component
 @EnableScheduling
 @EnableCaching
-public class TaskScheduler implements SchedulingConfigurer {
+public class MetricScheduler implements SchedulingConfigurer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricScheduler.class);
     private final WorkflowRunsUseCase workflowRunsUseCase;
     private final JobsUseCase jobsUseCase;
     private final SchedulingConfig schedulingConfig;
     private final Map<String, ScheduledFuture<?>> workflowRunsJob = new HashMap<>();
 
-    public TaskScheduler(WorkflowRunsUseCase workflowRunsUseCase, JobsUseCase jobsUseCase, SchedulingConfig schedulingConfig) {
+    public MetricScheduler(WorkflowRunsUseCase workflowRunsUseCase, JobsUseCase jobsUseCase, SchedulingConfig schedulingConfig) {
         this.workflowRunsUseCase = workflowRunsUseCase;
         this.jobsUseCase = jobsUseCase;
         this.schedulingConfig = schedulingConfig;

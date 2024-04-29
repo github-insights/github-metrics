@@ -18,11 +18,11 @@ class PrometheusExporterTest {
     void testPrometheusExporter() {
         PrometheusExporter prometheusExporter = new PrometheusExporter(this.registry);
         Map<WorkflowRun.RunStatus, Integer> workflowRunStatuses = new HashMap<>();
-        workflowRunStatuses.put(WorkflowRun.RunStatus.DONE, 5);
+        workflowRunStatuses.put(WorkflowRun.RunStatus.FAILED, 5);
         prometheusExporter.exportWorkflowRunsStatusCounts(workflowRunStatuses);
         assertEquals(
                 5,
-                registry.get("workflow_runs.done").gauge().value()
+                registry.get("workflow_runs").gauge().value()
         );
     }
 
