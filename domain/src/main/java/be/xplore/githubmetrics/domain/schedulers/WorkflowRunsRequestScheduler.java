@@ -6,13 +6,12 @@ import be.xplore.githubmetrics.domain.providers.usecases.GetAllWorkflowRunsOfLas
 import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Component
@@ -23,13 +22,14 @@ public class WorkflowRunsRequestScheduler implements WorkflowRunsUseCase {
     private final List<WorkflowRunsExportPort> workflowRunsExportPorts;
 
     public WorkflowRunsRequestScheduler(
-            GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase, List<WorkflowRunsExportPort> workflowRunsExportPorts
+            GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase,
+            List<WorkflowRunsExportPort> workflowRunsExportPorts
     ) {
         this.getAllWorkflowRunsOfLastDayUseCase = getAllWorkflowRunsOfLastDayUseCase;
         this.workflowRunsExportPorts = workflowRunsExportPorts;
     }
 
-    @Scheduled(fixedRate = 200, timeUnit = TimeUnit.SECONDS)
+    @CacheEvict(value = "workflowruns.lastday", allEntries = true, beforeInvocation = true)
     @Override
     public void retrieveAndExportWorkflowRuns() {
         LOGGER.info("Running scheduled workflow runs task.");

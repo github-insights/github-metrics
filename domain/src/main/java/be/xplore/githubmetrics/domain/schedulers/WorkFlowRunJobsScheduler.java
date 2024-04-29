@@ -6,13 +6,11 @@ import be.xplore.githubmetrics.domain.providers.usecases.GetAllJobsOfLastDayUseC
 import be.xplore.githubmetrics.domain.schedulers.ports.JobsUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Component
@@ -29,7 +27,6 @@ public class WorkFlowRunJobsScheduler implements JobsUseCase {
         this.workflowRunJobsExportPorts = workflowRunJobsExportPorts;
     }
 
-    @Scheduled(fixedRate = 60, timeUnit = TimeUnit.SECONDS)
     @Override
     public void retrieveAndExportJobs() {
         LOGGER.info("Running scheduled jobs task");
@@ -43,7 +40,7 @@ public class WorkFlowRunJobsScheduler implements JobsUseCase {
         workflowRunJobsExportPorts.forEach(port ->
                 port.exportWorkflowRunJobsLabelsCounts(jobLabelCounts));
 
-        LOGGER.info("Finished Scheduled workflow runs task");
+        LOGGER.info("Finished Scheduled Jobs task");
     }
 
     private Map<JobLabels, Integer> createJobLabelsCountsMap() {
