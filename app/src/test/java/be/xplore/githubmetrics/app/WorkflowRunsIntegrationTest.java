@@ -65,7 +65,7 @@ class WorkflowRunsIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/actuator/prometheus")
         ).andExpect(
-                content().string(Matchers.containsString("workflow_runs_done 2.0"))
+                content().string(Matchers.containsString("workflow_runs{status=\"DONE\",} 2.0"))
         );
     }
 }
