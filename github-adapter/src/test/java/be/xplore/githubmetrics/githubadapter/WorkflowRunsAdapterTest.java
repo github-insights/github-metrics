@@ -3,6 +3,7 @@ package be.xplore.githubmetrics.githubadapter;
 import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
@@ -47,8 +48,10 @@ class WorkflowRunsAdapterTest {
                 "github-insights"
         );
         workflowRunsAdapter = new WorkFlowRunsAdapter(
-                new GithubAdapter(githubConfig)
-        );
+                new GithubAdapter(
+                        githubConfig,
+                        new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
+                ));
         configureFor("localhost", wireMockServer.port());
     }
 
