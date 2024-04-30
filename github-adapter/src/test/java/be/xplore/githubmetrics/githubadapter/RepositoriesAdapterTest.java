@@ -2,7 +2,7 @@ package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
-import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHRepositoryArrayException;
+import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +82,7 @@ class RepositoriesAdapterTest {
                         .withBody("invalid body")));
 
         assertThrows(
-                UnableToParseGHRepositoryArrayException.class,
+                UnableToParseGithubResponseException.class,
                 this.repositoriesAdapter::getAllRepositories
         );
     }

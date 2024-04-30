@@ -4,7 +4,7 @@ import be.xplore.githubmetrics.domain.domain.Job;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
-import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHWorkFlowRunJobsException;
+import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkflowRunJobsAdapterTest {
     private WireMockServer wireMockServer;
-    private WorkFlowRunJobsAdapter workFlowRunJobsAdapter;
+    private WorkflowRunJobsAdapter workFlowRunJobsAdapter;
 
     @BeforeEach
     void setupWireMock() {
@@ -39,7 +39,7 @@ class WorkflowRunJobsAdapterTest {
                 "token",
                 "github-insights"
         );
-        workFlowRunJobsAdapter = new WorkFlowRunJobsAdapter(
+        workFlowRunJobsAdapter = new WorkflowRunJobsAdapter(
                 new GithubAdapter(
                         githubConfig,
                         new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
@@ -82,7 +82,7 @@ class WorkflowRunJobsAdapterTest {
                 )
         );
         assertThrows(
-                UnableToParseGHWorkFlowRunJobsException.class,
+                UnableToParseGithubResponseException.class,
                 () -> workFlowRunJobsAdapter.getWorkFlowRunJobs(
                         "github-metrics",
                         8828175949L)

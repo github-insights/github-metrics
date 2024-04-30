@@ -1,11 +1,15 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 @Component
@@ -17,6 +21,39 @@ public class GithubAdapter {
     public GithubAdapter(GithubConfig config, RestClient restClient) {
         this.config = config;
         this.restClient = restClient;
+    }
+
+    protected static <T> ResponseEntity<T> getEntity(
+            RestClient.ResponseSpec response,
+            Class<T> clazz
+    ) {
+        try {
+            return response.toEntity(clazz);
+        } catch (RestClientException e) {
+            throw new UnableToParseGithubResponseException(
+                    MessageFormat.format(
+                            "Could not parse Githubs response into {0}!",
+                            clazz
+                    ),
+                    e
+            );
+        }
+    }
+
+    protected static <T> T getBody(
+            RestClient.ResponseSpec response,
+            Class<T> clazz
+    ) {
+        var body = GithubAdapter.getEntity(response, clazz).getBody();
+        if (body == null) {
+            throw new UnableToParseGithubResponseException(
+                    MessageFormat.format(
+                            "Could not get Body out of response trying to parse to {0}!",
+                            clazz
+                    )
+            );
+        }
+        return body;
     }
 
     public RestClient.ResponseSpec getResponseSpec(String path, Map<String, String> queryParams) {
