@@ -4,7 +4,7 @@ import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
-import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHActionRunsException;
+import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ class WorkflowRunsAdapterTest {
 
     private final Repository repository;
     private WireMockServer wireMockServer;
-    private WorkFlowRunsAdapter workflowRunsAdapter;
+    private WorkflowRunsAdapter workflowRunsAdapter;
 
     WorkflowRunsAdapterTest() {
         this.repository = new Repository(123L, "github-metrics", "", new ArrayList<>());
@@ -47,7 +47,7 @@ class WorkflowRunsAdapterTest {
                 "token",
                 "github-insights"
         );
-        workflowRunsAdapter = new WorkFlowRunsAdapter(
+        workflowRunsAdapter = new WorkflowRunsAdapter(
                 new GithubAdapter(
                         githubConfig,
                         new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
@@ -90,7 +90,7 @@ class WorkflowRunsAdapterTest {
                 )
         );
         assertThrows(
-                UnableToParseGHActionRunsException.class,
+                UnableToParseGithubResponseException.class,
                 () -> workflowRunsAdapter.getLastDaysWorkflows(repository)
         );
     }

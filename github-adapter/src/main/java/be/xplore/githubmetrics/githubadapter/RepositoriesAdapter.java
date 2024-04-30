@@ -3,14 +3,11 @@ package be.xplore.githubmetrics.githubadapter;
 import be.xplore.githubmetrics.domain.domain.Repository;
 import be.xplore.githubmetrics.domain.queries.RepositoriesQueryPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
-import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHRepositoryArrayException;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -46,31 +43,23 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
     }
 
     private List<Repository> fetchRepositories(String path, Map<String, String> parameters) {
-        ResponseEntity<GHRepository[]> responseEntity = this.getEntity(
+        ResponseEntity<GHRepository[]> responseEntity = GithubAdapter.getEntity(
                 this.githubAdapter
-                        .getResponseSpec(path, parameters)
+                        .getResponseSpec(path, parameters),
+                GHRepository[].class
         );
 
         return conditionallyFetchNextPage(responseEntity);
     }
 
     private List<Repository> fetchRepositories(String fullUrl) {
-        ResponseEntity<GHRepository[]> responseEntity = this.getEntity(
+        ResponseEntity<GHRepository[]> responseEntity = GithubAdapter.getEntity(
                 this.githubAdapter
-                        .getResponseSpec(fullUrl)
+                        .getResponseSpec(fullUrl),
+                GHRepository[].class
         );
 
         return conditionallyFetchNextPage(responseEntity);
-    }
-
-    private ResponseEntity<GHRepository[]> getEntity(
-            RestClient.ResponseSpec response
-    ) {
-        try {
-            return response.toEntity(GHRepository[].class);
-        } catch (RestClientException e) {
-            throw new UnableToParseGHRepositoryArrayException(e.getMessage());
-        }
     }
 
     private List<Repository> conditionallyFetchNextPage(
