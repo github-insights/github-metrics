@@ -14,15 +14,9 @@ public class GithubAdapter {
     private final RestClient restClient;
     private final GithubConfig config;
 
-    public GithubAdapter(GithubConfig config) {
+    public GithubAdapter(GithubConfig config, RestClient restClient) {
         this.config = config;
-        this.restClient = RestClient.builder()
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.set("X-Github-Api-Version", "2022-11-28");
-                            httpHeaders.setBearerAuth(this.config.token());
-                        })
-                .build();
+        this.restClient = restClient;
     }
 
     public RestClient.ResponseSpec getResponseSpec(String path, Map<String, String> queryParams) {

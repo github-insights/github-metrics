@@ -1,10 +1,12 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
 
@@ -16,13 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GithubAdapterTest {
 
-    private final GithubAdapter githubAdapter = new GithubAdapter(new GithubConfig(
+    private final GithubConfig githubConfig = new GithubConfig(
             "http",
             "localhost",
             "8081",
             "",
             "github-insights"
-    ));
+    );
+
+    private final RestClient restClient = new GithubRestClientConfiguration().getGithubRestClient(githubConfig);
+    private final GithubAdapter githubAdapter = new GithubAdapter(githubConfig, restClient);
     private WireMockServer wireMockServer;
 
     @BeforeEach

@@ -3,6 +3,7 @@ package be.xplore.githubmetrics.githubadapter;
 import be.xplore.githubmetrics.domain.domain.Job;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGHWorkFlowRunJobsException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
@@ -38,7 +39,11 @@ class WorkflowRunJobsAdapterTest {
                 "token",
                 "github-insights"
         );
-        workFlowRunJobsAdapter = new WorkFlowRunJobsAdapter(new GithubAdapter(githubConfig));
+        workFlowRunJobsAdapter = new WorkFlowRunJobsAdapter(
+                new GithubAdapter(
+                        githubConfig,
+                        new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
+                ));
         configureFor("localhost", wireMockServer.port());
     }
 
