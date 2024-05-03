@@ -28,4 +28,7 @@ jobs:
             -   name: Submit Sonar Report
                 env:
                     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                    APP_SCHEDULING_WORKFLOWRUNSINTERVAL: "30 */5 * * * ?"
+                    export APP_SCHEDULING_JOBSINTERVAL: "0 */1 * * * ?"
+
                 run: ./gradlew sonar

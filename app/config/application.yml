@@ -1,6 +1,6 @@
 logging:
     level:
-        be.xplore.githubmetrics: INFO
+        be.xplore.githubmetrics: DEBUG
 management:
     endpoints:
         web:
@@ -14,7 +14,10 @@ management:
             enabled: true
 
 app:
+    scheduling:
+        enable: true
     github:
         schema: https
         host: "api.github.com"
+        port: 443
         org: "github-insights"
