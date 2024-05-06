@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import org.slf4j.Logger;
@@ -17,10 +18,12 @@ public class GithubAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubAdapter.class);
     private final RestClient restClient;
     private final GithubConfig config;
+    private final GithubApiAuthorization githubApiAuthorization;
 
-    public GithubAdapter(GithubConfig config, RestClient restClient) {
-        this.config = config;
+    public GithubAdapter(RestClient restClient, GithubConfig config, GithubApiAuthorization githubApiAuthorization) {
         this.restClient = restClient;
+        this.config = config;
+        this.githubApiAuthorization = githubApiAuthorization;
     }
 
     protected static <T> ResponseEntity<T> getEntity(
@@ -71,13 +74,17 @@ public class GithubAdapter {
                     LOGGER.debug(builder.toUriString());
                     return builder.build();
 
-                }).retrieve();
+                })
+                .headers(this.githubApiAuthorization.getAuthHeader())
+                .retrieve();
+
     }
 
     public RestClient.ResponseSpec getResponseSpec(String fullUrl) {
         LOGGER.info("Doing full url request for url: {}", fullUrl);
         return restClient.get()
                 .uri(fullUrl)
+                .headers(this.githubApiAuthorization.getAuthHeader())
                 .retrieve();
     }
 

@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
@@ -7,34 +8,54 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.web.client.RestClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RepositoriesAdapterTest {
-    private final GithubConfig githubConfig = new GithubConfig(
-            "http",
-            "localhost",
-            "8081",
-            "",
-            "github-insights"
-    );
 
-    private final RestClient restClient = new GithubRestClientConfiguration().getGithubRestClient(githubConfig);
-    private final GithubAdapter githubAdapter = new GithubAdapter(githubConfig, restClient);
-    private final RepositoriesAdapter repositoriesAdapter = new RepositoriesAdapter(githubConfig, githubAdapter);
     private WireMockServer wireMockServer;
+    private RepositoriesAdapter repositoriesAdapter;
 
     @BeforeEach
     void setUp() {
-        this.wireMockServer = new WireMockServer(8081);
-        this.wireMockServer.start();
-        configureFor(8081);
+        wireMockServer = new WireMockServer(
+                wireMockConfig().dynamicPort()
+        );
+
+        wireMockServer.start();
+        GithubConfig githubConfig = new GithubConfig(
+                "http",
+                "localhost",
+                String.valueOf(wireMockServer.port()),
+                "github-insights",
+                new GithubConfig.Application(
+                        "123",
+                        "123456",
+                        "pem-key"
+                )
+        );
+        RestClient restClient = new GithubRestClientConfiguration().getGithubRestClient(githubConfig);
+        GithubApiAuthorization mockGithubApiAuthorization = Mockito.mock(GithubApiAuthorization.class);
+        Mockito.when(mockGithubApiAuthorization.getAuthHeader()).thenReturn(httpHeaders -> {
+            httpHeaders.setBearerAuth("token");
+        });
+        repositoriesAdapter = new RepositoriesAdapter(
+                githubConfig,
+                new GithubAdapter(
+                        restClient,
+                        githubConfig,
+                        mockGithubApiAuthorization
+                ));
+
+        configureFor("localhost", wireMockServer.port());
     }
 
     @AfterEach
@@ -53,14 +74,14 @@ class RepositoriesAdapterTest {
         assertEquals(100, list.size());
     }
 
-    //
     @Test
     void getAllRepositoriesShouldFollowLinkHeader() {
         stubFor(get("/orgs/github-insights/repos")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:8081/orgs/github-insights/repos?since=369>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=369>; " +
+                                        "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("2RepositoriesTestData.json")));
@@ -93,7 +114,8 @@ class RepositoriesAdapterTest {
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:8081/orgs/github-insights/repos?since=1>; rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=1>; " +
+                                        "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("2RepositoriesTestData.json")));
@@ -101,7 +123,8 @@ class RepositoriesAdapterTest {
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:8081/orgs/github-insights/repos?since=2>; rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
+                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=2>; " +
+                                        "rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("2RepositoriesTestData.json")));

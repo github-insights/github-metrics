@@ -1,0 +1,11 @@
+{
+    "token": "Sa6akjsNtPuAdI3f25urtrfN2Ztnpfb0Q6dxU",
+    "expires_at": "2024-05-03T09:44:30Z",
+    "permissions": {
+        "organization_administration": "read",
+        "organization_projects": "read",
+        "actions": "read",
+        "metadata": "read"
+    },
+    "repository_selection": "all"
+}

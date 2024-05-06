@@ -7,7 +7,14 @@ public record GithubConfig(
         String schema,
         String host,
         String port,
-        String token,
-        String org
+        String org,
+        Application application
+
 ) {
+    public record Application(
+            String id,
+            String installId,
+            String pem
+    ) {
+    }
 }
