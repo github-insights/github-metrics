@@ -1,27 +1,25 @@
-package be.xplore.githubmetrics.domain.usecases;
+package be.xplore.githubmetrics.domain.workflowrun;
 
-import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.queries.RepositoriesQueryPort;
-import be.xplore.githubmetrics.domain.queries.WorkflowRunsQueryPort;
+import be.xplore.githubmetrics.domain.repository.RepositoriesQueryPort;
+import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class DefaultGetAllWorkflowRunsOfLastDayUseCase implements GetAllWorkflowRunsOfLastDayUseCase {
+public class GetAllWorkflowRunsOfLastDayUseCase {
     private final RepositoriesQueryPort repositoriesQuery;
 
     private final WorkflowRunsQueryPort workflowRunsQuery;
 
-    public DefaultGetAllWorkflowRunsOfLastDayUseCase(
+    public GetAllWorkflowRunsOfLastDayUseCase(
             RepositoriesQueryPort repositoriesQuery,
             WorkflowRunsQueryPort workflowRunsQuery) {
         this.repositoriesQuery = repositoriesQuery;
         this.workflowRunsQuery = workflowRunsQuery;
     }
 
-    @Override
     public List<WorkflowRun> getAllWorkflowRunsOfLastDay() {
         List<Repository> repositories = repositoriesQuery.getAllRepositories();
         return repositories.stream().map(

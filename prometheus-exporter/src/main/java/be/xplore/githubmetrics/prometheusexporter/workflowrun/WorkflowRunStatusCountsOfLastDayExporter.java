@@ -1,7 +1,8 @@
-package be.xplore.githubmetrics.prometheusexporter.workflowruns;
+package be.xplore.githubmetrics.prometheusexporter.workflowrun;
 
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.usecases.GetAllWorkflowRunsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;
@@ -38,7 +39,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();
 
-        Map<WorkflowRun.RunStatus, Integer> workflowRunsStatusCountsMap
+        Map<WorkflowRunStatus, Integer> workflowRunsStatusCountsMap
                 = this.getStatusCounts(workflowRuns);
 
         this.publishWorkflowRunsStatusCountsGauges(
@@ -48,8 +49,8 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         LOGGER.info("Finished scheduled workflow runs task");
     }
 
-    private void publishWorkflowRunsStatusCountsGauges(Map<WorkflowRun.RunStatus, Integer> statuses) {
-        for (Map.Entry<WorkflowRun.RunStatus, Integer> entry : statuses.entrySet()) {
+    private void publishWorkflowRunsStatusCountsGauges(Map<WorkflowRunStatus, Integer> statuses) {
+        for (Map.Entry<WorkflowRunStatus, Integer> entry : statuses.entrySet()) {
             Gauge.builder("workflow_runs",
                             entry,
                             Map.Entry::getValue
@@ -59,19 +60,19 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         }
     }
 
-    private Map<WorkflowRun.RunStatus, Integer> createStatusCountsMap() {
-        EnumMap<WorkflowRun.RunStatus, Integer> workflowRunStatusCountsMap = new EnumMap<>(WorkflowRun.RunStatus.class);
+    private Map<WorkflowRunStatus, Integer> createStatusCountsMap() {
+        EnumMap<WorkflowRunStatus, Integer> workflowRunStatusCountsMap = new EnumMap<>(WorkflowRunStatus.class);
 
-        Stream.of(WorkflowRun.RunStatus.values()).forEach(
+        Stream.of(WorkflowRunStatus.values()).forEach(
                 runStatus -> workflowRunStatusCountsMap.put(runStatus, 0));
 
         return workflowRunStatusCountsMap;
     }
 
-    private Map<WorkflowRun.RunStatus, Integer> getStatusCounts(
+    private Map<WorkflowRunStatus, Integer> getStatusCounts(
             List<WorkflowRun> workflowRuns
     ) {
-        Map<WorkflowRun.RunStatus, Integer> workflowRunStatusCountsMap
+        Map<WorkflowRunStatus, Integer> workflowRunStatusCountsMap
                 = this.createStatusCountsMap();
 
         workflowRuns.forEach(workflowRun ->

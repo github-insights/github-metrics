@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,10 @@ import java.util.Map;
 public class GithubAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubAdapter.class);
     private final RestClient restClient;
-    private final GithubConfig config;
+    private final GithubProperties config;
     private final GithubApiAuthorization githubApiAuthorization;
 
-    public GithubAdapter(RestClient restClient, GithubConfig config, GithubApiAuthorization githubApiAuthorization) {
+    public GithubAdapter(RestClient restClient, GithubProperties config, GithubApiAuthorization githubApiAuthorization) {
         this.restClient = restClient;
         this.config = config;
         this.githubApiAuthorization = githubApiAuthorization;
@@ -88,7 +88,7 @@ public class GithubAdapter {
                 .retrieve();
     }
 
-    public GithubConfig getConfig() {
+    public GithubProperties getConfig() {
         return config;
     }
 }

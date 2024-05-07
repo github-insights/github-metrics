@@ -1,12 +1,13 @@
 package be.xplore.githubmetrics.githubadapter;
 
-import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
 import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
-import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
+import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
@@ -31,7 +32,7 @@ class JobsAdapterTest {
     private final WorkflowRun workflowRun = new WorkflowRun(
             8828175949L,
             "Workflow Run",
-            WorkflowRun.RunStatus.DONE,
+            WorkflowRunStatus.DONE,
             new Repository(
                     8828175049L,
                     "github-metrics",
@@ -48,18 +49,18 @@ class JobsAdapterTest {
         );
 
         wireMockServer.start();
-        GithubConfig githubConfig = new GithubConfig(
+        GithubProperties githubProperties = new GithubProperties(
                 "http",
                 "localhost",
                 String.valueOf(wireMockServer.port()),
                 "github-insights",
-                new GithubConfig.Application(
+                new GithubProperties.Application(
                         "123",
                         "123456",
                         "pem-key"
                 )
         );
-        RestClient restClient = new GithubRestClientConfiguration().getGithubRestClient(githubConfig);
+        RestClient restClient = new GithubRestClientConfig().getGithubRestClient(githubProperties);
         GithubApiAuthorization mockGithubApiAuthorization = Mockito.mock(GithubApiAuthorization.class);
         Mockito.when(mockGithubApiAuthorization.getAuthHeader()).thenReturn(httpHeaders -> {
             httpHeaders.setBearerAuth("token");
@@ -67,7 +68,7 @@ class JobsAdapterTest {
         jobsAdapter = new JobsAdapter(
                 new GithubAdapter(
                         restClient,
-                        githubConfig,
+                        githubProperties,
                         mockGithubApiAuthorization
                 ));
         configureFor("localhost", wireMockServer.port());

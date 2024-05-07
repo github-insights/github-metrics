@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 )
 @Configuration
 @EnableScheduling
-public class SchedulingConfiguration {
+public class SchedulingConfig {
 
     @Bean
     TaskScheduler taskScheduler() {

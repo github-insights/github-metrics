@@ -1,7 +1,8 @@
 package be.xplore.githubmetrics.domain;
 
-import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
+import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ class DomainTest {
         WorkflowRun workflowRun = new WorkflowRun(
                 12,
                 "Test Workflow Run",
-                WorkflowRun.RunStatus.DONE,
+                WorkflowRunStatus.DONE,
                 new Repository(123L, "", "", new ArrayList<>())
         );
 

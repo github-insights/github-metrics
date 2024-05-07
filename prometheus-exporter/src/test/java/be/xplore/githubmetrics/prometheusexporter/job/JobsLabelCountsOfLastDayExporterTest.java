@@ -1,7 +1,9 @@
-package be.xplore.githubmetrics.prometheusexporter.jobs;
+package be.xplore.githubmetrics.prometheusexporter.job;
 
-import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.usecases.GetAllJobsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.job.GetAllJobsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.job.model.JobConclusion;
+import be.xplore.githubmetrics.domain.job.model.JobStatus;
 import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -23,7 +25,7 @@ class JobsLabelCountsOfLastDayExporterTest {
     private GetAllJobsOfLastDayUseCase mockUseCase;
     private MeterRegistry registry;
 
-    private List<Job> getJobs(Job.JobStatus status, Job.JobConclusion conclusion, int num) {
+    private List<Job> getJobs(JobStatus status, JobConclusion conclusion, int num) {
         return IntStream.range(0, num)
                 .mapToObj(n -> new Job(0L, 0L, status, conclusion))
                 .toList();
@@ -37,7 +39,7 @@ class JobsLabelCountsOfLastDayExporterTest {
         Mockito.when(mockProperties.workflowRunsInterval()).thenReturn("");
 
         this.jobsLabelCountsOfLastDayExporter = new JobsLabelCountsOfLastDayExporter(
-                mockUseCase, mockProperties, registry
+                this.mockUseCase, mockProperties, registry
         );
     }
 
@@ -45,15 +47,15 @@ class JobsLabelCountsOfLastDayExporterTest {
     void jobsWithDifferentStatusesAndConclusionsShouldBeCountedCorrectly() {
         Mockito.when(this.mockUseCase.getAllJobsOfLastDay()).thenReturn(
                 Stream.of(
-                                getJobs(Job.JobStatus.DONE, Job.JobConclusion.FAILURE, 1),
-                                getJobs(Job.JobStatus.IN_PROGRESS, Job.JobConclusion.FAILURE, 2),
-                                getJobs(Job.JobStatus.PENDING, Job.JobConclusion.FAILURE, 3),
-                                getJobs(Job.JobStatus.DONE, Job.JobConclusion.NEUTRAL, 4),
-                                getJobs(Job.JobStatus.IN_PROGRESS, Job.JobConclusion.NEUTRAL, 5),
-                                getJobs(Job.JobStatus.PENDING, Job.JobConclusion.NEUTRAL, 6),
-                                getJobs(Job.JobStatus.DONE, Job.JobConclusion.SUCCESS, 7),
-                                getJobs(Job.JobStatus.IN_PROGRESS, Job.JobConclusion.SUCCESS, 8),
-                                getJobs(Job.JobStatus.PENDING, Job.JobConclusion.SUCCESS, 9)
+                                getJobs(JobStatus.DONE, JobConclusion.FAILURE, 1),
+                                getJobs(JobStatus.IN_PROGRESS, JobConclusion.FAILURE, 2),
+                                getJobs(JobStatus.PENDING, JobConclusion.FAILURE, 3),
+                                getJobs(JobStatus.DONE, JobConclusion.NEUTRAL, 4),
+                                getJobs(JobStatus.IN_PROGRESS, JobConclusion.NEUTRAL, 5),
+                                getJobs(JobStatus.PENDING, JobConclusion.NEUTRAL, 6),
+                                getJobs(JobStatus.DONE, JobConclusion.SUCCESS, 7),
+                                getJobs(JobStatus.IN_PROGRESS, JobConclusion.SUCCESS, 8),
+                                getJobs(JobStatus.PENDING, JobConclusion.SUCCESS, 9)
                         ).flatMap(Collection::stream)
                         .collect(Collectors.toList())
         );

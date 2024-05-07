@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
-import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
+import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,25 +31,25 @@ class GithubAdapterTest {
         );
 
         wireMockServer.start();
-        GithubConfig githubConfig = new GithubConfig(
+        GithubProperties githubProperties = new GithubProperties(
                 "http",
                 "localhost",
                 String.valueOf(wireMockServer.port()),
                 "github-insights",
-                new GithubConfig.Application(
+                new GithubProperties.Application(
                         "123",
                         "123456",
                         "pem-key"
                 )
         );
-        RestClient restClient = new GithubRestClientConfiguration().getGithubRestClient(githubConfig);
+        RestClient restClient = new GithubRestClientConfig().getGithubRestClient(githubProperties);
         GithubApiAuthorization mockGithubApiAuthorization = Mockito.mock(GithubApiAuthorization.class);
         Mockito.when(mockGithubApiAuthorization.getAuthHeader()).thenReturn(httpHeaders -> {
             httpHeaders.setBearerAuth("token");
         });
         githubAdapter = new GithubAdapter(
                 restClient,
-                githubConfig,
+                githubProperties,
                 mockGithubApiAuthorization);
 
         configureFor(wireMockServer.port());

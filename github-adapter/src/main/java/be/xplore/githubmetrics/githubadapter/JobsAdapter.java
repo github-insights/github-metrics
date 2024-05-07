@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
-import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.queries.JobsQueryPort;
+import be.xplore.githubmetrics.domain.job.JobsQueryPort;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHWorkflowRunJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

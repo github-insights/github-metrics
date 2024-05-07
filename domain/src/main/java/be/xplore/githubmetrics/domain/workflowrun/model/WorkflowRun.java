@@ -1,12 +1,14 @@
-package be.xplore.githubmetrics.domain.domain;
+package be.xplore.githubmetrics.domain.workflowrun.model;
+
+import be.xplore.githubmetrics.domain.repository.Repository;
 
 public class WorkflowRun {
     private final long id;
     private final String name;
-    private final RunStatus status;
+    private final WorkflowRunStatus status;
     private final Repository repository;
 
-    public WorkflowRun(long id, String name, RunStatus status, Repository repository) {
+    public WorkflowRun(long id, String name, WorkflowRunStatus status, Repository repository) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -27,7 +29,7 @@ public class WorkflowRun {
         return name;
     }
 
-    public RunStatus getStatus() {
+    public WorkflowRunStatus getStatus() {
         return status;
     }
 
@@ -37,9 +39,5 @@ public class WorkflowRun {
 
     public Repository getRepository() {
         return repository;
-    }
-
-    public enum RunStatus {
-        DONE, PENDING, FAILED
     }
 }

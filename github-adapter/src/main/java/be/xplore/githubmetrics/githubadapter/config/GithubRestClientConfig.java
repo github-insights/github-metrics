@@ -5,10 +5,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class GithubRestClientConfiguration {
+public class GithubRestClientConfig {
 
     @Bean
-    public RestClient getGithubRestClient(GithubConfig githubConfig) {
+    public RestClient getGithubRestClient(GithubProperties githubProperties) {
 
         return RestClient.builder()
                 .defaultHeaders(

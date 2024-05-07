@@ -1,6 +1,6 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
-import be.xplore.githubmetrics.domain.domain.Repository;
+import be.xplore.githubmetrics.domain.repository.Repository;
 
 import java.util.List;
 

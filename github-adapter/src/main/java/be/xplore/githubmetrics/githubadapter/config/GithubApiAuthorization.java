@@ -23,11 +23,11 @@ import java.util.function.Consumer;
 @Component
 public class GithubApiAuthorization {
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubApiAuthorization.class);
-    private final GithubConfig githubConfig;
+    private final GithubProperties githubProperties;
     private final RestClient restClient;
 
-    public GithubApiAuthorization(GithubConfig githubConfig, RestClient restClient) {
-        this.githubConfig = githubConfig;
+    public GithubApiAuthorization(GithubProperties githubProperties, RestClient restClient) {
+        this.githubProperties = githubProperties;
         this.restClient = restClient;
     }
 
@@ -37,10 +37,10 @@ public class GithubApiAuthorization {
         var accessToken = this.restClient.post()
                 .uri(MessageFormat.format(
                         "{0}://{1}:{2}/app/installations/{3}/access_tokens",
-                        githubConfig.schema(),
-                        githubConfig.host(),
-                        githubConfig.port(),
-                        githubConfig.application().installId()))
+                        githubProperties.schema(),
+                        githubProperties.host(),
+                        githubProperties.port(),
+                        githubProperties.application().installId()))
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(
                         jwtToken
                 ))
@@ -56,14 +56,14 @@ public class GithubApiAuthorization {
     private String createAppIdJwt() {
         LOGGER.debug("Generating JWT from GH APP ID");
         try {
-            JWK jwk = JWK.parseFromPEMEncodedObjects(githubConfig.application().pem());
+            JWK jwk = JWK.parseFromPEMEncodedObjects(githubProperties.application().pem());
 
             SignedJWT signedJWT = new SignedJWT(
                     new JWSHeader.Builder(JWSAlgorithm.RS256)
                             .keyID(jwk.getKeyID())
                             .build(),
                     new JWTClaimsSet.Builder()
-                            .issuer(this.githubConfig.application().id())
+                            .issuer(this.githubProperties.application().id())
                             .issueTime(this.getDateOneMinuteAgo())
                             .expirationTime(this.getDateInTenMinutes())
                             .build()

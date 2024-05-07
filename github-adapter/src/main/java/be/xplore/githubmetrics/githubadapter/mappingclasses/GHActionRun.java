@@ -1,7 +1,8 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
-import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
+import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
 
 public record GHActionRun(
         long id,
@@ -20,14 +21,14 @@ public record GHActionRun(
         );
     }
 
-    WorkflowRun.RunStatus convertStatus() {
+    WorkflowRunStatus convertStatus() {
         return switch (this.status) {
-            case "completed", "success" -> WorkflowRun.RunStatus.DONE;
+            case "completed", "success" -> WorkflowRunStatus.DONE;
             case "action_required", "cancelled", "failure",
                     "neutral", "skipped", "stale", "timed_out" ->
-                    WorkflowRun.RunStatus.FAILED;
+                    WorkflowRunStatus.FAILED;
             case "in_progress", "queued", "requested",
-                    "waiting", "pending" -> WorkflowRun.RunStatus.PENDING;
+                    "waiting", "pending" -> WorkflowRunStatus.PENDING;
             default ->
                     throw new IllegalStateException("Unexpected value: " + status);
         };
