@@ -1,25 +1,24 @@
-package be.xplore.githubmetrics.domain.usecases;
+package be.xplore.githubmetrics.domain.job;
 
-import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.domain.WorkflowRun;
-import be.xplore.githubmetrics.domain.queries.JobsQueryPort;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class DefaultGetAllJobsOfLastDayUseCase implements GetAllJobsOfLastDayUseCase {
+public class GetAllJobsOfLastDayUseCase {
     private final JobsQueryPort jobsQuery;
     private final GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase;
 
-    public DefaultGetAllJobsOfLastDayUseCase(
+    public GetAllJobsOfLastDayUseCase(
             JobsQueryPort jobsQuery,
             GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase) {
         this.jobsQuery = jobsQuery;
         this.getAllWorkflowRunsOfLastDayUseCase = getAllWorkflowRunsOfLastDayUseCase;
     }
 
-    @Override
     public List<Job> getAllJobsOfLastDay() {
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();

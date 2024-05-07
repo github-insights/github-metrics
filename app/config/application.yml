@@ -12,7 +12,10 @@ management:
     health:
         probes:
             enabled: true
-
+spring:
+    threads:
+        virtual:
+            enabled: true
 app:
     scheduling:
         enable: true

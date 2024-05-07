@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
-import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfiguration;
+import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
 import be.xplore.githubmetrics.githubadapter.exceptions.UnableToAuthenticateGithubAppException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GithubAuthorizationTest {
 
-    private final GithubConfig.Application githubConfigApplication = new GithubConfig.Application(
+    private final GithubProperties.Application githubConfigApplication = new GithubProperties.Application(
             "123",
             "123456",
             "-----BEGIN PRIVATE KEY-----\n" +
@@ -53,7 +53,7 @@ class GithubAuthorizationTest {
                     "n3lLUx3lpr32I+zijs25AQ==\n" +
                     "-----END PRIVATE KEY-----"
     );
-    private GithubConfig githubConfig;
+    private GithubProperties githubProperties;
     private WireMockServer wireMockServer;
 
     @BeforeEach
@@ -63,7 +63,7 @@ class GithubAuthorizationTest {
         );
         wireMockServer.start();
         configureFor("localhost", wireMockServer.port());
-        githubConfig = new GithubConfig(
+        githubProperties = new GithubProperties(
                 "http",
                 "localhost",
                 String.valueOf(wireMockServer.port()),
@@ -74,12 +74,12 @@ class GithubAuthorizationTest {
 
     @Test
     void TestGithubAuthorizationGetAuthHeaderThrowsException() {
-        githubConfig = new GithubConfig(
+        githubProperties = new GithubProperties(
                 "http",
                 "localhost",
                 String.valueOf(wireMockServer.port()),
                 "github-insights",
-                new GithubConfig.Application(
+                new GithubProperties.Application(
                         "123",
                         "234",
                         "pem-key"
@@ -87,8 +87,8 @@ class GithubAuthorizationTest {
         );
         GithubApiAuthorization githubApiAuthorization =
                 new GithubApiAuthorization(
-                        githubConfig,
-                        new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
+                        githubProperties,
+                        new GithubRestClientConfig().getGithubRestClient(githubProperties)
                 );
 
         assertThrows(
@@ -101,13 +101,13 @@ class GithubAuthorizationTest {
     void testGithubAuthorizationGetAuthHeaderBadBodyThrowException() {
         GithubApiAuthorization githubApiAuthorization =
                 new GithubApiAuthorization(
-                        githubConfig,
-                        new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
+                        githubProperties,
+                        new GithubRestClientConfig().getGithubRestClient(githubProperties)
                 );
 
         stubFor(
                 post(urlEqualTo(
-                        "/app/installations/" + githubConfig.application().installId() + "/access_tokens"
+                        "/app/installations/" + githubProperties.application().installId() + "/access_tokens"
                 )).willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody("")));
@@ -123,13 +123,13 @@ class GithubAuthorizationTest {
     void testGithubAuthorizationGetAuthHeaderReturnsHeader() {
         GithubApiAuthorization githubApiAuthorization =
                 new GithubApiAuthorization(
-                        githubConfig,
-                        new GithubRestClientConfiguration().getGithubRestClient(githubConfig)
+                        githubProperties,
+                        new GithubRestClientConfig().getGithubRestClient(githubProperties)
                 );
 
         stubFor(
                 post(urlEqualTo(
-                        "/app/installations/" + githubConfig.application().installId() + "/access_tokens"
+                        "/app/installations/" + githubProperties.application().installId() + "/access_tokens"
                 )).willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("GithubAuthorizationResponse.json")));

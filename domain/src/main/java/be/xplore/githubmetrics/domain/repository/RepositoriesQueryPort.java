@@ -1,6 +1,4 @@
-package be.xplore.githubmetrics.domain.queries;
-
-import be.xplore.githubmetrics.domain.domain.Repository;
+package be.xplore.githubmetrics.domain.repository;
 
 import java.util.List;
 

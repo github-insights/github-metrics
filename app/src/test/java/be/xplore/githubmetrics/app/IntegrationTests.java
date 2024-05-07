@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.app;
 
-import be.xplore.githubmetrics.prometheusexporter.jobs.JobsLabelCountsOfLastDayExporter;
-import be.xplore.githubmetrics.prometheusexporter.workflowruns.WorkflowRunStatusCountsOfLastDayExporter;
+import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
+import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.hamcrest.Matchers;

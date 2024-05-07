@@ -1,7 +1,9 @@
-package be.xplore.githubmetrics.prometheusexporter.jobs;
+package be.xplore.githubmetrics.prometheusexporter.job;
 
-import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.usecases.GetAllJobsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.job.GetAllJobsOfLastDayUseCase;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.job.model.JobConclusion;
+import be.xplore.githubmetrics.domain.job.model.JobStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;
@@ -61,8 +63,8 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     private Map<JobLabel, Integer> createJobLabelsCountsMap() {
         Map<JobLabel, Integer> jobLabelCounts = new HashMap<>();
 
-        Stream.of(Job.JobStatus.values()).forEach(status ->
-                Stream.of(Job.JobConclusion.values()).forEach(conclusion ->
+        Stream.of(JobStatus.values()).forEach(status ->
+                Stream.of(JobConclusion.values()).forEach(conclusion ->
                         jobLabelCounts.put(
                                 new JobLabel(status, conclusion),
                                 0

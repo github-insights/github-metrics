@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.domain;
+package be.xplore.githubmetrics.domain.repository;
 
 import java.util.List;
 

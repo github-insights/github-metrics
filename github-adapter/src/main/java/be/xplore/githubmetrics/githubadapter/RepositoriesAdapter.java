@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
-import be.xplore.githubmetrics.domain.domain.Repository;
-import be.xplore.githubmetrics.domain.queries.RepositoriesQueryPort;
-import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
+import be.xplore.githubmetrics.domain.repository.RepositoriesQueryPort;
+import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +22,10 @@ import java.util.stream.Stream;
 @Service
 public class RepositoriesAdapter implements RepositoriesQueryPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoriesAdapter.class);
-    private final GithubConfig config;
+    private final GithubProperties config;
     private final GithubAdapter githubAdapter;
 
-    public RepositoriesAdapter(GithubConfig config, GithubAdapter githubAdapter) {
+    public RepositoriesAdapter(GithubProperties config, GithubAdapter githubAdapter) {
         this.config = config;
         this.githubAdapter = githubAdapter;
     }

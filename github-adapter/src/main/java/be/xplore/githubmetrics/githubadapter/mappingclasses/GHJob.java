@@ -1,6 +1,8 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
-import be.xplore.githubmetrics.domain.domain.Job;
+import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.job.model.JobConclusion;
+import be.xplore.githubmetrics.domain.job.model.JobStatus;
 
 public record GHJob(
         long id,
@@ -20,26 +22,26 @@ public record GHJob(
         );
     }
 
-    private Job.JobConclusion convertConclusion() {
+    private JobConclusion convertConclusion() {
         return switch (this.conclusion) {
-            case "success" -> Job.JobConclusion.SUCCESS;
+            case "success" -> JobConclusion.SUCCESS;
             case "failure",
                     "cancelled",
                     "timed_out",
-                    "action_required" -> Job.JobConclusion.FAILURE;
-            case "neutral", "skipped" -> Job.JobConclusion.NEUTRAL;
-            case null -> Job.JobConclusion.NEUTRAL;
+                    "action_required" -> JobConclusion.FAILURE;
+            case "neutral", "skipped" -> JobConclusion.NEUTRAL;
+            case null -> JobConclusion.NEUTRAL;
             default -> throw new IllegalStateException(
                     "Unexpected GH Job Conclusion Value: " + this.conclusion
             );
         };
     }
 
-    private Job.JobStatus convertStatus() {
+    private JobStatus convertStatus() {
         return switch (this.status) {
-            case "requested", "queued", "pending" -> Job.JobStatus.PENDING;
-            case "in_progress" -> Job.JobStatus.IN_PROGRESS;
-            case "completed" -> Job.JobStatus.DONE;
+            case "requested", "queued", "pending" -> JobStatus.PENDING;
+            case "in_progress" -> JobStatus.IN_PROGRESS;
+            case "completed" -> JobStatus.DONE;
             default -> throw new IllegalStateException(
                     "Unexpected GH Job Status value: " + this.status
             );

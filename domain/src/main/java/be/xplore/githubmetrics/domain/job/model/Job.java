@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.domain;
+package be.xplore.githubmetrics.domain.job.model;
 
 public class Job {
     private final long id;
@@ -19,13 +19,5 @@ public class Job {
 
     public JobConclusion getConclusion() {
         return conclusion;
-    }
-
-    public enum JobStatus {
-        DONE, PENDING, IN_PROGRESS
-    }
-
-    public enum JobConclusion {
-        SUCCESS, FAILURE, NEUTRAL
     }
 }
