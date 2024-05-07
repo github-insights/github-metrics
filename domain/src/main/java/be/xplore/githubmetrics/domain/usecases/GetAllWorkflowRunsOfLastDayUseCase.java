@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.providers.usecases;
+package be.xplore.githubmetrics.domain.usecases;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 

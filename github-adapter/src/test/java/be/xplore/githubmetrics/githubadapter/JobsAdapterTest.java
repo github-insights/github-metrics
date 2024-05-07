@@ -1,6 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.domain.Job;
+import be.xplore.githubmetrics.domain.domain.Repository;
+import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
 import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.web.client.RestClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -24,9 +27,19 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class WorkflowRunJobsAdapterTest {
+class JobsAdapterTest {
+    private final WorkflowRun workflowRun = new WorkflowRun(
+            8828175949L,
+            "Workflow Run",
+            WorkflowRun.RunStatus.DONE,
+            new Repository(
+                    8828175049L,
+                    "github-metrics",
+                    "github-metrics",
+                    new ArrayList<String>()
+            ));
     private WireMockServer wireMockServer;
-    private WorkflowRunJobsAdapter workFlowRunJobsAdapter;
+    private JobsAdapter jobsAdapter;
 
     @BeforeEach
     void setupWireMock() {
@@ -51,7 +64,7 @@ class WorkflowRunJobsAdapterTest {
         Mockito.when(mockGithubApiAuthorization.getAuthHeader()).thenReturn(httpHeaders -> {
             httpHeaders.setBearerAuth("token");
         });
-        workFlowRunJobsAdapter = new WorkflowRunJobsAdapter(
+        jobsAdapter = new JobsAdapter(
                 new GithubAdapter(
                         restClient,
                         githubConfig,
@@ -76,10 +89,8 @@ class WorkflowRunJobsAdapterTest {
                                 .withBodyFile("WorkFlowRunJobsValidTestData.json")
                 ));
 
-        List<Job> workFlowRunJobs = workFlowRunJobsAdapter
-                .getWorkFlowRunJobs(
-                        "github-metrics",
-                        8828175949L);
+        List<Job> workFlowRunJobs = jobsAdapter
+                .getAllJobsForWorkflowRun(this.workflowRun);
         assertEquals(1, workFlowRunJobs.size());
     }
 
@@ -96,9 +107,9 @@ class WorkflowRunJobsAdapterTest {
         );
         assertThrows(
                 UnableToParseGithubResponseException.class,
-                () -> workFlowRunJobsAdapter.getWorkFlowRunJobs(
-                        "github-metrics",
-                        8828175949L)
+                () -> jobsAdapter.getAllJobsForWorkflowRun(
+                        this.workflowRun
+                )
         );
     }
 }

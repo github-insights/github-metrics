@@ -1,10 +1,10 @@
-package be.xplore.githubmetrics.domain.providers.ports;
+package be.xplore.githubmetrics.domain.queries;
 
 import be.xplore.githubmetrics.domain.domain.Job;
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 
 import java.util.List;
 
-public interface JobsProvider {
+public interface JobsQueryPort {
     List<Job> getAllJobsForWorkflowRun(WorkflowRun workflowRun);
 }

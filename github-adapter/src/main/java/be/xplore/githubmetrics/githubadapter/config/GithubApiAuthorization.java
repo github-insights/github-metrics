@@ -87,7 +87,7 @@ public class GithubApiAuthorization {
     private Date getDateInTenMinutes() {
         var calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.add(Calendar.MINUTE, 10);
+        calendar.add(Calendar.MINUTE, 9);
         return calendar.getTime();
     }
 }
