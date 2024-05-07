@@ -3,6 +3,7 @@
 
 **/.DS_Store
 **/.env
+**/.env.list
 
 ### Git ###
 # Created by git for backups. To disable backups in Git:

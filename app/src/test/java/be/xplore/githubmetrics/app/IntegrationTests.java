@@ -1,14 +1,13 @@
 package be.xplore.githubmetrics.app;
 
-import be.xplore.githubmetrics.domain.schedulers.ports.JobsUseCase;
-import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
+import be.xplore.githubmetrics.prometheusexporter.jobs.JobsLabelCountsOfLastDayExporter;
+import be.xplore.githubmetrics.prometheusexporter.workflowruns.WorkflowRunStatusCountsOfLastDayExporter;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,12 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(
         webEnvironment = RANDOM_PORT
 )
-@AutoConfigureObservability
 class IntegrationTests {
     @Autowired
-    private WorkflowRunsUseCase workflowRunsUseCase;
+    private WorkflowRunStatusCountsOfLastDayExporter workflowRunStatusCountsOfLastDayExporter;
     @Autowired
-    private JobsUseCase jobsUseCase;
+    private JobsLabelCountsOfLastDayExporter jobsLabelCountsOfLastDayExporter;
     @Autowired
     private MockMvc mockMvc;
 
@@ -72,7 +70,7 @@ class IntegrationTests {
 
     @Test
     void retrieveAndExportJobsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
-        this.jobsUseCase.retrieveAndExportJobs();
+        this.jobsLabelCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/actuator/prometheus")
@@ -82,8 +80,8 @@ class IntegrationTests {
     }
 
     @Test
-    void retrieveAndExportWorkFlowRunsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
-        this.workflowRunsUseCase.retrieveAndExportWorkflowRuns();
+    void retrieveAndExportWorkflowRunsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
+        this.workflowRunStatusCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/actuator/prometheus")
