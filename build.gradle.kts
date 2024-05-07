@@ -1,14 +1,13 @@
 plugins {
     id("org.sonarqube") version "5.0.0.4638"
+    jacoco
 }
 
 
 version = "0.0.1-SNAPSHOT"
 
-allprojects {
-    apply(plugin = "java")
-    apply(plugin = "jacoco")
 
+allprojects {
     repositories {
         mavenCentral()
     }
@@ -74,21 +73,39 @@ sonar {
     }
 }
 
-/* FIXME: original from groovy creates aggregate report, dont know how to convert to kotlin.
-    Not sure if this is even necessary? Sonar already combines the reports into one.
-
-tasks.register('jacocoRootReport', JacocoReport) {
-    description = 'Generates an aggregate report from all subprojects'
-    dependsOn(subprojects.test)
-
-    additionalSourceDirs.from = files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories.from = files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.from = files(subprojects.sourceSets.main.output)
-    executionData.from = files(subprojects.jacocoTestReport.executionData)
+tasks.register("jacocoTestReport", JacocoReport::class) {
+    dependsOn(":app:compileJava")
+    dependsOn(":app:compileTestJava")
+    dependsOn(":app:test")
+    dependsOn(":app:processTestResources")
+    dependsOn(":domain:compileTestJava")
+    dependsOn(":domain:test")
+    dependsOn(":github-adapter:compileTestJava")
+    dependsOn(":github-adapter:test")
+    dependsOn(":prometheus-exporter:compileTestJava")
+    dependsOn(":prometheus-exporter:test")
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports"
 
     reports {
+        csv.required = false
+        html.required = true
         xml.required = true
     }
-}
 
-*/
+    sourceDirectories.setFrom(
+            fileTree("${project.projectDir}/app/src/main"),
+            fileTree("${project.projectDir}/domain/src/main")
+    )
+    classDirectories.setFrom(
+            fileTree("${project.projectDir}/app/build/classes"),
+            fileTree("${project.projectDir}/domain/build/classes"),
+            fileTree("${project.projectDir}/prometheus-exporter/build/classes"),
+            fileTree("${project.projectDir}/github-adapter/build/classes")
+    )
+    executionData.setFrom(
+            fileTree(project.projectDir) {
+                setIncludes(setOf("**/**/*.exec", "**/**/*.ec"))
+            }
+    )
+}
