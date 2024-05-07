@@ -57,7 +57,7 @@ NAsWO4FEfeuh1jOn9Nz+FIvcATdB2GFYT7qRb44gNq9yWj7Dx9BFByLXht4XM1cH\n
 n3lLUx3lpr32I+zijs25AQ==\n
 -----END PRIVATE KEY-----"
 
-                run: ./gradlew clean build
+                run: ./gradlew clean build jacocoTestReport
 
             -   name: Submit Sonar Report
                 env:
