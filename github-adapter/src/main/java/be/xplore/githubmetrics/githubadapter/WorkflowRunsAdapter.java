@@ -28,7 +28,6 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
     @Cacheable("WorkflowRuns")
     @Override
     public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
-        LOGGER.error("this is getting un cached response");
         var parameterMap = new HashMap<String, String>();
         parameterMap.put(
                 "created",
