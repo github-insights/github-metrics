@@ -1,22 +1,23 @@
 management:
     endpoint:
         prometheus:
-            enabled:
-                true
+            enabled: true
     endpoints:
         web:
             exposure:
                 include: [ "prometheus" ]
     metrics:
         enable:
-            all: false
-            workflow_runs: true
-            workflow_run_jobs: true
+            all: true
+    prometheus:
+        metrics:
+            export:
+                enabled: true
 app:
     scheduling:
         enable: false
         workflowrunsinterval: "30 */5 * * * ?"
-        JOBSINTERVAL: "0 */1 * * * ?"
+        jobsinterval: "0 */1 * * * ?"
     github:
         schema: http
         host: "localhost"
