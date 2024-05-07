@@ -4,6 +4,7 @@ val wiremockVersion: String by project
 val jsonwebtokenVersion: String by project
 val commonsCodecVersion: String by project
 val bouncyCastleVersion: String by project
+val nimbusVersion: String by project
 
 plugins {
     id("org.springframework.boot") version "3.2.5"
@@ -17,7 +18,7 @@ dependencies {
 
     implementation("org.springframework:spring-context")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.nimbusds:nimbus-jose-jwt:9.38-rc4")
+    implementation("com.nimbusds:nimbus-jose-jwt:$nimbusVersion")
 
     implementation("org.bouncycastle:bcpkix-jdk18on:$bouncyCastleVersion")
 
