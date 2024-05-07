@@ -69,6 +69,7 @@ sonar {
         property("sonar.organization", "github-insights")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
         //property("sonar.qualitygate.wait", "true")
     }
 }
@@ -95,8 +96,11 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
 
     sourceDirectories.setFrom(
             fileTree("${project.projectDir}/app/src/main"),
-            fileTree("${project.projectDir}/domain/src/main")
+            fileTree("${project.projectDir}/domain/src/main"),
+            fileTree("${project.projectDir}/prometheus-exporter/src/main"),
+            fileTree("${project.projectDir}/github-adapter/src/main"),
     )
+
     classDirectories.setFrom(
             fileTree("${project.projectDir}/app/build/classes"),
             fileTree("${project.projectDir}/domain/build/classes"),
