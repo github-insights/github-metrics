@@ -28,13 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkflowRunsAdapterTest {
 
-    private final Repository repository;
+    private final Repository repository = new Repository(123L, "github-metrics", "", new ArrayList<>());
     private WireMockServer wireMockServer;
     private WorkflowRunsAdapter workflowRunsAdapter;
-
-    WorkflowRunsAdapterTest() {
-        this.repository = new Repository(123L, "github-metrics", "", new ArrayList<>());
-    }
 
     @BeforeEach
     void setupWireMock() {
@@ -86,8 +82,7 @@ class WorkflowRunsAdapterTest {
                         )
         );
         assertFalse(
-                workflowRunsAdapter
-                        .getLastDaysWorkflows(repository)
+                workflowRunsAdapter.getLastDaysWorkflowRuns(repository)
                         .isEmpty()
         );
     }
@@ -104,7 +99,7 @@ class WorkflowRunsAdapterTest {
         );
         assertThrows(
                 UnableToParseGithubResponseException.class,
-                () -> workflowRunsAdapter.getLastDaysWorkflows(repository)
+                () -> workflowRunsAdapter.getLastDaysWorkflowRuns(repository)
         );
     }
 

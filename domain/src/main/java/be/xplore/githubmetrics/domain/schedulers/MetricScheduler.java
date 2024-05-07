@@ -6,7 +6,6 @@ import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -23,7 +22,6 @@ import java.util.concurrent.ScheduledFuture;
 )
 @Component
 @EnableScheduling
-@EnableCaching
 public class MetricScheduler implements SchedulingConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricScheduler.class);

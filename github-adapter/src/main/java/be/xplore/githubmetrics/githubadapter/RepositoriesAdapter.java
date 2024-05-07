@@ -6,6 +6,7 @@ import be.xplore.githubmetrics.githubadapter.config.GithubConfig;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
         this.githubAdapter = githubAdapter;
     }
 
+    @Cacheable("Repositories")
     @Override
     public List<Repository> getAllRepositories() {
         var repositories = this.fetchRepositories(

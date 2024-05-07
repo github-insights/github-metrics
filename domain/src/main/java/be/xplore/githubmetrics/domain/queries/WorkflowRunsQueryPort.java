@@ -7,6 +7,6 @@ import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import java.util.List;
 
 public interface WorkflowRunsQueryPort {
-    List<WorkflowRun> getLastDaysWorkflows(Repository repository) throws GenericAdapterException;
+    List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) throws GenericAdapterException;
 
 }

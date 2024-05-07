@@ -6,6 +6,7 @@ import be.xplore.githubmetrics.domain.queries.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRuns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -24,8 +25,10 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
         this.githubAdapter = githubAdapter;
     }
 
+    @Cacheable("WorkflowRuns")
     @Override
-    public List<WorkflowRun> getLastDaysWorkflows(Repository repository) {
+    public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
+        LOGGER.error("this is getting un cached response");
         var parameterMap = new HashMap<String, String>();
         parameterMap.put(
                 "created",

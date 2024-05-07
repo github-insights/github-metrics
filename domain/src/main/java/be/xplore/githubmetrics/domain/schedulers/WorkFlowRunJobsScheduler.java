@@ -2,8 +2,8 @@ package be.xplore.githubmetrics.domain.schedulers;
 
 import be.xplore.githubmetrics.domain.domain.Job;
 import be.xplore.githubmetrics.domain.exports.WorkflowRunJobsExportPort;
-import be.xplore.githubmetrics.domain.providers.usecases.GetAllJobsOfLastDayUseCase;
 import be.xplore.githubmetrics.domain.schedulers.ports.JobsUseCase;
+import be.xplore.githubmetrics.domain.usecases.GetAllJobsOfLastDayUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.domain.Job;
-import be.xplore.githubmetrics.domain.queries.WorkFlowRunJobsQueryPort;
+import be.xplore.githubmetrics.domain.domain.WorkflowRun;
+import be.xplore.githubmetrics.domain.queries.JobsQueryPort;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHWorkflowRunJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,24 +13,24 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class WorkflowRunJobsAdapter implements WorkFlowRunJobsQueryPort {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunJobsAdapter.class);
+public class JobsAdapter implements JobsQueryPort {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobsAdapter.class);
     private final GithubAdapter githubAdapter;
 
-    public WorkflowRunJobsAdapter(GithubAdapter githubAdapter) {
+    public JobsAdapter(GithubAdapter githubAdapter) {
         this.githubAdapter = githubAdapter;
     }
 
     @Override
-    public List<Job> getWorkFlowRunJobs(String repositoryName, long workflowRunId) {
-        LOGGER.debug("Getting Jobs for workflow run: {}", workflowRunId);
+    public List<Job> getAllJobsForWorkflowRun(WorkflowRun workflowRun) {
+        LOGGER.debug("Getting Jobs for workflow run: {}", workflowRun.getId());
         var responseSpec = GithubAdapter.getBody(
                 githubAdapter.getResponseSpec(
                         MessageFormat.format(
                                 "repos/{0}/{1}/actions/runs/{2,number,#}/jobs",
                                 this.githubAdapter.getConfig().org(),
-                                repositoryName,
-                                workflowRunId
+                                workflowRun.getRepository().getName(),
+                                workflowRun.getId()
                         ),
                         new HashMap<>()
                 ),
@@ -37,7 +38,7 @@ public class WorkflowRunJobsAdapter implements WorkFlowRunJobsQueryPort {
         );
 
         List<Job> jobs = responseSpec.getJobs();
-        LOGGER.debug("number of jobs for workflow run {}: {}", workflowRunId, jobs.size());
+        LOGGER.debug("number of jobs for workflow run {}: {}", workflowRun.getId(), jobs.size());
         return jobs;
     }
 }

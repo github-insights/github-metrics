@@ -2,8 +2,8 @@ package be.xplore.githubmetrics.domain.schedulers;
 
 import be.xplore.githubmetrics.domain.domain.WorkflowRun;
 import be.xplore.githubmetrics.domain.exports.WorkflowRunsExportPort;
-import be.xplore.githubmetrics.domain.providers.usecases.GetAllWorkflowRunsOfLastDayUseCase;
 import be.xplore.githubmetrics.domain.schedulers.ports.WorkflowRunsUseCase;
+import be.xplore.githubmetrics.domain.usecases.GetAllWorkflowRunsOfLastDayUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
