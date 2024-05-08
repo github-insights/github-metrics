@@ -5,8 +5,8 @@ plugins {
 rootProject.name = "github-metrics"
 
 include(
-        "app",
         "domain",
         "prometheus-exporter",
         "github-adapter"
 )
+
