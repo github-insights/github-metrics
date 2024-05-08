@@ -1,20 +1,16 @@
-package be.xplore.githubmetrics.app;
+package be.xplore.githubmetrics;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {
-        "be.xplore.githubmetrics.*"
-})
 @EnableConfigurationProperties({GithubProperties.class, SchedulingProperties.class})
-public class App {
+public class GithubMetrics {
 
     public static void main(String[] args) {
-        SpringApplication.run(App.class);
+        SpringApplication.run(GithubMetrics.class);
     }
 }

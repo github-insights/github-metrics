@@ -1,28 +1,22 @@
-plugins {
-    id("org.sonarqube") version "5.0.0.4638"
-    jacoco
-}
+val wiremockVersion: String by project
 
+plugins {
+    id("org.springframework.boot") version "3.2.5"
+    id("io.spring.dependency-management") version "1.1.5"
+    id("org.sonarqube") version "5.0.0.4638"
+    id("jacoco-report-aggregation")
+}
 
 version = "0.0.1-SNAPSHOT"
 
-
 allprojects {
+    apply(plugin = "java")
+    apply(plugin = "jacoco")
+    apply(plugin = "checkstyle")
+    apply(plugin = "pmd")
     repositories {
         mavenCentral()
     }
-}
-
-
-
-subprojects {
-    apply(plugin = "checkstyle")
-    apply(plugin = "pmd")
-    apply(plugin = "java")
-    apply(plugin = "jacoco")
-
-    group = "be.xplore.githubmetrics"
-
     tasks.withType(JavaCompile::class) {
         sourceCompatibility = JavaVersion.VERSION_21.toString()
         options.compilerArgs.add("-Werror")
@@ -49,8 +43,6 @@ subprojects {
         }
     }
 
-
-
     tasks.withType<Test> {
         finalizedBy(tasks.withType<JacocoReport>())
     }
@@ -63,53 +55,34 @@ subprojects {
     }
 }
 
+dependencies {
+    "implementation"(project(":domain"))
+    "implementation"(project(":github-adapter"))
+    "implementation"(project(":prometheus-exporter"))
+
+    "implementation"("org.springframework.boot:spring-boot-autoconfigure")
+    "implementation"("org.springframework.boot:spring-boot")
+
+
+    "testImplementation"("org.springframework.boot:spring-boot-starter-web")
+    "testImplementation"("org.springframework.boot:spring-boot-starter-test")
+    "testImplementation"("org.wiremock:wiremock-jetty12:$wiremockVersion")
+}
+
+subprojects {
+
+    group = "be.xplore.githubmetrics"
+
+
+}
+
 sonar {
     properties {
         property("sonar.projectKey", "github-insights_github-metrics")
         property("sonar.organization", "github-insights")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml")
         //property("sonar.qualitygate.wait", "true")
     }
-}
-
-tasks.register("jacocoTestReport", JacocoReport::class) {
-    dependsOn(":app:compileJava")
-    dependsOn(":app:compileTestJava")
-    dependsOn(":app:test")
-    dependsOn(":app:processTestResources")
-    dependsOn(":domain:compileTestJava")
-    dependsOn(":domain:test")
-    dependsOn(":github-adapter:compileTestJava")
-    dependsOn(":github-adapter:test")
-    dependsOn(":prometheus-exporter:compileTestJava")
-    dependsOn(":prometheus-exporter:test")
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports"
-
-    reports {
-        csv.required = false
-        html.required = true
-        xml.required = true
-    }
-
-    sourceDirectories.setFrom(
-            fileTree("${project.projectDir}/app/src/main"),
-            fileTree("${project.projectDir}/domain/src/main"),
-            fileTree("${project.projectDir}/prometheus-exporter/src/main"),
-            fileTree("${project.projectDir}/github-adapter/src/main"),
-    )
-
-    classDirectories.setFrom(
-            fileTree("${project.projectDir}/app/build/classes"),
-            fileTree("${project.projectDir}/domain/build/classes"),
-            fileTree("${project.projectDir}/prometheus-exporter/build/classes"),
-            fileTree("${project.projectDir}/github-adapter/build/classes")
-    )
-    executionData.setFrom(
-            fileTree(project.projectDir) {
-                setIncludes(setOf("**/**/*.exec", "**/**/*.ec"))
-            }
-    )
 }
