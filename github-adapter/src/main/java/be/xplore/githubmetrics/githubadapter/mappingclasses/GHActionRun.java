@@ -27,8 +27,9 @@ public record GHActionRun(
             case "action_required", "cancelled", "failure",
                     "neutral", "skipped", "stale", "timed_out" ->
                     WorkflowRunStatus.FAILED;
-            case "in_progress", "queued", "requested",
-                    "waiting", "pending" -> WorkflowRunStatus.PENDING;
+            case "in_progress" -> WorkflowRunStatus.IN_PROGRESS;
+            case "queued", "requested", "waiting", "pending" ->
+                    WorkflowRunStatus.PENDING;
             default ->
                     throw new IllegalStateException("Unexpected value: " + status);
         };
