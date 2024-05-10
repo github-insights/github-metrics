@@ -19,6 +19,8 @@ import java.util.concurrent.ScheduledFuture;
         value = "app.scheduling.enable", havingValue = "true", matchIfMissing = true
 )
 @Service
+
+
 public class MetricScheduler implements SchedulingConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricScheduler.class);
