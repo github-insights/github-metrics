@@ -2,8 +2,8 @@ package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.repository.Repository;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

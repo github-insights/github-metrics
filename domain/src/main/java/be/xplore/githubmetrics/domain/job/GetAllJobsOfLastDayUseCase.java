@@ -1,8 +1,7 @@
 package be.xplore.githubmetrics.domain.job;
 
-import be.xplore.githubmetrics.domain.job.model.Job;
 import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunsOfLastDayUseCase;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

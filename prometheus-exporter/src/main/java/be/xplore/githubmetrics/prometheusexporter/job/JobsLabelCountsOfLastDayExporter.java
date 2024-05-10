@@ -1,9 +1,9 @@
 package be.xplore.githubmetrics.prometheusexporter.job;
 
 import be.xplore.githubmetrics.domain.job.GetAllJobsOfLastDayUseCase;
-import be.xplore.githubmetrics.domain.job.model.Job;
-import be.xplore.githubmetrics.domain.job.model.JobConclusion;
-import be.xplore.githubmetrics.domain.job.model.JobStatus;
+import be.xplore.githubmetrics.domain.job.Job;
+import be.xplore.githubmetrics.domain.job.JobConclusion;
+import be.xplore.githubmetrics.domain.job.JobStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;

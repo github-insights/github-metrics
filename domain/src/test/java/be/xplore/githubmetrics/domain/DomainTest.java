@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.domain;
 
 import be.xplore.githubmetrics.domain.repository.Repository;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

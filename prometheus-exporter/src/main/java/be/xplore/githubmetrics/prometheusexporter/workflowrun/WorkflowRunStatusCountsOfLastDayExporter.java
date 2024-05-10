@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.prometheusexporter.workflowrun;
 
 import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunsOfLastDayUseCase;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;

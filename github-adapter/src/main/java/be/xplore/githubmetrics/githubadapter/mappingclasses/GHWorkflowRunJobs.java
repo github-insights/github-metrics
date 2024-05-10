@@ -1,6 +1,6 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
-import be.xplore.githubmetrics.domain.job.model.Job;
+import be.xplore.githubmetrics.domain.job.Job;
 
 import java.util.List;
 
