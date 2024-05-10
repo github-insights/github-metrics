@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.prometheusexporter;
+package be.xplore.githubmetrics.prometheusexporter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

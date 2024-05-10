@@ -5,7 +5,7 @@ import be.xplore.githubmetrics.domain.job.model.Job;
 import be.xplore.githubmetrics.domain.job.model.JobConclusion;
 import be.xplore.githubmetrics.domain.job.model.JobStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
-import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;

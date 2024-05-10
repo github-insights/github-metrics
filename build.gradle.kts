@@ -56,14 +56,17 @@ allprojects {
 }
 
 dependencies {
-    "implementation"(project(":domain"))
-    "implementation"(project(":github-adapter"))
-    "implementation"(project(":prometheus-exporter"))
+    "runtimeOnly"(project(":domain"))
+    "runtimeOnly"(project(":github-adapter"))
+    "runtimeOnly"(project(":prometheus-exporter"))
 
     "implementation"("org.springframework.boot:spring-boot-autoconfigure")
     "implementation"("org.springframework.boot:spring-boot")
 
 
+    "testImplementation"(project(":domain"))
+    "testImplementation"(project(":prometheus-exporter"))
+    "testImplementation"(project(":github-adapter"))
     "testImplementation"("org.springframework.boot:spring-boot-starter-web")
     "testImplementation"("org.springframework.boot:spring-boot-starter-test")
     "testImplementation"("org.wiremock:wiremock-jetty12:$wiremockVersion")

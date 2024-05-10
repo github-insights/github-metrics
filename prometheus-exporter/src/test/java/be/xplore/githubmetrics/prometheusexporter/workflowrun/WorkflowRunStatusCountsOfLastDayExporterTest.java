@@ -3,7 +3,7 @@ package be.xplore.githubmetrics.prometheusexporter.workflowrun;
 import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunsOfLastDayUseCase;
 import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
-import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;

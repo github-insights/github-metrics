@@ -4,7 +4,7 @@ import be.xplore.githubmetrics.domain.job.GetAllJobsOfLastDayUseCase;
 import be.xplore.githubmetrics.domain.job.model.Job;
 import be.xplore.githubmetrics.domain.job.model.JobConclusion;
 import be.xplore.githubmetrics.domain.job.model.JobStatus;
-import be.xplore.githubmetrics.prometheusexporter.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
