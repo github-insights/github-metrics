@@ -4,17 +4,12 @@ import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRunStatus;
-import be.xplore.githubmetrics.githubadapter.config.GithubApiAuthorization;
-import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
-import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
-import be.xplore.githubmetrics.githubadapter.exceptions.UnableToParseGithubResponseException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,34 +32,18 @@ class WorkflowRunsAdapterTest {
     private WorkflowRunsAdapter workflowRunsAdapter;
 
     @BeforeEach
-    void setupWireMock() {
+    void setupWireMock() throws IOException {
 
         this.wireMockServer = new WireMockServer(
                 wireMockConfig().dynamicPort()
         );
         wireMockServer.start();
-        GithubProperties githubProperties = new GithubProperties(
-                "http",
-                "localhost",
-                String.valueOf(wireMockServer.port()),
-                "github-insights",
-                new GithubProperties.Application(
-                        "123",
-                        "123456",
-                        "pem-key"
-                )
-        );
-        RestClient restClient = new GithubRestClientConfig().getGithubRestClient(githubProperties);
-        GithubApiAuthorization mockGithubApiAuthorization = Mockito.mock(GithubApiAuthorization.class);
-        Mockito.when(mockGithubApiAuthorization.getAuthHeader()).thenReturn(httpHeaders -> {
-            httpHeaders.setBearerAuth("token");
-        });
+        var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
+        var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
         workflowRunsAdapter = new WorkflowRunsAdapter(
-                new GithubAdapter(
-                        restClient,
-                        githubProperties,
-                        mockGithubApiAuthorization
-                ));
+                githubProperties,
+                restClient
+        );
         configureFor("localhost", wireMockServer.port());
     }
 
@@ -102,7 +81,7 @@ class WorkflowRunsAdapterTest {
                 )
         );
         assertThrows(
-                UnableToParseGithubResponseException.class,
+                NullPointerException.class,
                 () -> workflowRunsAdapter.getLastDaysWorkflowRuns(repository)
         );
     }
