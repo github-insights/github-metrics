@@ -2,7 +2,6 @@ package be.xplore.githubmetrics.domain.workflowrun;
 
 import be.xplore.githubmetrics.domain.repository.RepositoriesQueryPort;
 import be.xplore.githubmetrics.domain.repository.Repository;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

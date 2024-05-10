@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunsQueryPort;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRuns;
 import org.slf4j.Logger;

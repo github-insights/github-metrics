@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.workflowrun.model;
+package be.xplore.githubmetrics.domain.workflowrun;
 
 import be.xplore.githubmetrics.domain.repository.Repository;
 

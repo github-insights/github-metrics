@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
-import be.xplore.githubmetrics.domain.job.model.Job;
-import be.xplore.githubmetrics.domain.job.model.JobConclusion;
-import be.xplore.githubmetrics.domain.job.model.JobStatus;
+import be.xplore.githubmetrics.domain.job.Job;
+import be.xplore.githubmetrics.domain.job.JobConclusion;
+import be.xplore.githubmetrics.domain.job.JobStatus;
 
 public record GHJob(
         long id,

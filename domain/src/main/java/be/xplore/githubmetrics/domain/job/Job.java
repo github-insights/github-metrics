@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.domain.job.model;
+package be.xplore.githubmetrics.domain.job;
 
 public class Job {
     private final long id;

@@ -1,7 +1,6 @@
 package be.xplore.githubmetrics.domain.job;
 
-import be.xplore.githubmetrics.domain.job.model.Job;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 
 import java.util.List;
 

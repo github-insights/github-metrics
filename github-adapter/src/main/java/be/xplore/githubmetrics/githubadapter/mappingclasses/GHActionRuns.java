@@ -1,7 +1,7 @@
 package be.xplore.githubmetrics.githubadapter.mappingclasses;
 
 import be.xplore.githubmetrics.domain.repository.Repository;
-import be.xplore.githubmetrics.domain.workflowrun.model.WorkflowRun;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 
 import java.util.List;
 
