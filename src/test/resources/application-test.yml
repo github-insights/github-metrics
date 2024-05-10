@@ -1,3 +1,6 @@
+logging:
+    level:
+        be.xplore.githubmetrics: DEBUG
 management:
     endpoint:
         prometheus:
@@ -19,9 +22,7 @@ app:
         workflowrunsinterval: "30 */5 * * * ?"
         jobsinterval: "0 */1 * * * ?"
     github:
-        schema: http
-        host: "localhost"
-        port: 8081
+        url: http://localhost:8081
         org: "github-insights"
         application:
             id: "882159"

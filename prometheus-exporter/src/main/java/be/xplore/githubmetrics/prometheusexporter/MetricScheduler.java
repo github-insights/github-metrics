@@ -69,7 +69,7 @@ public class MetricScheduler implements SchedulingConfigurer {
     public void cancelTask(Class<? extends ScheduledExporter> key) {
         ScheduledFuture<?> future = this.scheduledTasksMap.remove(key.getSimpleName());
         if (future == null) {
-            LOGGER.info("Tried to cancel task of class that does not exist in map: {}", key.getSimpleName());
+            LOGGER.error("Tried to cancel task of class that does not exist in map: {}", key.getSimpleName());
             return;
         }
         future.cancel(true);

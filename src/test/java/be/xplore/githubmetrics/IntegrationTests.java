@@ -43,7 +43,7 @@ class IntegrationTests {
                 .withHeader("Content-Type", "application/json")
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
-        stubFor(WireMock.get("/orgs/github-insights/repos")
+        stubFor(WireMock.get("/orgs/github-insights/repos?per_page=100")
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));

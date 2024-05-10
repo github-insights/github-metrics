@@ -20,7 +20,5 @@ app:
     scheduling:
         enable: true
     github:
-        schema: https
-        host: "api.github.com"
-        port: 443
+        url: https://api.github.com
         org: "github-insights"
