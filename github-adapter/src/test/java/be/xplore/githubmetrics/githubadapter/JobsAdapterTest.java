@@ -1,6 +1,5 @@
 package be.xplore.githubmetrics.githubadapter;
 
-import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.job.Job;
 import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +25,11 @@ class JobsAdapterTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsAdapterTest.class);
     private final WorkflowRun workflowRun = new WorkflowRun(
-            8828175949L,
+            8_828_175_949L,
             "Workflow Run",
             WorkflowRunStatus.DONE,
             new Repository(
-                    8828175049L,
+                    8_828_175_049L,
                     "github-metrics",
                     "github-metrics",
                     new ArrayList<String>()
@@ -40,7 +38,7 @@ class JobsAdapterTest {
     private JobsAdapter jobsAdapter;
 
     @BeforeEach
-    void setupWireMock() throws IOException {
+    void setupWireMock() {
         wireMockServer = TestUtility.getWireMockServer();
 
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
@@ -71,7 +69,7 @@ class JobsAdapterTest {
     }
 
     @Test
-    void assertExceptionWhenWorkFlowRunJobsReceivesInvalidResponseTest() throws GenericAdapterException {
+    void assertExceptionWhenWorkFlowRunJobsReceivesInvalidResponseTest() {
         stubFor(
                 get(urlEqualTo(
                         "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs"

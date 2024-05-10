@@ -62,7 +62,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
     }
 
     private Map<WorkflowRunStatus, Integer> createStatusCountsMap() {
-        EnumMap<WorkflowRunStatus, Integer> workflowRunStatusCountsMap = new EnumMap<>(WorkflowRunStatus.class);
+        Map<WorkflowRunStatus, Integer> workflowRunStatusCountsMap = new EnumMap<>(WorkflowRunStatus.class);
 
         Stream.of(WorkflowRunStatus.values()).forEach(
                 runStatus -> workflowRunStatusCountsMap.put(runStatus, 0));

@@ -14,7 +14,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import java.io.IOException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,7 +55,7 @@ class GithubAuthorizationTest {
         var tokenInterceptor = TestUtility.getAuthTokenInterceptor(this.githubProperties);
 
         stubFor(
-                post(urlEqualTo(
+                WireMock.post(urlEqualTo(
                         "/app/installations/" + githubProperties.application().installId() + "/access_tokens"
                 )).willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")

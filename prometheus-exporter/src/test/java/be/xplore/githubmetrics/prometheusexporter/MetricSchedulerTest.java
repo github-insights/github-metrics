@@ -2,8 +2,6 @@ package be.xplore.githubmetrics.prometheusexporter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -18,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 class MetricSchedulerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetricSchedulerTest.class);
     private final TaskScheduler mockScheduler = mock(TaskScheduler.class);
     private final ScheduledFuture mockFuture = mock(ScheduledFuture.class);
     private final ScheduledExporter mockExporter = mock(ScheduledExporter.class);

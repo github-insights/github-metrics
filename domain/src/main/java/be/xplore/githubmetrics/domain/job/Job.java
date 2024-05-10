@@ -20,4 +20,14 @@ public class Job {
     public JobConclusion getConclusion() {
         return conclusion;
     }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "id=" + id +
+                ", runId=" + runId +
+                ", status=" + status +
+                ", conclusion=" + conclusion +
+                '}';
+    }
 }

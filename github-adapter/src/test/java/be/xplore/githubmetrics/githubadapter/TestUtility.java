@@ -63,7 +63,7 @@ public class TestUtility {
 
     public static RestClient getAuthTokenRestClient(GithubProperties githubProperties) {
         var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor());
-        var tokenInterceptor = TestUtility.getAuthTokenInterceptor(githubProperties);
+        var tokenInterceptor = getAuthTokenInterceptor(githubProperties);
         var defaultRestClient = restClientConfig.defaultRestClient(tokenInterceptor, githubProperties);
         defaultRestClient.mutate()
                 .requestInterceptors(interceptors -> {
@@ -106,7 +106,7 @@ public class TestUtility {
                 new GithubProperties.Application(
                         "123",
                         "123456",
-                        TestUtility.validPemKey()
+                        validPemKey()
                 )
         );
     }

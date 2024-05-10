@@ -5,6 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.5"
     id("org.sonarqube") version "5.0.0.4638"
     id("jacoco-report-aggregation")
+    id("pmd")
+    id("checkstyle")
 }
 
 version = "0.0.1-SNAPSHOT"
@@ -21,13 +23,17 @@ allprojects {
         sourceCompatibility = JavaVersion.VERSION_21.toString()
         options.compilerArgs.add("-Werror")
     }
-
     sonar {
         properties {
             property("sonar.sources", "src/main")
             property("sonar.tests", "src/test")
         }
     }
+    pmd {
+        toolVersion = "7.1.0"
+        isConsoleOutput = true
+    }
+
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter:5.10.2")
         "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
@@ -73,19 +79,30 @@ dependencies {
 }
 
 subprojects {
-
     group = "be.xplore.githubmetrics"
-
-
+    pmd {
+        ruleSetFiles = files("../config/pmd.xml")
+    }
+    checkstyle {
+        configFile = file("../config/checkstyle.xml")
+    }
 }
-
+pmd {
+    ruleSetFiles = files("./config/pmd.xml")
+}
+checkstyle {
+    configFile = file("./config/checkstyle.xml")
+}
 sonar {
     properties {
         property("sonar.projectKey", "github-insights_github-metrics")
         property("sonar.organization", "github-insights")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+        )
         //property("sonar.qualitygate.wait", "true")
     }
 }

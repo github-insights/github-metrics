@@ -1,6 +1,5 @@
 package be.xplore.githubmetrics.githubadapter;
 
-import be.xplore.githubmetrics.domain.exceptions.GenericAdapterException;
 import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
@@ -53,7 +52,7 @@ class WorkflowRunsAdapterTest {
     }
 
     @Test
-    void workFlowRunsTest() throws GenericAdapterException {
+    void workFlowRunsTest() {
         stubFor(
                 get(urlEqualTo(
                         "/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + LocalDate.now().minusDays(1)
@@ -71,7 +70,7 @@ class WorkflowRunsAdapterTest {
     }
 
     @Test
-    void workFlowRunsInvalidResponseTest() throws GenericAdapterException {
+    void workFlowRunsInvalidResponseTest() {
         stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + LocalDate.now().minusDays(1)
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
                 .willReturn(
