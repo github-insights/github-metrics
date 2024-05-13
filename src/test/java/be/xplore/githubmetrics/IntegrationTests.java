@@ -16,9 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -51,9 +48,7 @@ class IntegrationTests {
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
 
         stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D"
-                                + LocalDate.now()
-                                .minusDays(1)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                + TestUtility.yesterday()
                         )
                         .willReturn(ok()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

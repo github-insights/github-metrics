@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,8 +53,7 @@ class WorkflowRunsAdapterTest {
     void workFlowRunsTest() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + LocalDate.now().minusDays(1)
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+                        "/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + TestUtility.yesterday()))
                         .willReturn(
                                 aResponse()
                                         .withHeader("Content-Type", "application/json")
@@ -71,8 +68,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workFlowRunsInvalidResponseTest() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + LocalDate.now().minusDays(1)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + TestUtility.yesterday()))
                 .willReturn(
                         aResponse()
                                 .withHeader("Content-Type", "application/json")
@@ -87,8 +83,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workflowRunsQueryShouldHaveCorrectStatus() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + LocalDate.now().minusDays(1)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D" + TestUtility.yesterday()))
                 .willReturn(
                         aResponse()
                                 .withHeader("Content-Type", "application/json")

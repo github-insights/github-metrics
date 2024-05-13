@@ -15,6 +15,8 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -153,5 +155,10 @@ public class TestUtility {
                 wireMockServer.baseUrl()
         );
         return wireMockServer;
+    }
+
+    public static String yesterday() {
+        return LocalDate.now().minusDays(1)
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }
