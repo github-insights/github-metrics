@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -40,12 +42,12 @@ class IntegrationTests {
     void setUp() {
 
         stubFor(WireMock.post("/app/installations/50174772/access_tokens").willReturn(ok()
-                .withHeader("Content-Type", "application/json")
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
         stubFor(WireMock.get("/orgs/github-insights/repos?per_page=100")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
 
         stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D"
@@ -54,17 +56,17 @@ class IntegrationTests {
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
                         .willReturn(ok()
-                                .withHeader("Content-Type", "application/json")
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                         )
         );
         stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));
         stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));
     }
 

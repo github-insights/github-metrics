@@ -4,6 +4,7 @@ import be.xplore.githubmetrics.domain.job.Job;
 import be.xplore.githubmetrics.domain.job.JobConclusion;
 import be.xplore.githubmetrics.domain.job.JobStatus;
 
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public record GHJob(
         long id,
         long run_id,
@@ -25,10 +26,8 @@ public record GHJob(
     private JobConclusion convertConclusion() {
         return switch (this.conclusion) {
             case "success" -> JobConclusion.SUCCESS;
-            case "failure",
-                    "cancelled",
-                    "timed_out",
-                    "action_required" -> JobConclusion.FAILURE;
+            case "failure", "cancelled", "timed_out", "action_required" ->
+                    JobConclusion.FAILURE;
             case "neutral", "skipped" -> JobConclusion.NEUTRAL;
             case null -> JobConclusion.NEUTRAL;
             default -> throw new IllegalStateException(

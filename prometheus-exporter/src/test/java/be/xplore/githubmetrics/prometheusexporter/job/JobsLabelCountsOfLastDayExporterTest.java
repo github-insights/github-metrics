@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class JobsLabelCountsOfLastDayExporterTest {
 
+    private static final String WORKFLOW_RUN_JOBS = "workflow_run_jobs";
+    private static final String STATUS = "status";
+    private static final String CONCLUSION = "conclusion";
     private JobsLabelCountsOfLastDayExporter jobsLabelCountsOfLastDayExporter;
     private GetAllJobsOfLastDayUseCase mockUseCase;
     private MeterRegistry registry;
@@ -69,20 +72,20 @@ class JobsLabelCountsOfLastDayExporterTest {
     private void assertSuccessCounts() {
         assertEquals(
                 7,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "DONE", "conclusion", "SUCCESS"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "DONE", CONCLUSION, "SUCCESS"
                 ).gauge().value()
         );
         assertEquals(
                 8,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "IN_PROGRESS", "conclusion", "SUCCESS"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "IN_PROGRESS", CONCLUSION, "SUCCESS"
                 ).gauge().value()
         );
         assertEquals(
                 9,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "PENDING", "conclusion", "SUCCESS"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "PENDING", CONCLUSION, "SUCCESS"
                 ).gauge().value()
         );
     }
@@ -90,20 +93,20 @@ class JobsLabelCountsOfLastDayExporterTest {
     private void assertNeutralCounts() {
         assertEquals(
                 4,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "DONE", "conclusion", "NEUTRAL"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "DONE", CONCLUSION, "NEUTRAL"
                 ).gauge().value()
         );
         assertEquals(
                 5,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "IN_PROGRESS", "conclusion", "NEUTRAL"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "IN_PROGRESS", CONCLUSION, "NEUTRAL"
                 ).gauge().value()
         );
         assertEquals(
                 6,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "PENDING", "conclusion", "NEUTRAL"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "PENDING", CONCLUSION, "NEUTRAL"
                 ).gauge().value()
         );
     }
@@ -111,20 +114,20 @@ class JobsLabelCountsOfLastDayExporterTest {
     private void assertFailureCounts() {
         assertEquals(
                 1,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "DONE", "conclusion", "FAILURE"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "DONE", CONCLUSION, "FAILURE"
                 ).gauge().value()
         );
         assertEquals(
                 2,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "IN_PROGRESS", "conclusion", "FAILURE"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "IN_PROGRESS", CONCLUSION, "FAILURE"
                 ).gauge().value()
         );
         assertEquals(
                 3,
-                registry.find("workflow_run_jobs").tags(
-                        "status", "PENDING", "conclusion", "FAILURE"
+                registry.find(WORKFLOW_RUN_JOBS).tags(
+                        STATUS, "PENDING", CONCLUSION, "FAILURE"
                 ).gauge().value()
         );
     }

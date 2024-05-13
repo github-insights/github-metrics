@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
@@ -48,7 +50,7 @@ class RepositoriesAdapterTest {
     void getAllRepositoriesShouldReturnListOfRepositories() {
         stubFor(get("/orgs/github-insights/repos?per_page=100")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("100RepositoriesTestData.json")));
 
         var list = this.repositoriesAdapter.getAllRepositories();
@@ -64,12 +66,12 @@ class RepositoriesAdapterTest {
                                 "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=369>; " +
                                         "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
 
         stubFor(get("/orgs/github-insights/repos?since=369")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
 
         var list = this.repositoriesAdapter.getAllRepositories();
@@ -80,7 +82,7 @@ class RepositoriesAdapterTest {
     void getAllRepositoriesShouldThrowExceptionOnInvalidResponseBody() {
         stubFor(get("/orgs/github-insights/repos?per_page=100")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("invalid body")));
 
         assertThrows(
@@ -98,7 +100,7 @@ class RepositoriesAdapterTest {
                                 "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=1>; " +
                                         "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
         stubFor(get("/orgs/github-insights/repos?since=1")
                 .willReturn(ok()
@@ -107,7 +109,7 @@ class RepositoriesAdapterTest {
                                 "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=2>; " +
                                         "rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
         var list = this.repositoriesAdapter.getAllRepositories();
         assertEquals(4, list.size());

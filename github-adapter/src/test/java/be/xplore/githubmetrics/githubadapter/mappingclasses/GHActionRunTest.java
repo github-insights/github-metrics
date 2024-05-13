@@ -33,7 +33,7 @@ class GHActionRunTest {
         );
         assertThrows(
                 IllegalStateException.class,
-                () -> actionRun.convertStatus()
+                actionRun::convertStatus
         );
     }
 }

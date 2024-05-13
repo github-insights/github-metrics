@@ -4,6 +4,7 @@ import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public record GHActionRun(
         long id,
         String name,
@@ -25,7 +26,7 @@ public record GHActionRun(
         return switch (this.status) {
             case "completed", "success" -> WorkflowRunStatus.DONE;
             case "action_required", "cancelled", "failure",
-                    "neutral", "skipped", "stale", "timed_out" ->
+                 "neutral", "skipped", "stale", "timed_out" ->
                     WorkflowRunStatus.FAILED;
             case "in_progress" -> WorkflowRunStatus.IN_PROGRESS;
             case "queued", "requested", "waiting", "pending" ->
