@@ -19,6 +19,8 @@ spring:
 app:
     scheduling:
         enable: true
+        workflow_runs_interval: ${APP_SCHEDULING_WORKFLOW_RUNS_INTERVAL:30 */1 * * * ?}
+        jobs_interval: ${APP_SCHEDULING_JOBS_INTERVAL:0 */1 * * * ?}
     github:
         url: https://api.github.com
         org: "github-insights"
