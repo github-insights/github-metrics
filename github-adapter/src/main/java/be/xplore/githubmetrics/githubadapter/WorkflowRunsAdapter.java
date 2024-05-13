@@ -48,7 +48,7 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
         parameters.put(
                 "created",
                 ">=" + LocalDate.now().minusDays(1)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE)
         );
 
         var response = this.restClient.get()
