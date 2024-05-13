@@ -1,3 +1,4 @@
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val wiremockVersion: String by project
@@ -27,4 +28,8 @@ tasks.getByName<BootJar>("bootJar") {
 
 tasks.getByName<Jar>("jar") {
     enabled = true
+}
+
+tasks.getByName<BootBuildImage>("bootBuildImage") {
+    enabled = false
 }

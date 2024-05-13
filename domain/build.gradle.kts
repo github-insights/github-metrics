@@ -1,3 +1,4 @@
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
@@ -15,11 +16,13 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
 
 }
-
 tasks.getByName<BootJar>("bootJar") {
     enabled = false
 }
 
 tasks.getByName<Jar>("jar") {
     enabled = true
+}
+tasks.getByName<BootBuildImage>("bootBuildImage") {
+    enabled = false
 }

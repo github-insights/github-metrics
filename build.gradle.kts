@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
+
 val wiremockVersion: String by project
 
 plugins {
@@ -104,5 +106,34 @@ sonar {
             "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
         )
         //property("sonar.qualitygate.wait", "true")
+    }
+}
+
+tasks.getByName<BootBuildImage>("bootBuildImage") {
+    docker {
+        builder.set("paketobuildpacks/builder-jammy-base:latest")
+        imageName.set(System.getenv("IMAGE_NAME"))
+        tags.set(
+            listOf(
+                "${
+                    System.getenv("IMAGE_NAME")
+                }:${
+                    System.getenv("SHORT_SHA")
+                }"
+            )
+        )
+        publish.set(true)
+        environment.set(
+            mapOf(
+                "BP_OCI_SOURCE" to System.getenv("BP_OCI_SOURCE")
+            )
+        )
+        docker {
+            publishRegistry {
+                url.set(System.getenv("CR_URL"))
+                username.set(System.getenv("CR_USERNAME"))
+                password.set(System.getenv("CR_PASSWORD"))
+            }
+        }
     }
 }
