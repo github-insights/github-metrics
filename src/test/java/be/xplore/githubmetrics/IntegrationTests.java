@@ -2,11 +2,15 @@ package be.xplore.githubmetrics;
 
 import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,11 +27,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@WireMockTest(httpPort = 8081)
 @SpringBootTest(
         webEnvironment = RANDOM_PORT
 )
 class IntegrationTests {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
+    private static WireMockServer wireMockServer;
+
     @Autowired
     private WorkflowRunStatusCountsOfLastDayExporter workflowRunStatusCountsOfLastDayExporter;
     @Autowired
@@ -35,9 +42,19 @@ class IntegrationTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @BeforeAll
+    static void beforeAll() {
+        wireMockServer = TestUtility.getWireMockServer();
+        System.setProperty("APP_GITHUB_URL", "http://localhost:" + wireMockServer.port());
+    }
+
+    @AfterAll
+    static void afterAll() {
+        wireMockServer.stop();
+    }
+
     @BeforeEach
     void setUp() {
-
         stubFor(WireMock.post("/app/installations/50174772/access_tokens").willReturn(ok()
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("GithubAuthorizationResponse.json")));

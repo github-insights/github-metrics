@@ -22,7 +22,7 @@ app:
         workflowrunsinterval: "30 */5 * * * ?"
         jobsinterval: "0 */1 * * * ?"
     github:
-        url: http://localhost:8081
+        url: ${APP_GITHUB_URL:http://localhost:8081}
         org: "github-insights"
         application:
             id: "882159"
