@@ -10,11 +10,9 @@ import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,11 +23,7 @@ class RepositoriesAdapterTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        wireMockServer = new WireMockServer(
-                wireMockConfig().dynamicPort()
-        );
-
-        wireMockServer.start();
+        wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
 
@@ -38,7 +32,6 @@ class RepositoriesAdapterTest {
                 restClient
         );
 
-        configureFor("localhost", wireMockServer.port());
     }
 
     @AfterEach

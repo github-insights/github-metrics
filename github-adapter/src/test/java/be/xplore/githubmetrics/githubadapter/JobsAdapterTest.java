@@ -8,8 +8,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JobsAdapterTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobsAdapterTest.class);
     private final WorkflowRun workflowRun = new WorkflowRun(
             8_828_175_949L,
             "Workflow Run",
@@ -44,7 +43,6 @@ class JobsAdapterTest {
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var tokenRestClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
         jobsAdapter = new JobsAdapter(githubProperties, tokenRestClient);
-        LOGGER.info("");
     }
 
     @AfterEach
@@ -59,7 +57,7 @@ class JobsAdapterTest {
                         "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs")
                 ).willReturn(
                         aResponse()
-                                .withHeader("Content-Type", "application/json")
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBodyFile("WorkFlowRunJobsValidTestData.json")
                 ));
 
@@ -75,7 +73,7 @@ class JobsAdapterTest {
                         "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs"
                 )).willReturn(
                         aResponse()
-                                .withHeader("Content-Type", "application/json")
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBody("")
                 )
         );
