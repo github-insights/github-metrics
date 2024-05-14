@@ -8,21 +8,32 @@ public class WorkflowRun {
     private final WorkflowRunStatus status;
     private final Repository repository;
 
-    public WorkflowRun(long id, String name, WorkflowRunStatus status, Repository repository) {
+    private int buildTime;
+
+    public WorkflowRun(
+            long id,
+            String name,
+            WorkflowRunStatus status,
+            Repository repository
+    ) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.repository = repository;
     }
 
-    @Override
-    public String toString() {
-        return "WorkflowRun{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", repository='" + repository + '\'' +
-                ", status=" + status +
-                '}';
+    public WorkflowRun(
+            long id,
+            String name,
+            WorkflowRunStatus status,
+            Repository repository,
+            int buildTime
+    ) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.repository = repository;
+        this.buildTime = buildTime;
     }
 
     public String getName() {
@@ -39,5 +50,13 @@ public class WorkflowRun {
 
     public Repository getRepository() {
         return repository;
+    }
+
+    public int getBuildTime() {
+        return buildTime;
+    }
+
+    public void setBuildTime(int buildTime) {
+        this.buildTime = buildTime;
     }
 }
