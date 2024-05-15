@@ -38,6 +38,7 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
     @Cacheable("Repositories")
     @Override
     public List<Repository> getAllRepositories() {
+        LOGGER.info("Fetching fresh Repositories.");
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
 
@@ -48,7 +49,11 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
                 ),
                 parameters
         );
-        LOGGER.info("Correctly fetched {} repositories.", repositories.size());
+
+        LOGGER.debug(
+                "Response for the Repositories fetch returned {} repositories",
+                repositories.size()
+        );
         return repositories;
     }
 
@@ -87,9 +92,10 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
             var linkHeader = previousResponse.getHeaders()
                     .getValuesAsList("link")
                     .getFirst();
-            getNextPageLinkFromHeader(linkHeader).ifPresent(nextPageUrl ->
-                    repositories.addAll(this.fetchRepositories(nextPageUrl))
-            );
+            getNextPageLinkFromHeader(linkHeader).ifPresent(nextPageUrl -> {
+                LOGGER.debug("Repositories response contained pagination link, following link.");
+                repositories.addAll(this.fetchRepositories(nextPageUrl));
+            });
         }
 
         return repositories;

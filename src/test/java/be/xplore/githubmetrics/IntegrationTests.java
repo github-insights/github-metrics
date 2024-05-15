@@ -76,7 +76,7 @@ class IntegrationTests {
     }
 
     private void stubForWorkflowRunTests() {
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?created=%3E%3D"
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
                                 + TestUtility.yesterday()
                         )
                         .willReturn(ok()

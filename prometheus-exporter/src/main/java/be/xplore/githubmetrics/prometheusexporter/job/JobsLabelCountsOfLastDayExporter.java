@@ -35,17 +35,16 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     }
 
     private void retrieveAndExportLastDaysJobLabelCounts() {
-        LOGGER.info("Running scheduled jobs task");
+        LOGGER.info("LastDaysJobLabelCounts scheduled task is running.");
 
         List<Job> jobs = getAllJobsOfLastDayUseCase.getAllJobsOfLastDay();
-
         Map<JobLabel, Integer> jobLabelCounts = this.getJobLabelsCounts(jobs);
-
-        LOGGER.debug("Job Metrics to export: {}", jobLabelCounts.size());
-
         this.publishJobsLabelCountsGauges(jobLabelCounts);
 
-        LOGGER.info("Finished Scheduled Jobs task");
+        LOGGER.debug(
+                "LastDaysJobLabelCounts scheduled task finished with {} JobLabel combinations.",
+                jobLabelCounts.size()
+        );
     }
 
     private void publishJobsLabelCountsGauges(Map<JobLabel, Integer> statuses) {

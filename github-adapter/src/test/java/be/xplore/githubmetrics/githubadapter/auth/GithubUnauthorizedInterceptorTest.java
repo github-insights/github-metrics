@@ -2,6 +2,7 @@ package be.xplore.githubmetrics.githubadapter.auth;
 
 import be.xplore.githubmetrics.githubadapter.TestUtility;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.auth.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
 import be.xplore.githubmetrics.githubadapter.exceptions.GithubRequestWasUnauthenticatedException;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GithubUnauthorizedInterceptorTest {
     private final GithubUnauthorizedInterceptor unauthorizedInterceptor = new GithubUnauthorizedInterceptor();
+    private final DebugInterceptor debugInterceptor = new DebugInterceptor();
     private WireMockServer wireMockServer;
     private RestClient restClient;
 
@@ -31,7 +33,7 @@ class GithubUnauthorizedInterceptorTest {
         this.restClient = RestClient.builder()
                 .baseUrl(githubProperties.url())
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptor(TestUtility::debugInterceptor)
+                .requestInterceptor(debugInterceptor)
                 .build();
     }
 

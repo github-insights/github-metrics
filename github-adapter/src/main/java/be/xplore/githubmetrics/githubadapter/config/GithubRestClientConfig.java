@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics.githubadapter.config;
 
+import be.xplore.githubmetrics.githubadapter.config.auth.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
@@ -12,9 +13,11 @@ import org.springframework.web.client.RestClient;
 public class GithubRestClientConfig {
 
     private final GithubUnauthorizedInterceptor unauthorizedInterceptor;
+    private final DebugInterceptor debugInterceptor;
 
-    public GithubRestClientConfig(GithubUnauthorizedInterceptor unauthorizedInterceptor) {
+    public GithubRestClientConfig(GithubUnauthorizedInterceptor unauthorizedInterceptor, DebugInterceptor debugInterceptor) {
         this.unauthorizedInterceptor = unauthorizedInterceptor;
+        this.debugInterceptor = debugInterceptor;
     }
 
     @Bean
@@ -31,7 +34,10 @@ public class GithubRestClientConfig {
                         }
                 )
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptor(githubAuthTokenInterceptor)
+                .requestInterceptors(interceptors -> {
+                    interceptors.add(githubAuthTokenInterceptor);
+                    interceptors.add(debugInterceptor);
+                })
                 .build();
     }
 
@@ -49,7 +55,10 @@ public class GithubRestClientConfig {
                         }
                 )
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptor(githubJwtTokenInterceptor)
+                .requestInterceptors(interceptors -> {
+                    interceptors.add(githubJwtTokenInterceptor);
+                    interceptors.add(debugInterceptor);
+                })
                 .build();
     }
 }
