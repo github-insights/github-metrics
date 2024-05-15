@@ -36,7 +36,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
     }
 
     private void retrieveAndExportLastDaysWorkflowRunStatusCounts() {
-        LOGGER.info("Running scheduled workflow runs task.");
+        LOGGER.info("LastDaysWorkflowRunStatusCounts scheduled task is running.");
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();
 
@@ -47,7 +47,10 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
                 workflowRunsStatusCountsMap
         );
 
-        LOGGER.info("Finished scheduled workflow runs task");
+        LOGGER.debug(
+                "LastDaysWorkflowRunStatusCounts scheduled task has finished with {} different Status.",
+                workflowRunsStatusCountsMap.size()
+        );
     }
 
     private void publishWorkflowRunsStatusCountsGauges(Map<WorkflowRunStatus, Integer> statuses) {

@@ -4,6 +4,7 @@ import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHAppInstallationAccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -24,7 +25,10 @@ public class GithubAuthTokenInterceptor implements ClientHttpRequestInterceptor 
     private ZonedDateTime tokenExpirationDateTime = now();
     private String currentAccessToken;
 
-    public GithubAuthTokenInterceptor(GithubProperties githubProperties, RestClient tokenFetcherRestClient) {
+    public GithubAuthTokenInterceptor(
+            GithubProperties githubProperties,
+            @Qualifier("tokenFetcherRestClient") RestClient tokenFetcherRestClient
+    ) {
         this.githubProperties = githubProperties;
         this.tokenFetcherRestClient = tokenFetcherRestClient;
     }
@@ -36,16 +40,17 @@ public class GithubAuthTokenInterceptor implements ClientHttpRequestInterceptor 
     }
 
     private String getAuthToken() {
-        LOGGER.debug("Getting Auth Header From Installation id + app id + app private key");
 
         if (now().isAfter(this.tokenExpirationDateTime)) {
-            LOGGER.debug("Creating a new Access Token since the old one expired.");
+            LOGGER.debug("Access token has expired getting a new one.");
             var accessToken = this.tokenFetcherRestClient.post()
                     .uri(this.getAccessTokenApiPath())
                     .retrieve()
                     .body(GHAppInstallationAccessToken.class);
             this.currentAccessToken = accessToken.token();
             this.tokenExpirationDateTime = accessToken.getActualDate();
+        } else {
+            LOGGER.debug("Access token is still valid, reusing the old one.");
         }
 
         return this.currentAccessToken;

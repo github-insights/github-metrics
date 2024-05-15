@@ -1,6 +1,6 @@
 logging:
     level:
-        be.xplore.githubmetrics: DEBUG
+        be.xplore.githubmetrics: ${DEBUG_LEVEL:INFO}
 management:
     endpoints:
         web:

@@ -44,14 +44,16 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
     @Cacheable("WorkflowRuns")
     @Override
     public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
+        LOGGER.info("Fetching fresh WorkflowRuns for Repository {}.", repository.getId());
         var parameters = new HashMap<String, String>();
         parameters.put(
                 "created",
                 ">=" + LocalDate.now().minusDays(1)
                         .format(DateTimeFormatter.ISO_LOCAL_DATE)
         );
+        parameters.put("per_page", "100");
 
-        var response = this.restClient.get()
+        var workflowRuns = this.restClient.get()
                 .uri(uriBuilder -> {
                     uriBuilder.path(this.getWorkflowRunsApiPath(repository.getName()));
                     for (final var parameter : parameters.entrySet()) {
@@ -60,10 +62,14 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
                     return uriBuilder.build();
                 })
                 .retrieve()
-                .body(GHActionRuns.class);
+                .body(GHActionRuns.class)
+                .getWorkFlowRuns(repository);
 
-        List<WorkflowRun> workflowRuns = response.getWorkFlowRuns(repository);
-        LOGGER.debug("number of unique workflow runs: {}", workflowRuns.size());
+        LOGGER.debug(
+                "Response for the WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",
+                repository.getId(),
+                workflowRuns.size()
+        );
         return workflowRuns;
     }
 }

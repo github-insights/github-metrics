@@ -39,14 +39,19 @@ public class JobsAdapter implements JobsQueryPort {
 
     @Override
     public List<Job> getAllJobsForWorkflowRun(WorkflowRun workflowRun) {
-        LOGGER.debug("Getting Jobs for workflow run: {}", workflowRun.getId());
-        var response = this.restClient.get()
+        LOGGER.info("Fetching fresh Jobs for WorkflowRun {}.", workflowRun.getId());
+
+        var jobs = this.restClient.get()
                 .uri(getJobsApiPath(workflowRun.getRepository().getName(), workflowRun.getId()))
                 .retrieve()
-                .body(GHWorkflowRunJobs.class);
+                .body(GHWorkflowRunJobs.class)
+                .getJobs();
 
-        List<Job> jobs = response.getJobs();
-        LOGGER.debug("number of jobs for workflow run {}: {}", workflowRun.getId(), jobs.size());
+        LOGGER.debug(
+                "Response for the Jobs fetch of WorkflowRun {} returned {} jobs.",
+                workflowRun.getId(),
+                jobs.size()
+        );
         return jobs;
     }
 }

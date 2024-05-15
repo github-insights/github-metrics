@@ -42,7 +42,7 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
     }
 
     private void retrieveAndExportLastDaysWorkflowRunBuildTimes() {
-        LOGGER.info("Running scheduled workflow runs build times task");
+        LOGGER.info("LastDaysWorkflowRunBuildTimes scheduled task is running.");
         List<WorkflowRun> workflowRuns =
                 getAllWorkflowRunBuildTimesOfLastDayUseCase.getAllWorkflowRunBuildTime();
 
@@ -52,6 +52,8 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
         buildTimesMap.put("workflow_runs_average_build_times", this.getAverageBuildTimes(workflowRuns));
 
         this.publishWorkflowRunsBuildTimesGauges(buildTimesMap);
+
+        LOGGER.debug("LastDaysWorkflowRunBuildTimes scheduled task finished.");
     }
 
     private void publishWorkflowRunsBuildTimesGauges(

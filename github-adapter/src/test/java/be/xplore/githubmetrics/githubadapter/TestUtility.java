@@ -2,6 +2,7 @@ package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
+import be.xplore.githubmetrics.githubadapter.config.auth.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
@@ -10,23 +11,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestUtility {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtility.class);
+    private static final DebugInterceptor DEBUG_INTERCEPTOR = new DebugInterceptor();
 
     public static HttpRequest mockHttpRequestWithMockedHeaders() {
         var mockHttpHeaders = mock(HttpRequest.class);
@@ -34,23 +31,8 @@ public class TestUtility {
         return mockHttpHeaders;
     }
 
-    public static ClientHttpRequestExecution mockRequestExecutionWithMockedExecution(HttpRequest headers) throws IOException {
-        var mockExecution = mock(ClientHttpRequestExecution.class);
-        when(mockExecution.execute(eq(headers), any(byte[].class)))
-                .thenReturn(mock(ClientHttpResponse.class));
-        return mockExecution;
-    }
-
-    public static ClientHttpResponse debugInterceptor(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        LOGGER.info("Making a {} request to {}.", request.getMethod(), request.getURI());
-        LOGGER.info("The out body is {} bytes long.", body.length);
-        var response = execution.execute(request, body);
-        LOGGER.info("Response code was {}.", response.getStatusCode());
-        return response;
-    }
-
     public static GithubAuthTokenInterceptor getAuthTokenInterceptor(GithubProperties githubProperties) {
-        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor());
+        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR);
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
         var jwtRestClient = restClientConfig.tokenFetcherRestClient(
                 jwtInterceptor, githubProperties
@@ -58,22 +40,9 @@ public class TestUtility {
         jwtRestClient.mutate()
                 .requestInterceptors(interceptors -> {
                     interceptors.add(jwtInterceptor);
-                    interceptors.add(TestUtility::debugInterceptor);
+                    interceptors.add(DEBUG_INTERCEPTOR);
                 });
         return new GithubAuthTokenInterceptor(githubProperties, jwtRestClient);
-    }
-
-    public static RestClient getAuthTokenRestClient(GithubProperties githubProperties) {
-        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor());
-        var tokenInterceptor = getAuthTokenInterceptor(githubProperties);
-        var defaultRestClient = restClientConfig.defaultRestClient(tokenInterceptor, githubProperties);
-        defaultRestClient.mutate()
-                .requestInterceptors(interceptors -> {
-                    interceptors.add(tokenInterceptor);
-                    interceptors.add(TestUtility::debugInterceptor);
-                });
-        return defaultRestClient;
-
     }
 
     public static RestClient getDefaultRestClientNoAuth(GithubProperties githubProperties) {
@@ -85,7 +54,7 @@ public class TestUtility {
                             httpHeaders.set("Accept", "application/vnd.github+json");
                         }
                 )
-                .requestInterceptor(TestUtility::debugInterceptor)
+                .requestInterceptor(DEBUG_INTERCEPTOR)
                 .build();
     }
 
