@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record SchedulingProperties(
         String workflowRunsInterval,
         String workflowRunBuildTimesInterval,
-        String jobsInterval
+        String jobsInterval,
+        String pullRequestsInterval
 ) {
 }
