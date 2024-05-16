@@ -40,19 +40,18 @@ public class GithubAuthTokenInterceptor implements ClientHttpRequestInterceptor 
     }
 
     private String getAuthToken() {
-
-        if (now().isAfter(this.tokenExpirationDateTime)) {
-            LOGGER.debug("Access token has expired getting a new one.");
-            var accessToken = this.tokenFetcherRestClient.post()
-                    .uri(this.getAccessTokenApiPath())
-                    .retrieve()
-                    .body(GHAppInstallationAccessToken.class);
-            this.currentAccessToken = accessToken.token();
-            this.tokenExpirationDateTime = accessToken.getActualDate();
-        } else {
+        if (now().isBefore(this.tokenExpirationDateTime)) {
             LOGGER.debug("Access token is still valid, reusing the old one.");
+            return this.currentAccessToken;
         }
 
+        LOGGER.debug("Access token has expired getting a new one.");
+        var accessToken = this.tokenFetcherRestClient.post()
+                .uri(this.getAccessTokenApiPath())
+                .retrieve()
+                .body(GHAppInstallationAccessToken.class);
+        this.currentAccessToken = accessToken.token();
+        this.tokenExpirationDateTime = accessToken.getActualDate();
         return this.currentAccessToken;
     }
 

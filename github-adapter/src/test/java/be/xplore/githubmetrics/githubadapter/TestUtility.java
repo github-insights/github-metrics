@@ -9,8 +9,6 @@ import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInter
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
@@ -18,24 +16,16 @@ import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class TestUtility {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtility.class);
     private static final DebugInterceptor DEBUG_INTERCEPTOR = new DebugInterceptor();
 
-    public static HttpRequest mockHttpRequestWithMockedHeaders() {
-        var mockHttpHeaders = mock(HttpRequest.class);
-        when(mockHttpHeaders.getHeaders()).thenReturn(mock(HttpHeaders.class));
-        return mockHttpHeaders;
-    }
-
     public static GithubAuthTokenInterceptor getAuthTokenInterceptor(GithubProperties githubProperties) {
-        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR);
+        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR, githubProperties);
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
         var jwtRestClient = restClientConfig.tokenFetcherRestClient(
-                jwtInterceptor, githubProperties
+                jwtInterceptor
         );
         jwtRestClient.mutate()
                 .requestInterceptors(interceptors -> {
