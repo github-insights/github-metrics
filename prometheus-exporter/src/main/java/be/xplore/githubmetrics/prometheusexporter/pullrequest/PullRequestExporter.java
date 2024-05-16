@@ -16,6 +16,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Service
@@ -41,27 +42,64 @@ public class PullRequestExporter implements ScheduledExporter {
         LOGGER.info("PullRequests scheduled task is running.");
         List<PullRequest> pullRequests = getAllPullRequestsUseCase.getAllPullRequests();
 
-        var pullRequestMapByPeriod = new HashMap<String, Map<PullRequestState, Integer>>();
+        this.generateAndPublishPullRequestCountsMetrics(pullRequests);
 
-        pullRequestMapByPeriod.put(
-                "pull_requests_count_of_last_1_days",
-                this.getCountOfPullRequests(pullRequests, 1)
-        );
-        pullRequestMapByPeriod.put(
-                "pull_requests_count_of_last_2_days",
-                this.getCountOfPullRequests(pullRequests, 2)
-        );
-        pullRequestMapByPeriod.put(
-                "pull_requests_count_of_last_7_days",
-                this.getCountOfPullRequests(pullRequests, 7)
-        );
-
-        this.publishPullRequestMetrics(pullRequestMapByPeriod);
+        this.generateAndPublishPullRequestThroughputsMetrics(pullRequests);
 
         LOGGER.debug("PullRequests scheduled task is finished.");
     }
 
-    private void publishPullRequestMetrics(
+    private void generateAndPublishPullRequestThroughputsMetrics(List<PullRequest> pullRequests) {
+        var pullRequestThroughputMapByPeriod = new HashMap<String, Integer>();
+
+        pullRequestThroughputMapByPeriod.put(
+                "pull_request_throughput_of_last_7_days",
+                this.getThroughputOfPullRequests(pullRequests, 7)
+        );
+        pullRequestThroughputMapByPeriod.put(
+                "pull_request_throughput_of_last_14_days",
+                this.getThroughputOfPullRequests(pullRequests, 14)
+        );
+        pullRequestThroughputMapByPeriod.put(
+                "pull_request_throughput_of_last_28_days",
+                this.getThroughputOfPullRequests(pullRequests, 28)
+        );
+        pullRequestThroughputMapByPeriod.put(
+                "pull_request_throughput_of_last_year",
+                this.getThroughputOfPullRequests(pullRequests, 365)
+        );
+
+        this.publishPullRequestThroughputMetrics(pullRequestThroughputMapByPeriod);
+    }
+
+    private void generateAndPublishPullRequestCountsMetrics(List<PullRequest> pullRequests) {
+        var pullRequestCountMapByPeriod = new HashMap<String, Map<PullRequestState, Integer>>();
+
+        pullRequestCountMapByPeriod.put(
+                "pull_requests_count_of_last_1_days",
+                this.getCountOfPullRequests(pullRequests, 1)
+        );
+        pullRequestCountMapByPeriod.put(
+                "pull_requests_count_of_last_2_days",
+                this.getCountOfPullRequests(pullRequests, 2)
+        );
+        pullRequestCountMapByPeriod.put(
+                "pull_requests_count_of_last_7_days",
+                this.getCountOfPullRequests(pullRequests, 7)
+        );
+        pullRequestCountMapByPeriod.put(
+                "pull_requests_count_of_last_28_days",
+                this.getCountOfPullRequests(pullRequests, 28)
+        );
+        pullRequestCountMapByPeriod.put(
+                "pull_requests_count_of_last_year",
+                this.getCountOfPullRequests(pullRequests, 365)
+        );
+
+        this.publishPullRequestCountMetrics(pullRequestCountMapByPeriod);
+    }
+
+    private void publishPullRequestCountMetrics(
             Map<String, Map<PullRequestState, Integer>> pullRequestsMetricsMap
     ) {
         for (var pullRequestMetric : pullRequestsMetricsMap.entrySet()) {
@@ -73,6 +111,18 @@ public class PullRequestExporter implements ScheduledExporter {
                         .strongReference(true)
                         .register(this.registry);
             }
+        }
+    }
+
+    private void publishPullRequestThroughputMetrics(
+            Map<String, Integer> pullRequestThroughputsMetricsMap
+    ) {
+        for (var pullRequestMetric : pullRequestThroughputsMetricsMap.entrySet()) {
+            Gauge.builder(pullRequestMetric.getKey(),
+                            pullRequestMetric,
+                            Map.Entry::getValue)
+                    .strongReference(true)
+                    .register(this.registry);
         }
     }
 
@@ -94,6 +144,19 @@ public class PullRequestExporter implements ScheduledExporter {
 
         return pullRequestExportMap;
 
+    }
+
+    private Integer getThroughputOfPullRequests(List<PullRequest> pullRequests, int period) {
+        AtomicInteger mergedCount = new AtomicInteger();
+        pullRequests.stream()
+                .takeWhile(
+                        pullRequest ->
+                                pullRequest.getCreatedAt()
+                                        .isAfter(ZonedDateTime.now().minusHours(period * 24L)))
+                .filter(pullRequest -> pullRequest.getState().equals(PullRequestState.MERGED))
+                .forEach(pullRequest -> mergedCount.getAndIncrement());
+
+        return mergedCount.get() / period;
     }
 
     private Map<PullRequestState, Integer> getEmptyPullRequestsMapByState() {

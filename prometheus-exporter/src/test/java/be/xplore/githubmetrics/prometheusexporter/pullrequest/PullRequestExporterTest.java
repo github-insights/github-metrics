@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,6 +25,13 @@ class PullRequestExporterTest {
         List<PullRequest> pullRequests = new ArrayList<>();
         pullRequests.add(new PullRequest(0L, ZonedDateTime.now().minusHours(12)));
         pullRequests.add(new PullRequest(0L, ZonedDateTime.now().minusHours(36)));
+        IntStream.range(0, 6).forEach(n ->
+                pullRequests.add(new PullRequest(
+                        0L,
+                        ZonedDateTime.now().minusHours(36),
+                        ZonedDateTime.now().minusHours(37),
+                        ZonedDateTime.now().minusHours(37)))
+        );
         pullRequests.add(new PullRequest(
                 0L,
                 ZonedDateTime.now().minusHours(36),
@@ -52,9 +60,23 @@ class PullRequestExporterTest {
 
     @Test
     void pullRequestExporterShouldDisplayCorrectGaugeMetrics() {
-        String labelToCheck = "state";
         Mockito.when(this.mockUseCase.getAllPullRequests()).thenReturn(getPullRequests());
         pullRequestExporter.run();
+
+        this.pullRequestCountAsserts();
+        this.pullRequestThroughputAsserts();
+    }
+
+    private void pullRequestThroughputAsserts() {
+        assertEquals(
+                1,
+                registry.find("pull_request_throughput_of_last_7_days")
+                        .gauge().value()
+        );
+    }
+
+    private void pullRequestCountAsserts() {
+        String labelToCheck = "state";
         assertEquals(
                 0,
                 registry.find("pull_requests_count_of_last_1_days")
@@ -72,7 +94,7 @@ class PullRequestExporterTest {
                 registry.find("pull_requests_count_of_last_2_days")
                         .tag(labelToCheck, "CLOSED").gauge().value());
         assertEquals(
-                1,
+                7,
                 registry.find("pull_requests_count_of_last_7_days")
                         .tag(labelToCheck, "MERGED").gauge().value());
     }
