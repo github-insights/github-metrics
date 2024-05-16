@@ -13,41 +13,41 @@ public class GithubRestClientConfig {
 
     private final GithubUnauthorizedInterceptor unauthorizedInterceptor;
     private final DebugInterceptor debugInterceptor;
+    private final GithubProperties githubProperties;
 
     public GithubRestClientConfig(
             GithubUnauthorizedInterceptor unauthorizedInterceptor,
-            DebugInterceptor debugInterceptor
+            DebugInterceptor debugInterceptor,
+            GithubProperties githubProperties
     ) {
         this.unauthorizedInterceptor = unauthorizedInterceptor;
         this.debugInterceptor = debugInterceptor;
+        this.githubProperties = githubProperties;
     }
 
     @Bean
     public RestClient defaultRestClient(
-            GithubAuthTokenInterceptor githubAuthTokenInterceptor,
-            GithubProperties githubProperties
+            GithubAuthTokenInterceptor githubAuthTokenInterceptor
     ) {
-        return RestClient.builder()
-                .baseUrl(githubProperties.url())
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.set("X-Github-Api-Version", "2022-11-28");
-                            httpHeaders.set("Accept", "application/vnd.github+json");
-                        }
+        return this.getBasicRestClient()
+                .requestInterceptors(interceptors ->
+                        interceptors.add(githubAuthTokenInterceptor)
                 )
-                .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptors(interceptors -> {
-                    interceptors.add(debugInterceptor);
-                    interceptors.add(githubAuthTokenInterceptor);
-                })
                 .build();
     }
 
     @Bean
     public RestClient tokenFetcherRestClient(
-            GithubJwtTokenInterceptor githubJwtTokenInterceptor,
-            GithubProperties githubProperties
+            GithubJwtTokenInterceptor githubJwtTokenInterceptor
     ) {
+        return this.getBasicRestClient()
+                .requestInterceptors(interceptors ->
+                        interceptors.add(githubJwtTokenInterceptor)
+                )
+                .build();
+    }
+
+    private RestClient.Builder getBasicRestClient() {
         return RestClient.builder()
                 .baseUrl(githubProperties.url())
                 .defaultHeaders(
@@ -57,10 +57,8 @@ public class GithubRestClientConfig {
                         }
                 )
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptors(interceptors -> {
-                    interceptors.add(debugInterceptor);
-                    interceptors.add(githubJwtTokenInterceptor);
-                })
-                .build();
+                .requestInterceptors(interceptors ->
+                        interceptors.add(debugInterceptor)
+                );
     }
 }

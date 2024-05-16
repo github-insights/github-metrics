@@ -16,6 +16,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GithubUnauthorizedInterceptorTest {
@@ -68,6 +69,20 @@ class GithubUnauthorizedInterceptorTest {
         var request = this.restClient.get().retrieve();
         assertThrows(
                 GithubRequestWasUnauthenticatedException.class,
+                request::toBodilessEntity
+        );
+    }
+
+    @Test
+    void restClientWithUnauthorizedInterceptorShouldNotThrowOn404() {
+        stubFor(
+                get(urlEqualTo("/"))
+                        .willReturn(
+                                aResponse().withStatus(404)
+                        )
+        );
+        var request = this.restClient.get().retrieve();
+        assertDoesNotThrow(
                 request::toBodilessEntity
         );
     }
