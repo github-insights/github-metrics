@@ -13,41 +13,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 public class RepositoriesAdapter implements RepositoriesQueryPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoriesAdapter.class);
     private final RestClient restClient;
     private final GithubProperties config;
+    private final GithubApiUtilities utilities;
 
     public RepositoriesAdapter(
             GithubProperties config,
-            @Qualifier("defaultRestClient") RestClient restClient
+            @Qualifier("defaultRestClient") RestClient restClient, GithubApiUtilities utilities
     ) {
         this.restClient = restClient;
         this.config = config;
+        this.utilities = utilities;
     }
 
     @Cacheable("Repositories")
     @Override
     public List<Repository> getAllRepositories() {
         LOGGER.info("Fetching fresh Repositories.");
+
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
 
-        var repositories = this.fetchRepositories(
-                MessageFormat.format(
-                        "/orgs/{0}/repos",
-                        this.config.org()
-                ),
-                parameters
+        ResponseEntity<GHRepository[]> responseEntity = this.restClient.get()
+                .uri(utilities.setPathAndParameters(
+                        this.getRepositoriesApiPath(),
+                        parameters
+                ))
+                .retrieve()
+                .toEntity(GHRepository[].class);
+
+        var repositories = this.utilities.followPaginationLink(
+                responseEntity,
+                ghRepositories -> Arrays.stream(ghRepositories).map(GHRepository::getRepository).toList(),
+                GHRepository[].class
         );
 
         LOGGER.debug(
@@ -57,71 +62,11 @@ public class RepositoriesAdapter implements RepositoriesQueryPort {
         return repositories;
     }
 
-    private List<Repository> fetchRepositories(String path, Map<String, String> parameters) {
-        ResponseEntity<GHRepository[]> response = this.restClient.get()
-                .uri(uriBuilder -> {
-                    uriBuilder.path(path);
-                    for (final var parameter : parameters.entrySet()) {
-                        uriBuilder.queryParam(parameter.getKey(), parameter.getValue());
-                    }
-                    return uriBuilder.build();
-                })
-                .retrieve()
-                .toEntity(GHRepository[].class);
-
-        return conditionallyFetchNextPage(response);
-    }
-
-    private List<Repository> fetchRepositories(String fullUrl) {
-        ResponseEntity<GHRepository[]> response = this.restClient.get()
-                .uri(fullUrl)
-                .retrieve()
-                .toEntity(GHRepository[].class);
-
-        return conditionallyFetchNextPage(response);
-    }
-
-    private List<Repository> conditionallyFetchNextPage(
-            ResponseEntity<GHRepository[]> previousResponse
-    ) {
-        List<Repository> repositories = new ArrayList<>(
-                this.getRepositoriesFromResponse(previousResponse)
+    private String getRepositoriesApiPath() {
+        return MessageFormat.format(
+                "/orgs/{0}/repos",
+                this.config.org()
         );
-
-        if (previousResponse.getHeaders().containsKey("link")) {
-            var linkHeader = previousResponse.getHeaders()
-                    .getValuesAsList("link")
-                    .getFirst();
-            getNextPageLinkFromHeader(linkHeader).ifPresent(nextPageUrl -> {
-                LOGGER.debug("Repositories response contained pagination link, following link.");
-                repositories.addAll(this.fetchRepositories(nextPageUrl));
-            });
-        }
-
-        return repositories;
-    }
-
-    private List<Repository> getRepositoriesFromResponse(ResponseEntity<GHRepository[]> response) {
-        GHRepository[] repositories = response.getBody();
-        return Stream.of(repositories)
-                .map(GHRepository::getRepository)
-                .toList();
-    }
-
-    private Optional<String> getNextPageLinkFromHeader(String linkHeader) {
-        var optNextSection = Arrays.stream(linkHeader.split(","))
-                .filter(part -> part.contains("rel=\"next\""))
-                .findFirst();
-
-        if (optNextSection.isEmpty()) {
-            return optNextSection;
-        }
-        var nextSection = optNextSection.get();
-        return Arrays.stream(nextSection.split(";"))
-                .findFirst()
-                .map(bracedLink ->
-                        bracedLink.substring(1, bracedLink.length() - 1)
-                );
     }
 
 }

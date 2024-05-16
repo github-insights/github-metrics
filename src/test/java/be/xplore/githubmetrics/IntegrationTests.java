@@ -87,11 +87,11 @@ class IntegrationTests {
     }
 
     private void stubForJobsTests() {
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs")
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs")
+        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));

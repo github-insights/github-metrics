@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +28,16 @@ class WorkflowRunsAdapterTest {
     private WorkflowRunsAdapter workflowRunsAdapter;
 
     @BeforeEach
-    void setupWireMock() throws IOException {
+    void setupWireMock() {
 
         this.wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
+        var utilities = new GithubApiUtilities(restClient);
         workflowRunsAdapter = new WorkflowRunsAdapter(
                 githubProperties,
-                restClient
+                restClient,
+                utilities
         );
     }
 

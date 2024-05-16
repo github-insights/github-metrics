@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
-import be.xplore.githubmetrics.githubadapter.config.auth.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
