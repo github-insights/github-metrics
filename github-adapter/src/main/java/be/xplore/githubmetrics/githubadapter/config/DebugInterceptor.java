@@ -1,4 +1,4 @@
-package be.xplore.githubmetrics.githubadapter.config.auth;
+package be.xplore.githubmetrics.githubadapter.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,21 +26,23 @@ public class DebugInterceptor implements ClientHttpRequestInterceptor {
                 request.getURI(),
                 response.getStatusCode()
         );
-
-        Optional.ofNullable(response.getHeaders().get("X-RateLimit-Remaining")).ifPresent(header ->
-                Optional.ofNullable(header.getFirst()).ifPresent(rateRemaining -> {
-                    var intRateRemaining = Integer.parseInt(rateRemaining);
-                    if (intRateRemaining < 500 && intRateRemaining % 10 == 0) {
-                        LOGGER.warn("Current rate remaining is {}", intRateRemaining);
-                    }
-                    if (intRateRemaining % 500 == 0) {
-                        LOGGER.info("Current rate remaining is {}.", intRateRemaining);
-                    } else if (intRateRemaining % 100 == 0) {
-                        LOGGER.debug("Current rate remaining is {}.", intRateRemaining);
-                    }
-
-                })
+        LOGGER.trace(
+                "Headers of response were {}.",
+                response.getHeaders()
         );
+
+        Optional.ofNullable(response.getHeaders().get("X-RateLimit-Remaining")).flatMap(header -> Optional.ofNullable(header.getFirst())).ifPresent(rateRemaining -> {
+            var intRateRemaining = Integer.parseInt(rateRemaining);
+            if (intRateRemaining < 500 && intRateRemaining % 50 == 0) {
+                LOGGER.error("Current rate remaining is {}", intRateRemaining);
+            }
+            if (intRateRemaining % 500 == 0) {
+                LOGGER.info("Current rate remaining is {}.", intRateRemaining);
+            } else if (intRateRemaining % 100 == 0) {
+                LOGGER.debug("Current rate remaining is {}.", intRateRemaining);
+            }
+
+        });
         return response;
     }
 }

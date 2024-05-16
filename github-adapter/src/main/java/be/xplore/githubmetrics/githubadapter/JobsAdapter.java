@@ -8,10 +8,12 @@ import be.xplore.githubmetrics.githubadapter.mappingclasses.GHWorkflowRunJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -19,13 +21,15 @@ public class JobsAdapter implements JobsQueryPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsAdapter.class);
     private final GithubProperties githubProperties;
     private final RestClient restClient;
+    private final GithubApiUtilities utilities;
 
     public JobsAdapter(
             GithubProperties githubProperties,
-            @Qualifier("defaultRestClient") RestClient restClient
+            @Qualifier("defaultRestClient") RestClient restClient, GithubApiUtilities utilities
     ) {
         this.githubProperties = githubProperties;
         this.restClient = restClient;
+        this.utilities = utilities;
     }
 
     private String getJobsApiPath(String repoName, long workflowRunId) {
@@ -41,11 +45,22 @@ public class JobsAdapter implements JobsQueryPort {
     public List<Job> getAllJobsForWorkflowRun(WorkflowRun workflowRun) {
         LOGGER.info("Fetching fresh Jobs for WorkflowRun {}.", workflowRun.getId());
 
-        var jobs = this.restClient.get()
-                .uri(getJobsApiPath(workflowRun.getRepository().getName(), workflowRun.getId()))
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
+
+        ResponseEntity<GHWorkflowRunJobs> responseEntity = this.restClient.get()
+                .uri(utilities.setPathAndParameters(
+                        getJobsApiPath(workflowRun.getRepository().getName(), workflowRun.getId()),
+                        parameters
+                ))
                 .retrieve()
-                .body(GHWorkflowRunJobs.class)
-                .getJobs();
+                .toEntity(GHWorkflowRunJobs.class);
+
+        var jobs = this.utilities.followPaginationLink(
+                responseEntity,
+                GHWorkflowRunJobs::getJobs,
+                GHWorkflowRunJobs.class
+        );
 
         LOGGER.debug(
                 "Response for the Jobs fetch of WorkflowRun {} returned {} jobs.",

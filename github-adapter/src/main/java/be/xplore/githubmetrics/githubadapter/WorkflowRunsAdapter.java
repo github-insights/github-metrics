@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -24,13 +25,16 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunsAdapter.class);
     private final GithubProperties githubProperties;
     private final RestClient restClient;
+    private final GithubApiUtilities utilities;
 
     public WorkflowRunsAdapter(
             GithubProperties githubProperties,
-            @Qualifier("defaultRestClient") RestClient restClient
+            @Qualifier("defaultRestClient") RestClient restClient,
+            GithubApiUtilities utilities
     ) {
         this.githubProperties = githubProperties;
         this.restClient = restClient;
+        this.utilities = utilities;
     }
 
     private String getWorkflowRunsApiPath(String repoName) {
@@ -53,17 +57,19 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
         );
         parameters.put("per_page", "100");
 
-        var workflowRuns = this.restClient.get()
-                .uri(uriBuilder -> {
-                    uriBuilder.path(this.getWorkflowRunsApiPath(repository.getName()));
-                    for (final var parameter : parameters.entrySet()) {
-                        uriBuilder.queryParam(parameter.getKey(), parameter.getValue());
-                    }
-                    return uriBuilder.build();
-                })
+        ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
+                .uri(utilities.setPathAndParameters(
+                        this.getWorkflowRunsApiPath(repository.getName()),
+                        parameters
+                ))
                 .retrieve()
-                .body(GHActionRuns.class)
-                .getWorkFlowRuns(repository);
+                .toEntity(GHActionRuns.class);
+
+        var workflowRuns = this.utilities.followPaginationLink(
+                responseEntity,
+                actionRun -> actionRun.getWorkFlowRuns(repository),
+                GHActionRuns.class
+        );
 
         LOGGER.debug(
                 "Response for the WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",

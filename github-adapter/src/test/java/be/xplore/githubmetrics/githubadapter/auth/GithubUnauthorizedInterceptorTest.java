@@ -1,8 +1,8 @@
 package be.xplore.githubmetrics.githubadapter.auth;
 
 import be.xplore.githubmetrics.githubadapter.TestUtility;
+import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
-import be.xplore.githubmetrics.githubadapter.config.auth.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
 import be.xplore.githubmetrics.githubadapter.exceptions.GithubRequestWasUnauthenticatedException;
 import com.github.tomakehurst.wiremock.WireMockServer;

@@ -27,15 +27,6 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
         this.restClient = restClient;
     }
 
-    private String getBuildTimesApiPath(WorkflowRun workflowRun) {
-        return MessageFormat.format(
-                "repos/{0}/{1}/actions/runs/{2,number,#}/timing",
-                this.githubProperties.org(),
-                workflowRun.getRepository().getName(),
-                workflowRun.getId()
-        );
-    }
-
     @Cacheable("WorkflowRunBuildTimes")
     @Override
     public int getWorkflowRunBuildTimes(WorkflowRun workflowRun) {
@@ -57,5 +48,14 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
         );
 
         return buildTime;
+    }
+
+    private String getBuildTimesApiPath(WorkflowRun workflowRun) {
+        return MessageFormat.format(
+                "repos/{0}/{1}/actions/runs/{2,number,#}/timing",
+                this.githubProperties.org(),
+                workflowRun.getRepository().getName(),
+                workflowRun.getId()
+        );
     }
 }

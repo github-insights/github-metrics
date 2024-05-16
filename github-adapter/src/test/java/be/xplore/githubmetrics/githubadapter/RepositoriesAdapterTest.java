@@ -8,8 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientException;
 
-import java.io.IOException;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -22,14 +20,16 @@ class RepositoriesAdapterTest {
     private RepositoriesAdapter repositoriesAdapter;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
+        var utilities = new GithubApiUtilities(restClient);
 
         repositoriesAdapter = new RepositoriesAdapter(
                 githubProperties,
-                restClient
+                restClient,
+                utilities
         );
 
     }

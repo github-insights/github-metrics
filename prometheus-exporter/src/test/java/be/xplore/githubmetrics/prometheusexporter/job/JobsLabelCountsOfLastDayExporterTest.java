@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -60,7 +59,7 @@ class JobsLabelCountsOfLastDayExporterTest {
                                 getJobs(JobStatus.IN_PROGRESS, JobConclusion.SUCCESS, 8),
                                 getJobs(JobStatus.PENDING, JobConclusion.SUCCESS, 9)
                         ).flatMap(Collection::stream)
-                        .collect(Collectors.toList())
+                        .toList()
         );
 
         jobsLabelCountsOfLastDayExporter.run();

@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -50,7 +49,7 @@ class WorkflowRunStatusCountsOfLastDayExporterTest {
                                 getRuns(WorkflowRunStatus.PENDING, 3),
                                 getRuns(WorkflowRunStatus.FAILED, 7)
                         ).flatMap(Collection::stream)
-                        .collect(Collectors.toList())
+                        .toList()
         );
 
         workflowRunStatusCountsOfLastDayExporter.run();
