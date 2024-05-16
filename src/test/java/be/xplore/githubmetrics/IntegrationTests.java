@@ -1,10 +1,10 @@
 package be.xplore.githubmetrics;
 
 import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
+import be.xplore.githubmetrics.prometheusexporter.pullrequest.PullRequestExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunBuildTimesOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,8 +21,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -35,14 +39,15 @@ class IntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
     private static WireMockServer wireMockServer;
-
+    private final String actuatorEndpoint = "/actuator/prometheus";
     @Autowired
     private WorkflowRunStatusCountsOfLastDayExporter workflowRunStatusCountsOfLastDayExporter;
     @Autowired
     private WorkflowRunBuildTimesOfLastDayExporter workflowRunBuildTimesOfLastDayExporter;
     @Autowired
     private JobsLabelCountsOfLastDayExporter jobsLabelCountsOfLastDayExporter;
-
+    @Autowired
+    private PullRequestExporter pullRequestExporter;
     @Autowired
     private MockMvc mockMvc;
 
@@ -59,11 +64,11 @@ class IntegrationTests {
 
     @BeforeEach
     void setUp() {
-        stubFor(WireMock.post("/app/installations/50174772/access_tokens").willReturn(ok()
+        stubFor(post("/app/installations/50174772/access_tokens").willReturn(ok()
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
-        stubFor(WireMock.get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/orgs/github-insights/repos?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
@@ -73,12 +78,14 @@ class IntegrationTests {
         this.stubForJobsTests();
 
         this.stubForBuildTimeTests();
+
+        this.stubForPullRequestsTests();
     }
 
     private void stubForWorkflowRunTests() {
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
-                                + TestUtility.yesterday()
-                        )
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
+                        + TestUtility.yesterday()
+                )
                         .willReturn(ok()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
@@ -87,25 +94,46 @@ class IntegrationTests {
     }
 
     private void stubForJobsTests() {
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("JobsValidTestData.json")));
     }
 
     private void stubForBuildTimeTests() {
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784314559/timing")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/timing")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("WorkflowRunBuildTime.json")));
-        stubFor(WireMock.get("/repos/github-insights/github-metrics/actions/runs/8784267977/timing")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/timing")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("WorkflowRunBuildTime.json")));
+    }
+
+    private void stubForPullRequestsTests() {
+        stubFor(
+                get(urlEqualTo(
+                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
+                )).willReturn(
+                        aResponse()
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBodyFile("PullRequestsValidData.json")));
+    }
+
+    @Test
+    void retrieveAndExportPullRequestsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
+        this.pullRequestExporter.run();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(Matchers.containsString("pull_requests_count_of_last_1_days{state=\"OPEN\",} 1.0"))
+        );
     }
 
     @Test
@@ -113,7 +141,7 @@ class IntegrationTests {
         this.jobsLabelCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/actuator/prometheus")
+                .get(actuatorEndpoint)
         ).andExpect(
                 content().string(Matchers.containsString("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\",} 2.0"))
         );
@@ -124,7 +152,7 @@ class IntegrationTests {
         this.workflowRunStatusCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/actuator/prometheus")
+                .get(actuatorEndpoint)
         ).andExpect(
                 content().string(Matchers.containsString("workflow_runs{status=\"DONE\",} 2.0"))
         );
@@ -135,14 +163,14 @@ class IntegrationTests {
         this.workflowRunBuildTimesOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/actuator/prometheus")
+                .get(actuatorEndpoint)
         ).andExpect(
                 content().string(
                         Matchers.containsString(
                                 "workflow_runs_total_build_times{status=\"DONE\",} 272000.0"
                         )));
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/actuator/prometheus")
+                .get(actuatorEndpoint)
         ).andExpect(
                 content().string(
                         Matchers.containsString(
