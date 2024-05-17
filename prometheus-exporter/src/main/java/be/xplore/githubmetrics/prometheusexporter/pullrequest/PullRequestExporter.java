@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -22,9 +24,12 @@ import java.util.stream.Stream;
 @Service
 public class PullRequestExporter implements ScheduledExporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(PullRequestExporter.class);
-
+    private static final List<Integer> STATE_COUNT_PERIODS = List.of(1, 2, 7, 28, 365);
+    private static final List<Integer> THROUGHPUT_PERIODS = List.of(7, 14, 28, 365);
     private final GetAllPullRequestsUseCase getAllPullRequestsUseCase;
     private final MeterRegistry registry;
+    private final Map<Integer, Map<PullRequestState, AtomicInteger>> stateCountGauges = new HashMap<>();
+    private final Map<Integer, AtomicInteger> throughputGauges = new HashMap<>();
 
     private final String cronExpression;
 
@@ -36,6 +41,23 @@ public class PullRequestExporter implements ScheduledExporter {
         this.getAllPullRequestsUseCase = getAllPullRequestsUseCase;
         this.registry = registry;
         this.cronExpression = schedulingProperties.pullRequestsInterval();
+
+        this.initPullRequestGauges();
+
+    }
+
+    private static String getThroughputMetricName(int period) {
+        return MessageFormat.format(
+                "pull_request_throughput_of_last_{0}_days",
+                period
+        );
+    }
+
+    private static String getStateCountMetricName(int period) {
+        return MessageFormat.format(
+                "pull_requests_count_of_last_{0}_days",
+                period
+        );
     }
 
     private void retrieveAndExportPullRequestsMetrics() {
@@ -43,87 +65,26 @@ public class PullRequestExporter implements ScheduledExporter {
         List<PullRequest> pullRequests = getAllPullRequestsUseCase.getAllPullRequests();
 
         this.generateAndPublishPullRequestCountsMetrics(pullRequests);
-
-        this.generateAndPublishPullRequestThroughputsMetrics(pullRequests);
+        this.generateAndPublishPullRequestsThroughputMetrics(pullRequests);
 
         LOGGER.debug("PullRequests scheduled task is finished.");
     }
 
-    private void generateAndPublishPullRequestThroughputsMetrics(List<PullRequest> pullRequests) {
-        var pullRequestThroughputMapByPeriod = new HashMap<String, Integer>();
-
-        pullRequestThroughputMapByPeriod.put(
-                "pull_request_throughput_of_last_7_days",
-                this.getThroughputOfPullRequests(pullRequests, 7)
-        );
-        pullRequestThroughputMapByPeriod.put(
-                "pull_request_throughput_of_last_14_days",
-                this.getThroughputOfPullRequests(pullRequests, 14)
-        );
-        pullRequestThroughputMapByPeriod.put(
-                "pull_request_throughput_of_last_28_days",
-                this.getThroughputOfPullRequests(pullRequests, 28)
-        );
-        pullRequestThroughputMapByPeriod.put(
-                "pull_request_throughput_of_last_year",
-                this.getThroughputOfPullRequests(pullRequests, 365)
-        );
-
-        this.publishPullRequestThroughputMetrics(pullRequestThroughputMapByPeriod);
+    private void generateAndPublishPullRequestsThroughputMetrics(List<PullRequest> pullRequests) {
+        THROUGHPUT_PERIODS.forEach(period -> {
+            var throughput = this.getThroughputOfPullRequests(pullRequests, period);
+            this.throughputGauges.get(period).set(throughput);
+        });
     }
 
     private void generateAndPublishPullRequestCountsMetrics(List<PullRequest> pullRequests) {
-        var pullRequestCountMapByPeriod = new HashMap<String, Map<PullRequestState, Integer>>();
-
-        pullRequestCountMapByPeriod.put(
-                "pull_requests_count_of_last_1_days",
-                this.getCountOfPullRequests(pullRequests, 1)
-        );
-        pullRequestCountMapByPeriod.put(
-                "pull_requests_count_of_last_2_days",
-                this.getCountOfPullRequests(pullRequests, 2)
-        );
-        pullRequestCountMapByPeriod.put(
-                "pull_requests_count_of_last_7_days",
-                this.getCountOfPullRequests(pullRequests, 7)
-        );
-        pullRequestCountMapByPeriod.put(
-                "pull_requests_count_of_last_28_days",
-                this.getCountOfPullRequests(pullRequests, 28)
-        );
-        pullRequestCountMapByPeriod.put(
-                "pull_requests_count_of_last_year",
-                this.getCountOfPullRequests(pullRequests, 365)
-        );
-
-        this.publishPullRequestCountMetrics(pullRequestCountMapByPeriod);
-    }
-
-    private void publishPullRequestCountMetrics(
-            Map<String, Map<PullRequestState, Integer>> pullRequestsMetricsMap
-    ) {
-        for (var pullRequestMetric : pullRequestsMetricsMap.entrySet()) {
-            for (var entry : pullRequestMetric.getValue().entrySet()) {
-                Gauge.builder(pullRequestMetric.getKey(),
-                                entry,
-                                Map.Entry::getValue
-                        ).tag("state", entry.getKey().toString())
-                        .strongReference(true)
-                        .register(this.registry);
+        STATE_COUNT_PERIODS.forEach(period -> {
+            var gaugeMap = this.stateCountGauges.get(period);
+            var statesMap = this.getCountOfPullRequests(pullRequests, period);
+            for (final var stateCount : statesMap.entrySet()) {
+                gaugeMap.get(stateCount.getKey()).set(stateCount.getValue());
             }
-        }
-    }
-
-    private void publishPullRequestThroughputMetrics(
-            Map<String, Integer> pullRequestThroughputsMetricsMap
-    ) {
-        for (var pullRequestMetric : pullRequestThroughputsMetricsMap.entrySet()) {
-            Gauge.builder(pullRequestMetric.getKey(),
-                            pullRequestMetric,
-                            Map.Entry::getValue)
-                    .strongReference(true)
-                    .register(this.registry);
-        }
+        });
     }
 
     private Map<PullRequestState, Integer> getCountOfPullRequests(
@@ -167,6 +128,33 @@ public class PullRequestExporter implements ScheduledExporter {
                 pullRequestState -> pullRequestStateMap.put(pullRequestState, 0));
 
         return pullRequestStateMap;
+    }
+
+    private void initPullRequestGauges() {
+        THROUGHPUT_PERIODS.forEach(period -> {
+            var atomicInteger = new AtomicInteger();
+            Gauge.builder(
+                            getThroughputMetricName(period),
+                            () -> atomicInteger
+                    )
+                    .strongReference(true)
+                    .register(this.registry);
+            this.throughputGauges.put(period, atomicInteger);
+        });
+
+        STATE_COUNT_PERIODS.forEach(period -> {
+            this.stateCountGauges.put(period, new EnumMap<>(PullRequestState.class));
+            Arrays.stream(PullRequestState.values()).forEach(state -> {
+                var atomicInteger = new AtomicInteger();
+                Gauge.builder(
+                                getStateCountMetricName(period),
+                                () -> atomicInteger
+                        ).tag("state", state.toString())
+                        .strongReference(true)
+                        .register(this.registry);
+                this.stateCountGauges.get(period).put(state, atomicInteger);
+            });
+        });
     }
 
     @Override

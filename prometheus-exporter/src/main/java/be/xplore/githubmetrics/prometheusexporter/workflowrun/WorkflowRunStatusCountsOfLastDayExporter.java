@@ -12,9 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Service
@@ -24,6 +26,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
     private final GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase;
     private final MeterRegistry registry;
     private final String cronExpression;
+    private final Map<WorkflowRunStatus, AtomicInteger> statusCountsGauges = new EnumMap<>(WorkflowRunStatus.class);
 
     public WorkflowRunStatusCountsOfLastDayExporter(
             GetAllWorkflowRunsOfLastDayUseCase getAllWorkflowRunsOfLastDayUseCase,
@@ -33,6 +36,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         this.getAllWorkflowRunsOfLastDayUseCase = getAllWorkflowRunsOfLastDayUseCase;
         this.registry = registry;
         this.cronExpression = schedulingProperties.workflowRunsInterval();
+        this.initWorkflowStatusCountsGauges();
     }
 
     private void retrieveAndExportLastDaysWorkflowRunStatusCounts() {
@@ -43,25 +47,14 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         Map<WorkflowRunStatus, Integer> workflowRunsStatusCountsMap
                 = this.getStatusCounts(workflowRuns);
 
-        this.publishWorkflowRunsStatusCountsGauges(
-                workflowRunsStatusCountsMap
+        workflowRunsStatusCountsMap.forEach((status, count) ->
+                this.statusCountsGauges.get(status).set(count)
         );
 
         LOGGER.debug(
                 "LastDaysWorkflowRunStatusCounts scheduled task has finished with {} different Status.",
                 workflowRunsStatusCountsMap.size()
         );
-    }
-
-    private void publishWorkflowRunsStatusCountsGauges(Map<WorkflowRunStatus, Integer> statuses) {
-        for (Map.Entry<WorkflowRunStatus, Integer> entry : statuses.entrySet()) {
-            Gauge.builder("workflow_runs",
-                            entry,
-                            Map.Entry::getValue
-                    ).tag("status", entry.getKey().toString())
-                    .strongReference(true)
-                    .register(this.registry);
-        }
     }
 
     private Map<WorkflowRunStatus, Integer> createStatusCountsMap() {
@@ -87,6 +80,19 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
         );
 
         return workflowRunStatusCountsMap;
+    }
+
+    private void initWorkflowStatusCountsGauges() {
+        Arrays.stream(WorkflowRunStatus.values()).forEach(status -> {
+            var atomicInteger = new AtomicInteger();
+            Gauge.builder(
+                            "workflow_runs",
+                            () -> atomicInteger
+                    ).tag("status", status.toString())
+                    .strongReference(true)
+                    .register(this.registry);
+            this.statusCountsGauges.put(status, atomicInteger);
+        });
     }
 
     @Override

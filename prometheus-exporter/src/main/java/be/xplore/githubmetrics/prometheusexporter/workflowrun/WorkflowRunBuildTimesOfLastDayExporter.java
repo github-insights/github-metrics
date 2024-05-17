@@ -13,21 +13,25 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.Math.round;
 
 @Service
 public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunBuildTimesOfLastDayExporter.class);
+    private static final String TOTAL_GAUGE_NAME = "workflow_runs_total_build_times";
+    private static final String AVERAGE_GAUGE_NAME = "workflow_runs_average_build_times";
     private final GetAllWorkflowRunBuildTimesOfLastDayUseCase getAllWorkflowRunBuildTimesOfLastDayUseCase;
     private final MeterRegistry registry;
     private final String cronExpression;
+    private final Map<String, Map<WorkflowRunStatus, AtomicInteger>> gaugesMap = new HashMap<>();
 
     public WorkflowRunBuildTimesOfLastDayExporter(
             GetAllWorkflowRunBuildTimesOfLastDayUseCase
@@ -39,6 +43,7 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
                 = getAllWorkflowRunBuildTimesOfLastDayUseCase;
         this.registry = registry;
         this.cronExpression = schedulingProperties.workflowRunBuildTimesInterval();
+        this.initWorkflowBuildTimesGauges();
     }
 
     private void retrieveAndExportLastDaysWorkflowRunBuildTimes() {
@@ -46,31 +51,14 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
         List<WorkflowRun> workflowRuns =
                 getAllWorkflowRunBuildTimesOfLastDayUseCase.getAllWorkflowRunBuildTime();
 
-        var buildTimesMap = new HashMap<String, Map<WorkflowRunStatus, Integer>>();
-
-        buildTimesMap.put("workflow_runs_total_build_times", this.getTotalBuildTimes(workflowRuns));
-        buildTimesMap.put("workflow_runs_average_build_times", this.getAverageBuildTimes(workflowRuns));
-
-        this.publishWorkflowRunsBuildTimesGauges(buildTimesMap);
+        this.getTotalBuildTimes(workflowRuns).forEach((status, total) ->
+                this.gaugesMap.get(TOTAL_GAUGE_NAME).get(status).set(total)
+        );
+        this.getAverageBuildTimes(workflowRuns).forEach((status, average) ->
+                this.gaugesMap.get(AVERAGE_GAUGE_NAME).get(status).set(average)
+        );
 
         LOGGER.debug("LastDaysWorkflowRunBuildTimes scheduled task finished.");
-    }
-
-    private void publishWorkflowRunsBuildTimesGauges(
-            Map<String, Map<WorkflowRunStatus, Integer>> buildTimesMap
-    ) {
-        for (Map.Entry<String, Map<WorkflowRunStatus, Integer>> metric : buildTimesMap.entrySet()) {
-            for (Map.Entry<WorkflowRunStatus, Integer> entry : metric.getValue().entrySet()) {
-                Gauge.builder(metric.getKey(),
-                                entry,
-                                Map.Entry::getValue
-                        ).tag("status", entry.getKey().toString())
-                        .strongReference(true)
-                        .register(this.registry);
-
-            }
-
-        }
     }
 
     private Map<WorkflowRunStatus, Integer> getAverageBuildTimes(
@@ -136,6 +124,35 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
                 runStatus -> workflowRunExportMap.put(runStatus, 0));
 
         return workflowRunExportMap;
+    }
+
+    private void initWorkflowBuildTimesGauges() {
+        this.gaugesMap.put(TOTAL_GAUGE_NAME, new EnumMap<>(WorkflowRunStatus.class));
+        this.gaugesMap.put(AVERAGE_GAUGE_NAME, new EnumMap<>(WorkflowRunStatus.class));
+        Arrays.stream(WorkflowRunStatus.values()).forEach(status -> {
+            var totalAtomicInteger = new AtomicInteger();
+            var averageAtomicInteger = new AtomicInteger();
+            Gauge.builder(
+                            TOTAL_GAUGE_NAME,
+                            () -> totalAtomicInteger
+                    ).tag("status", status.toString())
+                    .strongReference(true)
+                    .register(this.registry);
+            Gauge.builder(
+                            AVERAGE_GAUGE_NAME,
+                            () -> averageAtomicInteger
+                    ).tag("status", status.toString())
+                    .strongReference(true)
+                    .register(this.registry);
+
+            this.gaugesMap.get(TOTAL_GAUGE_NAME).put(
+                    status, totalAtomicInteger
+            );
+            this.gaugesMap.get(AVERAGE_GAUGE_NAME).put(
+                    status, averageAtomicInteger
+            );
+        });
+
     }
 
     @Override

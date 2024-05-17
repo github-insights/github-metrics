@@ -15,14 +15,18 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 @Service
 public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsLabelCountsOfLastDayExporter.class);
+    private static final String JOBS_GAUGE_NAME = "workflow_run_jobs";
     private final GetAllJobsOfLastDayUseCase getAllJobsOfLastDayUseCase;
     private final MeterRegistry registry;
     private final String cronExpression;
+    private final Map<JobLabel, AtomicInteger> jobCountGauges = new HashMap<>();
 
     public JobsLabelCountsOfLastDayExporter(
             GetAllJobsOfLastDayUseCase getAllJobsOfLastDayUseCase,
@@ -32,14 +36,19 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
         this.getAllJobsOfLastDayUseCase = getAllJobsOfLastDayUseCase;
         this.registry = registry;
         this.cronExpression = schedulingProperties.jobsInterval();
+        this.initJobCountGauges();
     }
 
     private void retrieveAndExportLastDaysJobLabelCounts() {
         LOGGER.info("LastDaysJobLabelCounts scheduled task is running.");
 
         List<Job> jobs = getAllJobsOfLastDayUseCase.getAllJobsOfLastDay();
+
         Map<JobLabel, Integer> jobLabelCounts = this.getJobLabelsCounts(jobs);
-        this.publishJobsLabelCountsGauges(jobLabelCounts);
+
+        jobLabelCounts.forEach((entry, value) ->
+                jobCountGauges.get(entry).set(value)
+        );
 
         LOGGER.debug(
                 "LastDaysJobLabelCounts scheduled task finished with {} JobLabel combinations.",
@@ -47,27 +56,12 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
         );
     }
 
-    private void publishJobsLabelCountsGauges(Map<JobLabel, Integer> statuses) {
-        for (Map.Entry<JobLabel, Integer> entry : statuses.entrySet()) {
-            Gauge.builder("workflow_run_jobs",
-                            entry,
-                            Map.Entry::getValue)
-                    .tag("conclusion", entry.getKey().conclusion().toString())
-                    .tag("status", entry.getKey().status().toString())
-                    .strongReference(true)
-                    .register(this.registry);
-        }
-    }
-
     private Map<JobLabel, Integer> createJobLabelsCountsMap() {
         Map<JobLabel, Integer> jobLabelCounts = new HashMap<>();
 
-        Stream.of(JobStatus.values()).forEach(status ->
-                Stream.of(JobConclusion.values()).forEach(conclusion ->
-                        jobLabelCounts.put(
-                                new JobLabel(status, conclusion),
-                                0
-                        )));
+        this.allStateCombinations((status, conclusion) ->
+                jobLabelCounts.put(new JobLabel(status, conclusion), 0)
+        );
 
         return jobLabelCounts;
     }
@@ -90,6 +84,24 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
         return jobLabelsCounts;
     }
 
+    private void initJobCountGauges() {
+        this.allStateCombinations((status, conclusion) -> {
+            var atomicInteger = new AtomicInteger();
+            Gauge.builder(
+                            JOBS_GAUGE_NAME,
+                            () -> atomicInteger)
+                    .tag("conclusion", conclusion.toString())
+                    .tag("status", status.toString())
+                    .strongReference(true)
+                    .register(this.registry);
+            this.jobCountGauges.put(
+                    new JobLabel(status, conclusion),
+                    atomicInteger
+            );
+        });
+
+    }
+
     @Override
     public void run() {
         this.retrieveAndExportLastDaysJobLabelCounts();
@@ -98,5 +110,12 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     @Override
     public String cronExpression() {
         return this.cronExpression;
+    }
+
+    private void allStateCombinations(BiConsumer<JobStatus, JobConclusion> function) {
+        Stream.of(JobStatus.values()).forEach(status ->
+                Stream.of(JobConclusion.values()).forEach(conclusion ->
+                        function.accept(status, conclusion)
+                ));
     }
 }
