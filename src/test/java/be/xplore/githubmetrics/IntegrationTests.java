@@ -2,6 +2,7 @@ package be.xplore.githubmetrics;
 
 import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.pullrequest.PullRequestExporter;
+import be.xplore.githubmetrics.prometheusexporter.selfhostedrunner.SelfHostedRunnerCountsExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunBuildTimesOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -49,6 +50,8 @@ class IntegrationTests {
     @Autowired
     private PullRequestExporter pullRequestExporter;
     @Autowired
+    private SelfHostedRunnerCountsExporter selfHostedRunnerCountsExporter;
+    @Autowired
     private MockMvc mockMvc;
 
     @BeforeAll
@@ -73,16 +76,14 @@ class IntegrationTests {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
 
-        this.stubForWorkflowRunTests();
-
-        this.stubForJobsTests();
-
-        this.stubForBuildTimeTests();
-
-        this.stubForPullRequestsTests();
+        this.stubForWorkflowRunEndpoints();
+        this.stubForJobsEndpoints();
+        this.stubForBuildTimeEndpoints();
+        this.stubForPullRequestsEndpoints();
+        this.stubForSelfHostedRunnersEndpoints();
     }
 
-    private void stubForWorkflowRunTests() {
+    private void stubForWorkflowRunEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
                         + TestUtility.yesterday()
                 )
@@ -93,7 +94,7 @@ class IntegrationTests {
         );
     }
 
-    private void stubForJobsTests() {
+    private void stubForJobsEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -104,7 +105,7 @@ class IntegrationTests {
                         .withBodyFile("JobsValidTestData.json")));
     }
 
-    private void stubForBuildTimeTests() {
+    private void stubForBuildTimeEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/timing")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -115,7 +116,7 @@ class IntegrationTests {
                         .withBodyFile("WorkflowRunBuildTime.json")));
     }
 
-    private void stubForPullRequestsTests() {
+    private void stubForPullRequestsEndpoints() {
         stubFor(
                 get(urlEqualTo(
                         "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
@@ -123,6 +124,23 @@ class IntegrationTests {
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBodyFile("PullRequestsValidData.json")));
+    }
+
+    private void stubForSelfHostedRunnersEndpoints() {
+        stubFor(
+                get(urlEqualTo(
+                        "/orgs/github-insights/actions/runners?per_page=100"
+                )).willReturn(
+                        aResponse()
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBodyFile("SelfHostedRunnersMacData.json")));
+        stubFor(
+                get(urlEqualTo(
+                        "/repos/github-insights/github-metrics/actions/runners?per_page=100"
+                )).willReturn(
+                        aResponse()
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBodyFile("SelfHostedRunnersOtherData.json")));
     }
 
     @Test
@@ -175,6 +193,32 @@ class IntegrationTests {
                 content().string(
                         Matchers.containsString(
                                 "workflow_runs_average_build_times{status=\"DONE\",} 136000.0"
+                        )));
+    }
+
+    @Test
+    void retrieveAndExportSelfHostedRunnersShouldCorrectlyDisplayStatusesAndOss() throws Exception {
+        this.selfHostedRunnerCountsExporter.run();
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(
+                        Matchers.containsString(
+                                "self_hosted_runners{os=\"LINUX\",status=\"BUSY\",} 1.0"
+                        )));
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(
+                        Matchers.containsString(
+                                "self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\",} 1.0"
+                        )));
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(
+                        Matchers.containsString(
+                                "self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\",} 1.0"
                         )));
     }
 }

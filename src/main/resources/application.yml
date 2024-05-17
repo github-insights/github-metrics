@@ -23,6 +23,7 @@ app:
         jobs_interval: ${APP_SCHEDULING_JOBS_INTERVAL:0 */5 * * * ?}
         workflow_run_build_times_interval: ${APP_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES_INTERVAL:10 */5 * * * ?}
         pull_requests_interval: ${APP_SCHEDULING_PULL_REQUESTS_INTERVAL:0 */5 * * * ?}
+        self_hosted_runners_interval: ${SELF_HOSTED_RUNNERS_INTERVAL:20 */5 * * * ?}
     github:
         url: https://api.github.com
         org: "github-insights"

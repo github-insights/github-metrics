@@ -1,0 +1,29 @@
+{
+    "total_count": 1,
+    "runners": [
+        {
+            "id": 20,
+            "name": "Thomass-MacBook-Pro",
+            "os": "macOS",
+            "status": "online",
+            "busy": false,
+            "labels": [
+                {
+                    "id": 1,
+                    "name": "self-hosted",
+                    "type": "read-only"
+                },
+                {
+                    "id": 2,
+                    "name": "macOS",
+                    "type": "read-only"
+                },
+                {
+                    "id": 3,
+                    "name": "ARM64",
+                    "type": "read-only"
+                }
+            ]
+        }
+    ]
+}
