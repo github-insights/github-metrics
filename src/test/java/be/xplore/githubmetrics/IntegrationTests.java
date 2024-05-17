@@ -74,7 +74,7 @@ class IntegrationTests {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
@@ -163,7 +163,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("pull_requests_count_of_last_1_days{state=\"OPEN\",} 1.0"))
+                content().string(Matchers.containsString("pull_requests_count_of_last_2_days{state=\"OPEN\",} 1.0"))
         );
     }
 
