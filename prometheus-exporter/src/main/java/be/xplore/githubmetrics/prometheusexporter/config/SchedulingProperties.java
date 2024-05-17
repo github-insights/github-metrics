@@ -7,6 +7,7 @@ public record SchedulingProperties(
         String workflowRunsInterval,
         String workflowRunBuildTimesInterval,
         String jobsInterval,
-        String pullRequestsInterval
+        String pullRequestsInterval,
+        String selfHostedRunnersInterval
 ) {
 }

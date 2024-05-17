@@ -1,0 +1,53 @@
+{
+    "total_count": 2,
+    "runners": [
+        {
+            "id": 21,
+            "name": "Thomass-MacBook-Pro",
+            "os": "linux",
+            "status": "online",
+            "busy": true,
+            "labels": [
+                {
+                    "id": 1,
+                    "name": "self-hosted",
+                    "type": "read-only"
+                },
+                {
+                    "id": 2,
+                    "name": "macOS",
+                    "type": "read-only"
+                },
+                {
+                    "id": 3,
+                    "name": "ARM64",
+                    "type": "read-only"
+                }
+            ]
+        },
+        {
+            "id": 23,
+            "name": "Thomass-MacBook-Pro",
+            "os": "windows",
+            "status": "offline",
+            "busy": false,
+            "labels": [
+                {
+                    "id": 1,
+                    "name": "self-hosted",
+                    "type": "read-only"
+                },
+                {
+                    "id": 2,
+                    "name": "macOS",
+                    "type": "read-only"
+                },
+                {
+                    "id": 3,
+                    "name": "ARM64",
+                    "type": "read-only"
+                }
+            ]
+        }
+    ]
+}

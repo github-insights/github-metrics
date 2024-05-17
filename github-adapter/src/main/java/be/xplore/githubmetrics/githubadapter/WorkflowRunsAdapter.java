@@ -50,12 +50,12 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort {
     public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
         LOGGER.info("Fetching fresh WorkflowRuns for Repository {}.", repository.getId());
         var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
         parameters.put(
                 "created",
                 ">=" + LocalDate.now().minusDays(1)
                         .format(DateTimeFormatter.ISO_LOCAL_DATE)
         );
-        parameters.put("per_page", "100");
 
         ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
