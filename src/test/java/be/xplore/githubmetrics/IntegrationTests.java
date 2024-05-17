@@ -2,6 +2,7 @@ package be.xplore.githubmetrics;
 
 import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.pullrequest.PullRequestExporter;
+import be.xplore.githubmetrics.prometheusexporter.repository.RepositoryCountExporter;
 import be.xplore.githubmetrics.prometheusexporter.selfhostedrunner.SelfHostedRunnerCountsExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunBuildTimesOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
@@ -41,6 +42,8 @@ class IntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
     private static WireMockServer wireMockServer;
     private final String actuatorEndpoint = "/actuator/prometheus";
+    @Autowired
+    private RepositoryCountExporter repositoryCountExporter;
     @Autowired
     private WorkflowRunStatusCountsOfLastDayExporter workflowRunStatusCountsOfLastDayExporter;
     @Autowired
@@ -141,6 +144,16 @@ class IntegrationTests {
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBodyFile("SelfHostedRunnersOtherData.json")));
+    }
+
+    @Test
+    void retrieveAndExportRepositoriesShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
+        this.repositoryCountExporter.run();
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(Matchers.containsString("repositories_count 1.0"))
+        );
     }
 
     @Test
