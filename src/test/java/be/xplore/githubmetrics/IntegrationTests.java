@@ -74,7 +74,7 @@ class IntegrationTests {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));

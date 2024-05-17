@@ -41,7 +41,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldReturnListOfRepositories() {
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("100RepositoriesTestData.json")));
@@ -52,17 +52,17 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldFollowLinkHeader() {
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=369>; " +
+                                "<http://localhost:" + wireMockServer.port() + "/installation/repositories?since=369>; " +
                                         "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
 
-        stubFor(get("/orgs/github-insights/repos?since=369")
+        stubFor(get("/installation/repositories?since=369")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
@@ -73,7 +73,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldThrowExceptionOnInvalidResponseBody() {
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("invalid body")));
@@ -86,20 +86,20 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesStopsRecursionWhenRelNextNotPresent() {
-        stubFor(get("/orgs/github-insights/repos?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=1>; " +
+                                "<http://localhost:" + wireMockServer.port() + "/installation/repositories?since=1>; " +
                                         "rel=\"next\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
-        stubFor(get("/orgs/github-insights/repos?since=1")
+        stubFor(get("/installation/repositories?since=1")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
-                                "<http://localhost:" + wireMockServer.port() + "/orgs/github-insights/repos?since=2>; " +
+                                "<http://localhost:" + wireMockServer.port() + "/installation/repositories?since=2>; " +
                                         "rel=\"prev\", <https://api.github.com/repositories{?since}>; rel=\"first\""
                         )
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
