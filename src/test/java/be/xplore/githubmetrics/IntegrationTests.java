@@ -163,7 +163,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("pull_requests_count_of_last_1_days{state=\"OPEN\",} 1.0"))
+                content().string(Matchers.containsString("pull_requests_count_of_last_2_days{state=\"OPEN\",} 1.0"))
         );
     }
 
