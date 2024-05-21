@@ -60,4 +60,4 @@ n3lLUx3lpr32I+zijs25AQ==\n
                 env:
                     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-                run: ./gradlew sonar
+                run: ./gradlew sonar -debug
