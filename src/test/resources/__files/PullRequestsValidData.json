@@ -32,7 +32,7 @@
             "site_admin": false
         },
         "body": "#114 I did this by both adding tests for a few branches that did not exist before but also by removing unnecessary code that was not being used.",
-        "created_at": "{{todays_date}}T09:13:45Z",
+        "created_at": "{{todays_date}}",
         "updated_at": null,
         "closed_at": null,
         "merged_at": null,
@@ -487,9 +487,9 @@
             "site_admin": false
         },
         "body": "#110 Created a generic pagination function that allows for very easy pagination of any different request. The idea is that any reqest to an api endpoint will return some mappingclass which can be mapped to a list of domain objects. The generic function I created takes in this function, the initial response entity and then follows the pagination as far as it can and collects all the responses into one big list of domain objects.\r\n\r\nConsider that this pagination functionality will have to be reworked once #112 is beeing implemented as this functionality will follow the pagination blindly until the end.",
-        "created_at": "{{yesterdays_date}}T08:17:59Z",
-        "updated_at": "{{yesterdays_date}}T08:29:07Z",
-        "closed_at": "{{yesterdays_date}}T08:28:58Z",
+        "created_at": "{{yesterdays_date}}",
+        "updated_at": "{{yesterdays_date}}",
+        "closed_at": "{{yesterdays_date}}",
         "merged_at": null,
         "merge_commit_sha": "6bfd1ec0eae717eac58e308ecb782f0fd6f51609",
         "assignee": {
@@ -942,10 +942,10 @@
             "site_admin": false
         },
         "body": null,
-        "created_at": "{{3_days_ago_date}}T08:02:18Z",
-        "updated_at": "{{3_days_ago_date}}T08:29:46Z",
-        "closed_at": "{{3_days_ago_date}}T08:28:23Z",
-        "merged_at": "{{3_days_ago_date}}T08:28:23Z",
+        "created_at": "{{3_days_ago_date}}",
+        "updated_at": "{{3_days_ago_date}}",
+        "closed_at": "{{3_days_ago_date}}",
+        "merged_at": "{{3_days_ago_date}}",
         "merge_commit_sha": "ad707441e52fe78bcd3d46d792fdc86f92ee0464",
         "assignee": {
             "login": "tomellm",
@@ -1397,10 +1397,10 @@
             "site_admin": false
         },
         "body": null,
-        "created_at": "{{8_days_ago_date}}T12:21:00Z",
-        "updated_at": "{{8_days_ago_date}}T12:23:41Z",
-        "closed_at": "{{8_days_ago_date}}T12:21:52Z",
-        "merged_at": "{{8_days_ago_date}}T12:21:52Z",
+        "created_at": "{{8_days_ago_date}}",
+        "updated_at": "{{8_days_ago_date}}",
+        "closed_at": "{{8_days_ago_date}}",
+        "merged_at": "{{8_days_ago_date}}",
         "merge_commit_sha": "955ef4a169daa91e0be01f19a087467cbe99d085",
         "assignee": {
             "login": "tomellm",
@@ -1852,10 +1852,10 @@
             "site_admin": false
         },
         "body": "workflow build minutes both total and average are now being exposed on the Prometheus endpoint.\r\n\r\nI wonder if some additional metrics could be published from this data:\r\nstandard deviation?\r\noutliers?",
-        "created_at": "{{16_days_ago_date}}T08:52:35Z",
-        "updated_at": "{{16_days_ago_date}}T11:10:14Z",
-        "closed_at": "{{16_days_ago_date}}T11:10:11Z",
-        "merged_at": "{{16_days_ago_date}}T11:10:11Z",
+        "created_at": "{{16_days_ago_date}}",
+        "updated_at": "{{16_days_ago_date}}",
+        "closed_at": "{{16_days_ago_date}}",
+        "merged_at": "{{16_days_ago_date}}",
         "merge_commit_sha": "73040281897336f2d60fada293c9c5d036f15b68",
         "assignee": null,
         "assignees": [],
