@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -28,8 +28,7 @@ public class TestUtility {
     }
 
     public static String getDateTimeXDaysAgo(int x) {
-        return LocalDateTime.now().minusDays(x).plusHours(2)
-                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "Z";
+        return ZonedDateTime.now().minusDays(x).plusHours(2).toInstant().toString();
     }
 
     public static WireMockServer getWireMockServer() {
