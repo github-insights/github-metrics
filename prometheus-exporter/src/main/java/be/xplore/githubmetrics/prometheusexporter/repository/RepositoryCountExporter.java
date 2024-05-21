@@ -2,6 +2,7 @@ package be.xplore.githubmetrics.prometheusexporter.repository;
 
 import be.xplore.githubmetrics.domain.repository.GetAllRepositoriesUseCase;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
+import be.xplore.githubmetrics.prometheusexporter.StartupExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class RepositoryCountExporter implements ScheduledExporter {
+public class RepositoryCountExporter implements ScheduledExporter, StartupExporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryCountExporter.class);
     private final GetAllRepositoriesUseCase getAllRepositoriesUseCase;

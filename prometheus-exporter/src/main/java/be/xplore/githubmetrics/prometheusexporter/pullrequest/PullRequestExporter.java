@@ -4,6 +4,7 @@ import be.xplore.githubmetrics.domain.pullrequest.GetAllPullRequestsUseCase;
 import be.xplore.githubmetrics.domain.pullrequest.PullRequest;
 import be.xplore.githubmetrics.domain.pullrequest.PullRequestState;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
+import be.xplore.githubmetrics.prometheusexporter.StartupExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Service
-public class PullRequestExporter implements ScheduledExporter {
+public class PullRequestExporter implements ScheduledExporter, StartupExporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(PullRequestExporter.class);
     private static final List<Integer> STATE_COUNT_PERIODS = List.of(1, 2, 7, 28, 365);
     private static final List<Integer> THROUGHPUT_PERIODS = List.of(7, 14, 28, 365);
