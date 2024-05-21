@@ -6,6 +6,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
@@ -29,7 +30,7 @@ class MetricSchedulerTest {
                 .thenReturn(this.mockFuture);
         when(this.mockExporter.cronExpression()).thenReturn(CRON_EXP);
 
-        this.metricScheduler = new MetricScheduler(this.mockScheduler, List.of(this.mockExporter));
+        this.metricScheduler = new MetricScheduler(this.mockScheduler, List.of(this.mockExporter), new ArrayList<>());
         this.metricScheduler.configureTasks(mock(ScheduledTaskRegistrar.class));
     }
 
