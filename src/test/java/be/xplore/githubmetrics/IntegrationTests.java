@@ -15,8 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,6 +44,8 @@ class IntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
     private static WireMockServer wireMockServer;
     private final String actuatorEndpoint = "/actuator/prometheus";
+    @Value("classpath:__files/PullRequestsValidData.json")
+    private Resource pullRequestJson;
     @Autowired
     private RepositoryCountExporter repositoryCountExporter;
     @Autowired
@@ -120,13 +124,20 @@ class IntegrationTests {
     }
 
     private void stubForPullRequestsEndpoints() {
+        String json = TestUtility.asString(pullRequestJson);
+        json = json.replace("{{todays_date}}", TestUtility.getDateXDaysAgo(0));
+        json = json.replace("{{yesterdays_date}}", TestUtility.yesterday());
+        json = json.replace("{{3_days_ago_date}}", TestUtility.getDateXDaysAgo(3));
+        json = json.replace("{{8_days_ago_date}}", TestUtility.getDateXDaysAgo(8));
+        json = json.replace("{{16_days_ago_date}}", TestUtility.getDateXDaysAgo(16));
+
         stubFor(
                 get(urlEqualTo(
                         "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
                 )).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                .withBodyFile("PullRequestsValidData.json")));
+                                .withBody(json)));
     }
 
     private void stubForSelfHostedRunnersEndpoints() {
