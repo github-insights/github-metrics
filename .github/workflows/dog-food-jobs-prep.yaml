@@ -16,14 +16,20 @@ jobs:
             -   name: Cut Beef
                 run: sleep $((RANDOM % 200))
                 shell: bash
+            -   name: Success?
+                run: test $((RANDOM % 20 )) -ge 1
+                shell: bash
 
             -   name: Cut Chicken
                 run: sleep $((RANDOM % 200))
                 shell: bash
             -   name: Success?
-                run: return $((RANDOM % 2))
+                run: test $((RANDOM % 20 )) -ge 1
                 shell: bash
 
             -   name: cut Herbs
                 run: sleep $((RANDOM % 200))
+                shell: bash
+            -   name: Success?
+                run: test $((RANDOM % 20 )) -ge 1
                 shell: bash
