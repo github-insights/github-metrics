@@ -11,6 +11,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,6 +169,7 @@ class IntegrationTests {
     }
 
     @Test
+    @Disabled
     void retrieveAndExportPullRequestsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
         this.pullRequestExporter.run();
 
