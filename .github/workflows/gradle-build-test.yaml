@@ -26,6 +26,7 @@ jobs:
                 env:
                     APP_GITHUB_APPLICATION_ID: ${{ secrets.APP_GITHUB_APPLICATION_ID }}
                     APP_GITHUB_APPLICATION_INSTALL_ID: ${{ secrets.APP_GITHUB_APPLICATION_INSTALL_ID }}
+                    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
                     APP_GITHUB_APPLICATION_PEM: "-----BEGIN PRIVATE KEY-----\n
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCjknN/LTKuPvXU\n
 bvLvyAwIs7I189CC+JErIOWwYzE1zRRLn7zNbG+UQJFqVorWm/84OqX/iC9HYudo\n
@@ -55,10 +56,10 @@ NAsWO4FEfeuh1jOn9Nz+FIvcATdB2GFYT7qRb44gNq9yWj7Dx9BFByLXht4XM1cH\n
 n3lLUx3lpr32I+zijs25AQ==\n
 -----END PRIVATE KEY-----"
 
-                run: ./gradlew clean build testCodeCoverageReport
+                run: ./gradlew clean build testCodeCoverageReport sonar
 
-            -   name: Submit Sonar Report
-                env:
-                    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-                run: ./gradlew sonar -debug
+#            -   name: Submit Sonar Report
+#                env:
+#                    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#
+#                run: ./gradlew sonar -debug
