@@ -17,6 +17,9 @@ jobs:
             -   name: Cook Beef
                 run: sleep $((RANDOM % 100))
                 shell: bash
+            -   name: Success?
+                run: test $((RANDOM % 40 )) -ge 1
+                shell: bash
     herbs:
         runs-on: ubuntu-latest
         permissions:
@@ -27,7 +30,7 @@ jobs:
                 run: sleep $((RANDOM % 150))
                 shell: bash
             -   name: Success?
-                run: return $((RANDOM % 2))
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
     cool:
         needs: cook
@@ -37,6 +40,9 @@ jobs:
         steps:
             -   name: Let Cool
                 run: sleep $((RANDOM % 300))
+                shell: bash
+            -   name: Success?
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
     can:
         needs: cool
@@ -48,5 +54,5 @@ jobs:
                 run: sleep $((RANDOM % 300))
                 shell: bash
             -   name: Success?
-                run: return $((RANDOM % 2))
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
