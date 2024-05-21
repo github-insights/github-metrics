@@ -1,0 +1,29 @@
+name: Prep Dog Food
+
+on:
+    workflow_run:
+        workflows: ["Demo Workflows Trigger"]
+        types:
+            -  completed
+
+jobs:
+    prep:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Cut Beef
+                run: sleep $((RANDOM % 200))
+                shell: bash
+
+            -   name: Cut Chicken
+                run: sleep $((RANDOM % 200))
+                shell: bash
+            -   name: Success?
+                run: return $((RANDOM % 2))
+                shell: bash
+
+            -   name: cut Herbs
+                run: sleep $((RANDOM % 200))
+                shell: bash

@@ -1,0 +1,52 @@
+name: Create Beef Dog Food
+
+on:
+    workflow_run:
+        workflows: ["Demo Workflows Trigger"]
+        types:
+            -  completed
+
+jobs:
+    cook:
+
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Cook Beef
+                run: sleep $((RANDOM % 100))
+                shell: bash
+    herbs:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Add Herbs
+                run: sleep $((RANDOM % 150))
+                shell: bash
+            -   name: Success?
+                run: return $((RANDOM % 2))
+                shell: bash
+    cool:
+        needs: cook
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            -   name: Let Cool
+                run: sleep $((RANDOM % 300))
+                shell: bash
+    can:
+        needs: cool
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            -   name: Can
+                run: sleep $((RANDOM % 300))
+                shell: bash
+            -   name: Success?
+                run: return $((RANDOM % 2))
+                shell: bash
