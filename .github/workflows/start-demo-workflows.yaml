@@ -1,0 +1,15 @@
+name: Demo Workflows Trigger
+
+on: 
+    workflow_dispatch:
+
+jobs:
+    rundemo:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Start All
+                run: sleep 2
+                shell: bash
