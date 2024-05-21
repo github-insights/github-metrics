@@ -58,7 +58,6 @@ allprojects {
         dependsOn(tasks.withType<Test>())
         reports {
             html.required.set(true)
-            xml.required.set(true)
         }
     }
 }
@@ -88,12 +87,22 @@ subprojects {
     checkstyle {
         configFile = file("../config/checkstyle.xml")
     }
+    tasks.withType<JacocoReport> {
+        reports {
+            xml.required.set(false)
+        }
+    }
 }
 pmd {
     ruleSetFiles = files("./config/pmd.xml")
 }
 checkstyle {
     configFile = file("./config/checkstyle.xml")
+}
+tasks.withType<JacocoReport> {
+    reports {
+        xml.required.set(true)
+    }
 }
 sonar {
     properties {
