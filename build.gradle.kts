@@ -105,6 +105,7 @@ sonar {
             "sonar.coverage.jacoco.xmlReportPaths",
             "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
         )
+        property("sonar.log.level", "DEBUG")
         //property("sonar.qualitygate.wait", "true")
     }
 }
