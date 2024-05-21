@@ -125,11 +125,11 @@ class IntegrationTests {
 
     private void stubForPullRequestsEndpoints() {
         String json = TestUtility.asString(pullRequestJson);
-        json = json.replace("{{todays_date}}", TestUtility.getDateXDaysAgo(0));
-        json = json.replace("{{yesterdays_date}}", TestUtility.yesterday());
-        json = json.replace("{{3_days_ago_date}}", TestUtility.getDateXDaysAgo(3));
-        json = json.replace("{{8_days_ago_date}}", TestUtility.getDateXDaysAgo(8));
-        json = json.replace("{{16_days_ago_date}}", TestUtility.getDateXDaysAgo(16));
+        json = json.replace("{{todays_date}}", TestUtility.getDateTimeXDaysAgo(0));
+        json = json.replace("{{yesterdays_date}}", TestUtility.getDateTimeXDaysAgo(1));
+        json = json.replace("{{3_days_ago_date}}", TestUtility.getDateTimeXDaysAgo(3));
+        json = json.replace("{{8_days_ago_date}}", TestUtility.getDateTimeXDaysAgo(8));
+        json = json.replace("{{16_days_ago_date}}", TestUtility.getDateTimeXDaysAgo(16));
 
         stubFor(
                 get(urlEqualTo(
