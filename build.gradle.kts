@@ -1,6 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 val wiremockVersion: String by project
+val togglzTestVersion: String by project
 
 plugins {
     id("org.springframework.boot") version "3.2.5"
@@ -77,6 +78,10 @@ dependencies {
     "testImplementation"("org.springframework.boot:spring-boot-starter-web")
     "testImplementation"("org.springframework.boot:spring-boot-starter-test")
     "testImplementation"("org.wiremock:wiremock-jetty12:$wiremockVersion")
+
+    "testImplementation"("org.togglz:togglz-testing:$togglzTestVersion")
+    "testImplementation"("org.togglz:togglz-junit:$togglzTestVersion")
+    "testImplementation"("io.micrometer:micrometer-registry-prometheus")
 }
 
 subprojects {
@@ -111,9 +116,9 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
         property(
-            "sonar.coverage.jacoco.xmlReportPaths",
-            "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml," +
-                    "../build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+                "sonar.coverage.jacoco.xmlReportPaths",
+                "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml," +
+                        "../build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
         )
         //property("sonar.qualitygate.wait", "true")
     }
@@ -124,19 +129,19 @@ tasks.getByName<BootBuildImage>("bootBuildImage") {
         builder.set("paketobuildpacks/builder-jammy-base:latest")
         imageName.set(System.getenv("IMAGE_NAME"))
         tags.set(
-            listOf(
-                "${
-                    System.getenv("IMAGE_NAME")
-                }:${
-                    System.getenv("SHORT_SHA")
-                }"
-            )
+                listOf(
+                        "${
+                            System.getenv("IMAGE_NAME")
+                        }:${
+                            System.getenv("SHORT_SHA")
+                        }"
+                )
         )
         publish.set(true)
         environment.set(
-            mapOf(
-                "BP_OCI_SOURCE" to System.getenv("BP_OCI_SOURCE")
-            )
+                mapOf(
+                        "BP_OCI_SOURCE" to System.getenv("BP_OCI_SOURCE")
+                )
         )
         docker {
             publishRegistry {

@@ -6,6 +6,8 @@ import be.xplore.githubmetrics.domain.pullrequest.PullRequestState;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.StartupExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.features.FeatureAssociation;
+import be.xplore.githubmetrics.prometheusexporter.features.Features;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -159,6 +161,7 @@ public class PullRequestExporter implements ScheduledExporter, StartupExporter {
     }
 
     @Override
+    @FeatureAssociation(value = Features.EXPORTER_PULL_REQUESTS_FEATURE)
     public void run() {
         this.retrieveAndExportPullRequestsMetrics();
     }

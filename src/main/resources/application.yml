@@ -28,3 +28,16 @@ app:
     github:
         url: https://api.github.com
         org: "github-insights"
+togglz:
+    feature-enums: be.xplore.githubmetrics.prometheusexporter.features.Features
+    features:
+        EXPORTER_JOBS_FEATURE:
+            enabled: ${EXPORTER_JOBS_FEATURE:false}
+        EXPORTER_WORKFLOW_RUNS_FEATURE:
+            enabled: ${EXPORTER_WORKFLOW_RUNS_FEATURE:false}
+        EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER:
+            enabled: ${EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER:false}
+        EXPORTER_REPOSITORIES_FEATURE:
+            enabled: ${EXPORTER_REPOSITORIES_FEATURE:false}
+        EXPORTER_PULL_REQUESTS_FEATURE:
+            enabled: ${EXPORTER_PULL_REQUESTS_FEATURE:false}

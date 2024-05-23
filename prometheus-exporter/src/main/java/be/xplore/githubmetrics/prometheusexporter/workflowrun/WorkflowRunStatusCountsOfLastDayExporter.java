@@ -5,6 +5,8 @@ import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.features.FeatureAssociation;
+import be.xplore.githubmetrics.prometheusexporter.features.Features;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -97,6 +99,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
 
     @Override
     @CacheEvict(value = "WorkflowRuns", allEntries = true, beforeInvocation = true)
+    @FeatureAssociation(value = Features.EXPORTER_WORKFLOW_RUNS_FEATURE)
     public void run() {
         this.retrieveAndExportLastDaysWorkflowRunStatusCounts();
     }

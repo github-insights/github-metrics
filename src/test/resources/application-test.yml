@@ -55,4 +55,16 @@ fUUh3gRV/FFEnVfTiyIcP3UL4ikPOCXrDaIE8QOPs5hUzzen5Vo2NG66LyzgH2HG\n
 NAsWO4FEfeuh1jOn9Nz+FIvcATdB2GFYT7qRb44gNq9yWj7Dx9BFByLXht4XM1cH\n
 n3lLUx3lpr32I+zijs25AQ==\n
 -----END PRIVATE KEY-----"
-
+togglz:
+    feature-enums: be.xplore.githubmetrics.prometheusexporter.features.Features
+    features:
+        EXPORTER_JOBS_FEATURE:
+            enabled: true
+        EXPORTER_WORKFLOW_RUNS_FEATURE:
+            enabled: true
+        EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER:
+            enabled: true
+        EXPORTER_REPOSITORIES_FEATURE:
+            enabled: true
+        EXPORTER_PULL_REQUESTS_FEATURE:
+            enabled: true
