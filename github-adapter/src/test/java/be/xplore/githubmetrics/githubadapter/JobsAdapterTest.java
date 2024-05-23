@@ -1,6 +1,7 @@
 package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.job.Job;
+import be.xplore.githubmetrics.domain.job.JobConclusion;
 import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
@@ -64,7 +65,7 @@ class JobsAdapterTest {
 
         List<Job> workFlowRunJobs = jobsAdapter
                 .getAllJobsForWorkflowRun(this.workflowRun);
-        assertEquals(1, workFlowRunJobs.size());
+        assertEquals(2, workFlowRunJobs.size());
     }
 
     @Test
@@ -86,5 +87,21 @@ class JobsAdapterTest {
                     );
                 }
         );
+    }
+
+    @Test
+    void workflowRunJobsAdapterShouldContainAnActionRequiredJob() {
+        stubFor(
+                get(urlEqualTo(
+                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100")
+                ).willReturn(
+                        aResponse()
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBodyFile("WorkFlowRunJobsValidTestData.json")
+                ));
+
+        List<Job> workFlowRunJobs = jobsAdapter
+                .getAllJobsForWorkflowRun(this.workflowRun);
+        assertEquals(JobConclusion.ACTION_REQUIRED, workFlowRunJobs.get(1).getConclusion());
     }
 }
