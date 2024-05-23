@@ -6,6 +6,8 @@ import be.xplore.githubmetrics.domain.job.JobConclusion;
 import be.xplore.githubmetrics.domain.job.JobStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.features.FeatureAssociation;
+import be.xplore.githubmetrics.prometheusexporter.features.Features;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -103,6 +105,7 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     }
 
     @Override
+    @FeatureAssociation(value = Features.EXPORTER_JOBS_FEATURE)
     public void run() {
         this.retrieveAndExportLastDaysJobLabelCounts();
     }

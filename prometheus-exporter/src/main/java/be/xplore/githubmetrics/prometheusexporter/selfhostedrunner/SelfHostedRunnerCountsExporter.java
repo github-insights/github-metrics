@@ -6,6 +6,8 @@ import be.xplore.githubmetrics.domain.selfhostedrunner.SelfHostedRunner;
 import be.xplore.githubmetrics.domain.selfhostedrunner.SelfHostedRunnerStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
+import be.xplore.githubmetrics.prometheusexporter.features.FeatureAssociation;
+import be.xplore.githubmetrics.prometheusexporter.features.Features;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -90,6 +92,7 @@ public class SelfHostedRunnerCountsExporter implements ScheduledExporter {
     }
 
     @Override
+    @FeatureAssociation(value = Features.EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER)
     public void run() {
         this.retrieveAndExportSelfHostedRunnerCounts();
     }
