@@ -26,8 +26,8 @@ public record GHJob(
     private JobConclusion convertConclusion() {
         return switch (this.conclusion) {
             case "success" -> JobConclusion.SUCCESS;
-            case "failure", "cancelled", "timed_out", "action_required" ->
-                    JobConclusion.FAILURE;
+            case "failure", "cancelled", "timed_out" -> JobConclusion.FAILURE;
+            case "action_required" -> JobConclusion.ACTION_REQUIRED;
             case "neutral", "skipped" -> JobConclusion.NEUTRAL;
             case null -> JobConclusion.NEUTRAL;
             default -> throw new IllegalStateException(
