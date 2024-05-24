@@ -62,7 +62,7 @@ togglz:
             enabled: true
         EXPORTER_WORKFLOW_RUNS_FEATURE:
             enabled: true
-        EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER:
+        EXPORTER_SELF_HOSTED_RUNNERS_FEATURE:
             enabled: true
         EXPORTER_REPOSITORIES_FEATURE:
             enabled: true
