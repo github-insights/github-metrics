@@ -92,7 +92,7 @@ public class SelfHostedRunnerCountsExporter implements ScheduledExporter {
     }
 
     @Override
-    @FeatureAssociation(value = Features.EXPORTER_SELF_HOSTED_RUNNERS_EXPORTER)
+    @FeatureAssociation(value = Features.EXPORTER_SELF_HOSTED_RUNNERS_FEATURE)
     public void run() {
         this.retrieveAndExportSelfHostedRunnerCounts();
     }
