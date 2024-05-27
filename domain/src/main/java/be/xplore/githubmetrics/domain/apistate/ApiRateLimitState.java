@@ -17,8 +17,8 @@ public class ApiRateLimitState {
     private long reset;
     private long used;
     private Optional<ApiRateLimitStatus> status = Optional.of(ApiRateLimitStatus.OK);
-    private double actualRequestsPerMilli;
-    private double idealRequestsPerMilli;
+    private double actualRequestsPerSecond;
+    private double idealRequestsPerSecond;
 
     public ApiRateLimitState(
             double rateLimitBuffer,
@@ -39,8 +39,8 @@ public class ApiRateLimitState {
             double idealRequestsPerSecond
     ) {
         this.status.ifPresent(currentStatus -> {
-            this.actualRequestsPerMilli = actualRequestsPerSecond;
-            this.idealRequestsPerMilli = idealRequestsPerSecond;
+            this.actualRequestsPerSecond = actualRequestsPerSecond;
+            this.idealRequestsPerSecond = idealRequestsPerSecond;
 
             var newStatus = this.getNewAbsoluteStatus();
 
@@ -54,13 +54,13 @@ public class ApiRateLimitState {
 
     public ApiRateLimitStatus getNewAbsoluteStatus() {
         ApiRateLimitStatus newStatus;
-        if (this.idealRequestsPerMilli * this.goodLimit >= this.actualRequestsPerMilli) {
+        if (this.idealRequestsPerSecond * this.goodLimit >= this.actualRequestsPerSecond) {
             newStatus = ApiRateLimitStatus.OK;
-        } else if (this.idealRequestsPerMilli * this.concerningLimit >= this.actualRequestsPerMilli) {
+        } else if (this.idealRequestsPerSecond * this.concerningLimit >= this.actualRequestsPerSecond) {
             newStatus = ApiRateLimitStatus.GOOD;
-        } else if (this.idealRequestsPerMilli * this.warningLimit >= this.actualRequestsPerMilli) {
+        } else if (this.idealRequestsPerSecond * this.warningLimit >= this.actualRequestsPerSecond) {
             newStatus = ApiRateLimitStatus.CONCERNING;
-        } else if (this.idealRequestsPerMilli * this.criticalLimit >= this.actualRequestsPerMilli) {
+        } else if (this.idealRequestsPerSecond * this.criticalLimit >= this.actualRequestsPerSecond) {
             newStatus = ApiRateLimitStatus.WARNING;
         } else {
             newStatus = ApiRateLimitStatus.CRITICAL;
@@ -139,12 +139,12 @@ public class ApiRateLimitState {
         this.used = used;
     }
 
-    public double getActualRequestsPerMilli() {
-        return actualRequestsPerMilli;
+    public double getActualRequestsPerSecond() {
+        return actualRequestsPerSecond;
     }
 
-    public double getIdealRequestsPerMilli() {
-        return idealRequestsPerMilli;
+    public double getIdealRequestsPerSecond() {
+        return idealRequestsPerSecond;
     }
 
     public Optional<ApiRateLimitStatus> getStatus() {

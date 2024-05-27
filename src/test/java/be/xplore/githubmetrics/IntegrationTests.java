@@ -1,5 +1,6 @@
 package be.xplore.githubmetrics;
 
+import be.xplore.githubmetrics.prometheusexporter.apistate.ApiRateLimitStateExporter;
 import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.pullrequest.PullRequestExporter;
 import be.xplore.githubmetrics.prometheusexporter.repository.RepositoryCountExporter;
@@ -22,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -56,6 +58,8 @@ class IntegrationTests {
     private PullRequestExporter pullRequestExporter;
     @Autowired
     private SelfHostedRunnerCountsExporter selfHostedRunnerCountsExporter;
+    @Autowired
+    private ApiRateLimitStateExporter apiRateLimitStateExporter;
 
     @Autowired
     private ActiveWorkflowRunStatusCountsExporter activeWorkflowRunStatusCountsExporter;
@@ -169,9 +173,7 @@ class IntegrationTests {
         this.repositoryCountExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(Matchers.containsString("repositories_count 1.0"))
-        );
+        ).andExpect(containsStr("repositories_count 1.0"));
     }
 
     @Test
@@ -180,9 +182,7 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(Matchers.containsString("pull_requests_count_of_last_2_days{state=\"OPEN\"} 1.0"))
-        );
+        ).andExpect(containsStr("pull_requests_count_of_last_2_days{state=\"OPEN\"} 1.0"));
     }
 
     @Test
@@ -191,9 +191,7 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(Matchers.containsString("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\"} 2.0"))
-        );
+        ).andExpect(containsStr("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\"} 2.0"));
     }
 
     @Test
@@ -213,14 +211,10 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(Matchers.containsString("active_workflow_runs{status=\"IN_PROGRESS\"} 1.0"))
-        );
+        ).andExpect(containsStr("active_workflow_runs{status=\"IN_PROGRESS\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(Matchers.containsString("active_workflow_runs{status=\"PENDING\"} 1.0"))
-        );
+        ).andExpect(containsStr("active_workflow_runs{status=\"PENDING\"} 1.0"));
     }
 
     @Test
@@ -229,18 +223,14 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(
-                        Matchers.containsString(
-                                "workflow_runs_total_build_times{status=\"DONE\"} 272000.0"
-                        )));
+        ).andExpect(containsStr(
+                "workflow_runs_total_build_times{status=\"DONE\"} 272000.0"
+        ));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(
-                        Matchers.containsString(
-                                "workflow_runs_average_build_times{status=\"DONE\"} 136000.0"
-                        )));
+        ).andExpect(containsStr(
+                "workflow_runs_average_build_times{status=\"DONE\"} 136000.0"
+        ));
     }
 
     @Test
@@ -248,24 +238,33 @@ class IntegrationTests {
         this.selfHostedRunnerCountsExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(
-                        Matchers.containsString(
-                                "self_hosted_runners{os=\"LINUX\",status=\"BUSY\"} 1.0"
-                        )));
+        ).andExpect(containsStr("self_hosted_runners{os=\"LINUX\",status=\"BUSY\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(
-                        Matchers.containsString(
-                                "self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"
-                        )));
+        ).andExpect(containsStr("self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(
-                content().string(
-                        Matchers.containsString(
-                                "self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\"} 1.0"
-                        )));
+        ).andExpect(containsStr("self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\"} 1.0"));
+    }
+
+    @Test
+    void retriveAndExportApiRateLimitStateShouldCorrecltyExportData() throws Exception {
+        this.apiRateLimitStateExporter.run();
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get(actuatorEndpoint)
+                )
+                .andExpect(containsStr("api_ratelimit_state_actual_req 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_ideal_req 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_limit 4500.0"))
+                .andExpect(containsStr("api_ratelimit_state_paused 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_remaining 5000.0"))
+                .andExpect(containsStr("api_ratelimit_state_reset"))
+                .andExpect(containsStr("api_ratelimit_state_status 4.0"))
+                .andExpect(containsStr("api_ratelimit_state_used 0.0"));
+
+    }
+
+    private ResultMatcher containsStr(String string) {
+        return content().string(Matchers.containsString(string));
     }
 }
