@@ -10,6 +10,7 @@ public record SchedulingProperties(
         String jobs,
         String pullRequests,
         String selfHostedRunners,
-        String repositoryCount
+        String repositoryCount,
+        String apiRateLimitState
 ) {
 }

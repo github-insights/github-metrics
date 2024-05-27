@@ -29,6 +29,7 @@ app:
             pull_requests: ${EXPORTERS_SCHEDULING_PULL_REQUESTS:*/30 * * * * ?}
             self_hosted_runners: ${EXPORTERS_SCHEDULING_SELF_HOSTED_RUNNERS:*/30 * * * * ?}
             repository_count: ${EXPORTERS_SCHEDULING_REPOSITORY_COUNT:*/30 * * * * ?}
+            api_ratelimit_state: ${EXPORTERS_SCHEDULING_API_RATELIMIT_STATE:*/15 * * * * ?}
         cacheeviction:
             enable: true
             workflow_runs:

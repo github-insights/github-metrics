@@ -207,7 +207,7 @@ public class RateLimitingInterceptor implements ClientHttpRequestInterceptor {
         LOGGER.debug("{} Requests in period {}", numRequestsInDuration, this.getCountingDuration());
         LOGGER.debug(
                 "Actual {} req/s / Ideal {} req/s",
-                this.rateLimitState.getActualRequestsPerMilli(), this.rateLimitState.getIdealRequestsPerMilli()
+                this.rateLimitState.getActualRequestsPerSecond(), this.rateLimitState.getIdealRequestsPerSecond()
         );
         LOGGER.trace(
                 "Limit {} Remaining {} Used {}",
