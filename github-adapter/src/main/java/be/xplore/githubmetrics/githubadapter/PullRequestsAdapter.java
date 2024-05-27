@@ -61,9 +61,9 @@ public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCache
                 "Fetching fresh PullRequests for Repository {} {}",
                 repository.getId(), repository.getName()
         );
-        var parameters = new HashMap<String, String>();
-        parameters.put("state", "all");
-        parameters.put("per_page", "100");
+        var parameters = new HashMap<String, List<String>>();
+        parameters.put("state", List.of("all"));
+        parameters.put("per_page", List.of("100"));
 
         ResponseEntity<GHPullRequest[]> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(

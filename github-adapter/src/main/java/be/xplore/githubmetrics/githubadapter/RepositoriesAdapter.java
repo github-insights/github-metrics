@@ -48,8 +48,8 @@ public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCach
     public List<Repository> getAllRepositories() {
         LOGGER.debug("Fetching fresh Repositories.");
 
-        var parameters = new HashMap<String, String>();
-        parameters.put("per_page", "100");
+        var parameters = new HashMap<String, List<String>>();
+        parameters.put("per_page", List.of("100"));
 
         ResponseEntity<GHRepositories> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(

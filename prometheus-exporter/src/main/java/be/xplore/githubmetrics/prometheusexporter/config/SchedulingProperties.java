@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.scheduling.exporters")
 public record SchedulingProperties(
         String workflowRuns,
+        String activeWorkflowRuns,
         String workflowRunBuildTimes,
         String jobs,
         String pullRequests,

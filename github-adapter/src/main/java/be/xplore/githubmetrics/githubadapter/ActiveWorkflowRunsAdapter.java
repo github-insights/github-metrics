@@ -2,8 +2,8 @@ package be.xplore.githubmetrics.githubadapter;
 
 import be.xplore.githubmetrics.domain.apistate.ApiRateLimitState;
 import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.domain.workflowrun.ActiveWorkflowRunsQueryPort;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
-import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
@@ -17,34 +17,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCacheEvictionPort {
+public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, ScheduledCacheEvictionPort {
 
-    private static final String WORKFLOW_RUNS_CACHE_NAME = "WorkflowRuns";
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunsAdapter.class);
+    private static final String ACTIVE_WORKFLOW_RUNS_CACHE_NAME = "ActiveWorkflowRuns";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActiveWorkflowRunsAdapter.class);
     private final GithubProperties githubProperties;
-    private final ApiRateLimitState rateLimitState;
     private final RestClient restClient;
     private final GithubApiUtilities utilities;
-    private final CacheEvictionProperties evictionProperties;
 
-    public WorkflowRunsAdapter(
+    private final CacheEvictionProperties evictionProperties;
+    private final ApiRateLimitState rateLimitState;
+
+    public ActiveWorkflowRunsAdapter(
             GithubProperties githubProperties,
-            ApiRateLimitState rateLimitState,
             @Qualifier("defaultRestClient") RestClient restClient,
             GithubApiUtilities utilities,
-            CacheEvictionProperties evictionProperties
+            CacheEvictionProperties evictionProperties,
+            ApiRateLimitState rateLimitState
     ) {
         this.githubProperties = githubProperties;
-        this.rateLimitState = rateLimitState;
         this.restClient = restClient;
         this.utilities = utilities;
         this.evictionProperties = evictionProperties;
+        this.rateLimitState = rateLimitState;
     }
 
     private String getWorkflowRunsApiPath(String repoName) {
@@ -55,17 +56,11 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
         );
     }
 
-    @Cacheable(WORKFLOW_RUNS_CACHE_NAME)
     @Override
-    public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
-        LOGGER.debug("Fetching fresh WorkflowRuns for Repository {} {}.",
-                repository.getId(), repository.getName());
-        var parameters = new HashMap<String, List<String>>();
-        parameters.put("per_page", List.of("100"));
-        parameters.put(
-                "created",
-                List.of(">=" + LocalDate.now().minusDays(1)
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE)));
+    @Cacheable(ACTIVE_WORKFLOW_RUNS_CACHE_NAME)
+    public List<WorkflowRun> getActiveWorkflowRuns(Repository repository) {
+        LOGGER.info("Fetching fresh Active WorkflowRuns for Repository {}.", repository.getId());
+        var parameters = getParameterMap();
 
         ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
@@ -82,26 +77,37 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
         );
 
         LOGGER.debug(
-                "Response for the WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",
-                repository.getId(), workflowRuns.size()
+                "Response for the Active WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",
+                repository.getId(),
+                workflowRuns.size()
         );
         return workflowRuns;
+    }
+
+    private Map<String, List<String>> getParameterMap() {
+        var parameters = new HashMap<String, List<String>>();
+        parameters.put("per_page", List.of("100"));
+        parameters.put(
+                "status",
+                List.of("requested", "queued", "pending", "in_progress"));
+
+        return parameters;
     }
 
     @Override
     public boolean freshDataCanWait() {
         return this.rateLimitState.shouldDataWait(
-                this.evictionProperties.workflowRuns().status()
+                this.evictionProperties.pullRequests().status()
         );
     }
 
     @Override
     public String cacheName() {
-        return WORKFLOW_RUNS_CACHE_NAME;
+        return ACTIVE_WORKFLOW_RUNS_CACHE_NAME;
     }
 
     @Override
     public String cronExpression() {
-        return evictionProperties.workflowRuns().schedule();
+        return this.evictionProperties.activeWorkflowRuns().schedule();
     }
 }
