@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -28,16 +26,13 @@ public class MetricScheduler implements SchedulingConfigurer {
     private final Map<String, ScheduledFuture<?>> scheduledTasksMap = new HashMap<>();
     private final TaskScheduler taskScheduler;
     private final List<ScheduledExporter> scheduledExporters;
-    private final List<StartupExporter> startupExporters;
 
     public MetricScheduler(
             @Qualifier("prometheusExporterTaskScheduler") TaskScheduler taskScheduler,
-            List<ScheduledExporter> scheduledExporters,
-            List<StartupExporter> startupExporters
+            List<ScheduledExporter> scheduledExporters
     ) {
         this.taskScheduler = taskScheduler;
         this.scheduledExporters = scheduledExporters;
-        this.startupExporters = startupExporters;
     }
 
     @Override
@@ -80,11 +75,5 @@ public class MetricScheduler implements SchedulingConfigurer {
         }
         future.cancel(true);
     }
-
-    @EventListener
-    public void onApplicationStartup(ContextRefreshedEvent event) {
-        this.startupExporters.forEach(StartupExporter::run);
-    }
-
 }
 
