@@ -29,11 +29,11 @@ public class RepositoryCountExporter implements ScheduledExporter, StartupExport
     ) {
         this.getAllRepositoriesUseCase = getAllRepositoriesUseCase;
         this.registry = meterRegistry;
-        this.cronExpression = schedulingProperties.repositoryCountInterval();
+        this.cronExpression = schedulingProperties.repositoryCount();
     }
 
     private void retrieveAndExportRepositoryCount() {
-        LOGGER.info("RepositoryCount scheduled task is running.");
+        LOGGER.trace("RepositoryCount scheduled task is running.");
 
         var repositories = this.getAllRepositoriesUseCase.getAllRepositories();
 
@@ -45,7 +45,7 @@ public class RepositoryCountExporter implements ScheduledExporter, StartupExport
                 .strongReference(true)
                 .register(this.registry);
 
-        LOGGER.debug("RepositoryCount scheduled task finished.");
+        LOGGER.trace("RepositoryCount scheduled task finished.");
     }
 
     @Override

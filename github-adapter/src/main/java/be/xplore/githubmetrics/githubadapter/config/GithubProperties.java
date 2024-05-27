@@ -6,13 +6,23 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record GithubProperties(
         String url,
         String org,
-        Application application
-
+        Application application,
+        RateLimiting ratelimiting
 ) {
     public record Application(
             String id,
             String installId,
             String pem
+    ) {
+    }
+
+    public record RateLimiting(
+            long secondsBetweenStateRecalculations,
+            double rateLimitBuffer,
+            double criticalLimit,
+            double warningLimit,
+            double concerningLimit,
+            double goodLimit
     ) {
     }
 }

@@ -8,14 +8,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 
 @ConditionalOnProperty(
-        value = "app.scheduling.enable", havingValue = "true", matchIfMissing = true
+        value = "app.scheduling.exporters.enable", havingValue = "true", matchIfMissing = true
 )
 @Configuration
 @EnableScheduling
-public class SchedulingConfig {
+public class ExporterSchedulingConfig {
 
     @Bean
-    TaskScheduler taskScheduler() {
+    TaskScheduler prometheusExporterTaskScheduler() {
         var scheduler = new SimpleAsyncTaskScheduler();
         scheduler.setVirtualThreads(true);
         return scheduler;

@@ -1,13 +1,17 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.domain.apistate.ApiRateLimitState;
 import be.xplore.githubmetrics.domain.pullrequest.PullRequest;
 import be.xplore.githubmetrics.domain.pullrequest.PullRequestQueryPort;
 import be.xplore.githubmetrics.domain.repository.Repository;
+import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
+import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -18,21 +22,28 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
-public class PullRequestsAdapter implements PullRequestQueryPort {
-
+public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCacheEvictionPort {
+    private static final String PULL_REQUESTS_CACHE_NAME = "PullRequests";
     private static final Logger LOGGER = LoggerFactory.getLogger(PullRequestsAdapter.class);
+
     private final GithubProperties githubProperties;
     private final RestClient restClient;
     private final GithubApiUtilities utilities;
+    private final CacheEvictionProperties evictionProperties;
+    private final ApiRateLimitState rateLimitState;
 
     public PullRequestsAdapter(
             GithubProperties githubProperties,
             @Qualifier("defaultRestClient") RestClient restClient,
-            GithubApiUtilities utilities
+            GithubApiUtilities utilities,
+            CacheEvictionProperties evictionProperties,
+            ApiRateLimitState rateLimitState
     ) {
         this.githubProperties = githubProperties;
         this.restClient = restClient;
         this.utilities = utilities;
+        this.evictionProperties = evictionProperties;
+        this.rateLimitState = rateLimitState;
     }
 
     private String getPullRequestsApiPath(String repoName) {
@@ -43,9 +54,13 @@ public class PullRequestsAdapter implements PullRequestQueryPort {
         );
     }
 
+    @Cacheable(PULL_REQUESTS_CACHE_NAME)
     @Override
     public List<PullRequest> getAllPullRequestsForRepository(Repository repository) {
-        LOGGER.info("Fetching fresh PullRequests for Repository {}", repository.getId());
+        LOGGER.debug(
+                "Fetching fresh PullRequests for Repository {} {}",
+                repository.getId(), repository.getName()
+        );
         var parameters = new HashMap<String, String>();
         parameters.put("state", "all");
         parameters.put("per_page", "100");
@@ -71,5 +86,22 @@ public class PullRequestsAdapter implements PullRequestQueryPort {
         );
 
         return pullRequests;
+    }
+
+    @Override
+    public boolean freshDataCanWait() {
+        return this.rateLimitState.shouldDataWait(
+                this.evictionProperties.pullRequests().status()
+        );
+    }
+
+    @Override
+    public String cacheName() {
+        return PULL_REQUESTS_CACHE_NAME;
+    }
+
+    @Override
+    public String cronExpression() {
+        return this.evictionProperties.pullRequests().schedule();
     }
 }

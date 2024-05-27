@@ -38,7 +38,7 @@ class JobsLabelCountsOfLastDayExporterTest {
         this.registry = new SimpleMeterRegistry();
         this.mockUseCase = Mockito.mock(GetAllJobsOfLastDayUseCase.class);
         var mockProperties = Mockito.mock(SchedulingProperties.class);
-        Mockito.when(mockProperties.workflowRunsInterval()).thenReturn("");
+        Mockito.when(mockProperties.workflowRuns()).thenReturn("");
 
         this.jobsLabelCountsOfLastDayExporter = new JobsLabelCountsOfLastDayExporter(
                 this.mockUseCase, mockProperties, registry

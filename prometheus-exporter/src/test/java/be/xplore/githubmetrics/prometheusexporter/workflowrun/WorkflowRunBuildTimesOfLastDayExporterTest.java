@@ -34,7 +34,7 @@ class WorkflowRunBuildTimesOfLastDayExporterTest {
         this.registry = new SimpleMeterRegistry();
         this.mockUseCase = Mockito.mock(GetAllWorkflowRunBuildTimesOfLastDayUseCase.class);
         var mockProperties = Mockito.mock(SchedulingProperties.class);
-        Mockito.when(mockProperties.workflowRunBuildTimesInterval()).thenReturn("");
+        Mockito.when(mockProperties.workflowRunBuildTimes()).thenReturn("");
 
         this.workflowRunBuildTimesOfLastDayExporter = new WorkflowRunBuildTimesOfLastDayExporter(
                 mockUseCase, mockProperties, registry

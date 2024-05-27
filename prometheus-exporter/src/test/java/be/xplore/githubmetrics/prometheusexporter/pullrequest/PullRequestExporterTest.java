@@ -51,7 +51,7 @@ class PullRequestExporterTest {
         this.registry = new SimpleMeterRegistry();
         this.mockUseCase = Mockito.mock(GetAllPullRequestsUseCase.class);
         var mockProperties = Mockito.mock(SchedulingProperties.class);
-        Mockito.when(mockProperties.pullRequestsInterval()).thenReturn("");
+        Mockito.when(mockProperties.pullRequests()).thenReturn("");
 
         this.pullRequestExporter = new PullRequestExporter(
                 mockUseCase, mockProperties, registry

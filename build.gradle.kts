@@ -116,9 +116,9 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.sourceEncoding", "UTF-8")
         property(
-                "sonar.coverage.jacoco.xmlReportPaths",
-                "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml," +
-                        "../build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml," +
+                    "../build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml"
         )
         //property("sonar.qualitygate.wait", "true")
     }
@@ -129,19 +129,15 @@ tasks.getByName<BootBuildImage>("bootBuildImage") {
         builder.set("paketobuildpacks/builder-jammy-base:latest")
         imageName.set(System.getenv("IMAGE_NAME"))
         tags.set(
-                listOf(
-                        "${
-                            System.getenv("IMAGE_NAME")
-                        }:${
-                            System.getenv("SHORT_SHA")
-                        }"
-                )
+            listOf(
+                "${System.getenv("IMAGE_NAME")}:${System.getenv("SHORT_SHA")}"
+            )
         )
         publish.set(true)
         environment.set(
-                mapOf(
-                        "BP_OCI_SOURCE" to System.getenv("BP_OCI_SOURCE")
-                )
+            mapOf(
+                "BP_OCI_SOURCE" to System.getenv("BP_OCI_SOURCE")
+            )
         )
         docker {
             publishRegistry {

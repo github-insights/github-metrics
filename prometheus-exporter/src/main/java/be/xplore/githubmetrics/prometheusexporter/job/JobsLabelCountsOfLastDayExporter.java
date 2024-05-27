@@ -37,12 +37,12 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
     ) {
         this.getAllJobsOfLastDayUseCase = getAllJobsOfLastDayUseCase;
         this.registry = registry;
-        this.cronExpression = schedulingProperties.jobsInterval();
+        this.cronExpression = schedulingProperties.jobs();
         this.initJobCountGauges();
     }
 
     private void retrieveAndExportLastDaysJobLabelCounts() {
-        LOGGER.info("LastDaysJobLabelCounts scheduled task is running.");
+        LOGGER.trace("LastDaysJobLabelCounts scheduled task is running.");
 
         List<Job> jobs = getAllJobsOfLastDayUseCase.getAllJobsOfLastDay();
 
@@ -52,7 +52,7 @@ public class JobsLabelCountsOfLastDayExporter implements ScheduledExporter {
                 jobCountGauges.get(entry).set(value)
         );
 
-        LOGGER.debug(
+        LOGGER.trace(
                 "LastDaysJobLabelCounts scheduled task finished with {} JobLabel combinations.",
                 jobLabelCounts.size()
         );

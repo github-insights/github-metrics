@@ -36,8 +36,10 @@ class WorkflowRunsAdapterTest {
         var utilities = new GithubApiUtilities(restClient);
         workflowRunsAdapter = new WorkflowRunsAdapter(
                 githubProperties,
+                TestUtility.getApiRateLimitState(),
                 restClient,
-                utilities
+                utilities,
+                TestUtility.getCacheEvictionProperties()
         );
     }
 

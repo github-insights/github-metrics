@@ -1,7 +1,10 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.domain.apistate.ApiRateLimitState;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunBuildTimesQueryPort;
+import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
+import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRunTiming;
 import org.slf4j.Logger;
@@ -14,25 +17,32 @@ import org.springframework.web.client.RestClient;
 import java.text.MessageFormat;
 
 @Service
-public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryPort {
+public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryPort, ScheduledCacheEvictionPort {
+    private static final String WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME = "WorkflowRunBuildTimes";
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunBuildTimesAdapter.class);
     private final GithubProperties githubProperties;
     private final RestClient restClient;
+    private final CacheEvictionProperties evictionProperties;
+    private final ApiRateLimitState rateLimitState;
 
     public WorkflowRunBuildTimesAdapter(
             GithubProperties githubProperties,
-            @Qualifier("defaultRestClient") RestClient restClient
+            @Qualifier("defaultRestClient") RestClient restClient,
+            CacheEvictionProperties evictionProperties,
+            ApiRateLimitState rateLimitState
     ) {
         this.githubProperties = githubProperties;
         this.restClient = restClient;
+        this.evictionProperties = evictionProperties;
+        this.rateLimitState = rateLimitState;
     }
 
-    @Cacheable("WorkflowRunBuildTimes")
+    @Cacheable(WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME)
     @Override
     public int getWorkflowRunBuildTimes(WorkflowRun workflowRun) {
-        LOGGER.info(
-                "Fetching fresh BuildTimes for WorkflowRun {}.",
-                workflowRun.getId()
+        LOGGER.debug(
+                "Fetching fresh BuildTimes for WorkflowRun {} {}.",
+                workflowRun.getId(), workflowRun.getName()
         );
 
         var buildTime = this.restClient.get()
@@ -57,5 +67,22 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
                 workflowRun.getRepository().getName(),
                 workflowRun.getId()
         );
+    }
+
+    @Override
+    public boolean freshDataCanWait() {
+        return this.rateLimitState.shouldDataWait(
+                this.evictionProperties.workflowRunBuildTimes().status()
+        );
+    }
+
+    @Override
+    public String cacheName() {
+        return WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME;
+    }
+
+    @Override
+    public String cronExpression() {
+        return evictionProperties.workflowRunBuildTimes().schedule();
     }
 }

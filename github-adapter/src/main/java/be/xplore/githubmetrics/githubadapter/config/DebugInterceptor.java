@@ -31,7 +31,7 @@ public class DebugInterceptor implements ClientHttpRequestInterceptor {
                 response.getHeaders()
         );
 
-        Optional.ofNullable(response.getHeaders().get("X-RateLimit-Remaining")).flatMap(header -> Optional.ofNullable(header.getFirst())).ifPresent(rateRemaining -> {
+        Optional.ofNullable(response.getHeaders().get("x-ratelimit-remaining")).flatMap(header -> Optional.ofNullable(header.getFirst())).ifPresent(rateRemaining -> {
             var intRateRemaining = Integer.parseInt(rateRemaining);
             if (intRateRemaining < 500 && intRateRemaining % 50 == 0) {
                 LOGGER.error("Current rate remaining is {}", intRateRemaining);

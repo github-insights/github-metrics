@@ -43,7 +43,7 @@ public class PullRequestExporter implements ScheduledExporter, StartupExporter {
     ) {
         this.getAllPullRequestsUseCase = getAllPullRequestsUseCase;
         this.registry = registry;
-        this.cronExpression = schedulingProperties.pullRequestsInterval();
+        this.cronExpression = schedulingProperties.pullRequests();
 
         this.initPullRequestGauges();
 
@@ -64,13 +64,13 @@ public class PullRequestExporter implements ScheduledExporter, StartupExporter {
     }
 
     private void retrieveAndExportPullRequestsMetrics() {
-        LOGGER.info("PullRequests scheduled task is running.");
+        LOGGER.trace("PullRequests scheduled task is running.");
         List<PullRequest> pullRequests = getAllPullRequestsUseCase.getAllPullRequests();
 
         this.generateAndPublishPullRequestCountsMetrics(pullRequests);
         this.generateAndPublishPullRequestsThroughputMetrics(pullRequests);
 
-        LOGGER.debug("PullRequests scheduled task is finished.");
+        LOGGER.trace("PullRequests scheduled task is finished.");
     }
 
     private void generateAndPublishPullRequestsThroughputMetrics(List<PullRequest> pullRequests) {

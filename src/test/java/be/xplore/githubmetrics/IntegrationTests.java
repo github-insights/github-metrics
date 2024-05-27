@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -40,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = RANDOM_PORT
 )
 class IntegrationTests {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
     private static WireMockServer wireMockServer;
     private final String actuatorEndpoint = "/actuator/prometheus";
@@ -75,12 +72,12 @@ class IntegrationTests {
     @BeforeEach
     void setUp() {
         stubFor(post("/app/installations/50174772/access_tokens").willReturn(ok()
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .withHeaders(TestUtility.getRateLimitingHeaders())
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
         stubFor(get("/installation/repositories?per_page=100")
                 .willReturn(ok()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
 
         this.stubForWorkflowRunEndpoints();
@@ -95,7 +92,7 @@ class IntegrationTests {
                         + TestUtility.yesterday()
                 )
                         .willReturn(ok()
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                         )
         );
@@ -104,22 +101,22 @@ class IntegrationTests {
     private void stubForJobsEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
                 .willReturn(ok()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("JobsValidTestData.json")));
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100")
                 .willReturn(ok()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("JobsValidTestData.json")));
     }
 
     private void stubForBuildTimeEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/timing")
                 .willReturn(ok()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("WorkflowRunBuildTime.json")));
         stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/timing")
                 .willReturn(ok()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("WorkflowRunBuildTime.json")));
     }
 
@@ -136,7 +133,7 @@ class IntegrationTests {
                         "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
                 )).willReturn(
                         aResponse()
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBody(json)));
     }
 
@@ -146,14 +143,14 @@ class IntegrationTests {
                         "/orgs/github-insights/actions/runners?per_page=100"
                 )).willReturn(
                         aResponse()
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBodyFile("SelfHostedRunnersMacData.json")));
         stubFor(
                 get(urlEqualTo(
                         "/repos/github-insights/github-metrics/actions/runners?per_page=100"
                 )).willReturn(
                         aResponse()
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBodyFile("SelfHostedRunnersOtherData.json")));
     }
 
@@ -174,7 +171,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("pull_requests_count_of_last_2_days{state=\"OPEN\",} 1.0"))
+                content().string(Matchers.containsString("pull_requests_count_of_last_2_days{state=\"OPEN\"} 1.0"))
         );
     }
 
@@ -185,7 +182,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\",} 2.0"))
+                content().string(Matchers.containsString("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\"} 2.0"))
         );
     }
 
@@ -196,7 +193,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("workflow_runs{status=\"DONE\",} 2.0"))
+                content().string(Matchers.containsString("workflow_runs{status=\"DONE\"} 2.0"))
         );
     }
 
@@ -209,14 +206,14 @@ class IntegrationTests {
         ).andExpect(
                 content().string(
                         Matchers.containsString(
-                                "workflow_runs_total_build_times{status=\"DONE\",} 272000.0"
+                                "workflow_runs_total_build_times{status=\"DONE\"} 272000.0"
                         )));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
                 content().string(
                         Matchers.containsString(
-                                "workflow_runs_average_build_times{status=\"DONE\",} 136000.0"
+                                "workflow_runs_average_build_times{status=\"DONE\"} 136000.0"
                         )));
     }
 
@@ -228,21 +225,21 @@ class IntegrationTests {
         ).andExpect(
                 content().string(
                         Matchers.containsString(
-                                "self_hosted_runners{os=\"LINUX\",status=\"BUSY\",} 1.0"
+                                "self_hosted_runners{os=\"LINUX\",status=\"BUSY\"} 1.0"
                         )));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
                 content().string(
                         Matchers.containsString(
-                                "self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\",} 1.0"
+                                "self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"
                         )));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
                 content().string(
                         Matchers.containsString(
-                                "self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\",} 1.0"
+                                "self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\"} 1.0"
                         )));
     }
 }

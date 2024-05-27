@@ -27,9 +27,9 @@ class RepositoriesAdapterTest {
         var utilities = new GithubApiUtilities(restClient);
 
         repositoriesAdapter = new RepositoriesAdapter(
-                githubProperties,
-                restClient,
-                utilities
+                githubProperties, restClient, utilities,
+                TestUtility.getCacheEvictionProperties(),
+                TestUtility.getApiRateLimitState()
         );
 
     }

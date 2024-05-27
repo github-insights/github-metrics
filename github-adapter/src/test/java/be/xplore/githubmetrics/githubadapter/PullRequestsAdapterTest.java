@@ -38,9 +38,9 @@ class PullRequestsAdapterTest {
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
         var utilities = new GithubApiUtilities(restClient);
         this.pullRequestsAdapter = new PullRequestsAdapter(
-                githubProperties,
-                restClient,
-                utilities
+                githubProperties, restClient, utilities,
+                TestUtility.getCacheEvictionProperties(),
+                TestUtility.getApiRateLimitState()
         );
     }
 

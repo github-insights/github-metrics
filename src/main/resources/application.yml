@@ -1,6 +1,8 @@
 logging:
     level:
-        be.xplore.githubmetrics: ${LOGGING_LEVEL:INFO}
+        be.xplore.githubmetrics:
+            ROOT: ${LOGGING_LEVEL:INFO}
+
 management:
     endpoints:
         web:
@@ -18,16 +20,44 @@ spring:
             enabled: true
 app:
     scheduling:
-        enable: true
-        workflow_runs_interval: ${APP_SCHEDULING_WORKFLOW_RUNS_INTERVAL:30 */5 * * * ?}
-        jobs_interval: ${APP_SCHEDULING_JOBS_INTERVAL:0 */5 * * * ?}
-        workflow_run_build_times_interval: ${APP_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES_INTERVAL:10 0 * * * ?}
-        pull_requests_interval: ${APP_SCHEDULING_PULL_REQUESTS_INTERVAL:15 0 * * * ?}
-        self_hosted_runners_interval: ${SELF_HOSTED_RUNNERS_INTERVAL:20 */5 * * * ?}
-        repository_count_interval: ${REPOSITORY_COUNT_INTERVAL:0 0 * * * ?}
+        exporters:
+            enable: true
+            workflow_runs: ${EXPORTERS_SCHEDULING_WORKFLOW_RUNS:*/30 * * * * ?}
+            jobs: ${EXPORTERS_SCHEDULING_JOBS:*/30 * * * * ?}
+            workflow_run_build_times: ${EXPORTERS_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:*/30 * * * * ?}
+            pull_requests: ${EXPORTERS_SCHEDULING_PULL_REQUESTS:*/30 * * * * ?}
+            self_hosted_runners: ${EXPORTERS_SCHEDULING_SELF_HOSTED_RUNNERS:*/30 * * * * ?}
+            repository_count: ${EXPORTERS_SCHEDULING_REPOSITORY_COUNT:*/30 * * * * ?}
+        cacheeviction:
+            enable: true
+            workflow_runs:
+                schedule: ${CACHE_EVICTION_SCHEDULING_WORKFLOW_RUNS:30 */5 * * * ?}
+                status: ${CACHE_EVICTION_WORKFLOW_RUNS_STOP_EVICTION_STATUS:}
+            jobs:
+                schedule: ${CACHE_EVICTION_SCHEDULING_JOBS:0 */5 * * * ?}
+                status: ${CACHE_EVICTION_JOBS_STOP_EVICTION_STATUS:CONCERNING}
+            workflow_run_build_times:
+                schedule: ${CACHE_EVICTION_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:10 0 * * * ?}
+                status: ${CACHE_EVICTION_WORKFLOW_RUN_BUILD_TIMES_STOP_EVICTION_STATUS:CONCERNING}
+            pull_requests:
+                schedule: ${CACHE_EVICTION_SCHEDULING_PULL_REQUESTS:15 0 * * * ?}
+                status: ${CACHE_EVICTION_PULL_REQUESTS_STOP_EVICTION_STATUS:GOOD}
+            self_hosted_runners:
+                schedule: ${CACHE_EVICTION_SCHEDULING_SELF_HOSTED_RUNNERS:20 */5 * * * ?}
+                status: ${CACHE_EVICTION_SELF_HOSTED_RUNNERS_STOP_EVICTION_STATUS:CONCERNING}
+            repository_count:
+                schedule: ${CACHE_EVICTION_SCHEDULING_REPOSITORY_COUNT:0 0 * * * ?}
+                status: ${CACHE_EVICTION_REPOSITORY_COUNT_STOP_EVICTION_STATUS:GOOD}
     github:
         url: https://api.github.com
         org: "github-insights"
+        ratelimiting:
+            seconds_between_state_recalculations: ${APP_GITHUB_RATELIMITING_SECONDS_BETWEEN_STATE_RECALCULATIONS:60}
+            rate_limit_buffer: ${APP_GHITHUB_RATELIMIT_BUFFER:0.9}
+            critical_limit: ${APP_GITHUB_RATELIMITING_CRITICAL_LIMIT:1.2}
+            warning_limit: ${APP_GITHUB_RATELIMITING_WARNING_LIMIT:0.9}
+            concerning_limit: ${APP_GITHUB_RATELIMITING_CONCERNING_LIMIT:0.7}
+            good_limit: ${APP_GITHUB_RATELIMITING_GOOD_LIMIT:0.5}
 togglz:
     feature-enums: be.xplore.githubmetrics.prometheusexporter.features.Features
     features:
