@@ -44,7 +44,11 @@ class JobsAdapterTest {
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var tokenRestClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
         var utilities = new GithubApiUtilities(tokenRestClient);
-        jobsAdapter = new JobsAdapter(githubProperties, tokenRestClient, utilities);
+        jobsAdapter = new JobsAdapter(
+                githubProperties, tokenRestClient, utilities,
+                TestUtility.getCacheEvictionProperties(),
+                TestUtility.getApiRateLimitState()
+        );
     }
 
     @AfterEach

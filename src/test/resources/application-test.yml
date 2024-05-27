@@ -1,6 +1,6 @@
 logging:
     level:
-        be.xplore.githubmetrics: DEBUG
+        be.xplore.githubmetrics: TRACE
 management:
     endpoint:
         prometheus:
@@ -18,9 +18,12 @@ management:
                 enabled: true
 app:
     scheduling:
-        enable: false
-        workflowrunsinterval: "30 */5 * * * ?"
-        jobsinterval: "0 */1 * * * ?"
+        exporters:
+            enable: false
+            workflowrunsinterval: "30 */5 * * * ?"
+            jobsinterval: "0 */1 * * * ?"
+        cacheeviction:
+            enable: false
     github:
         url: ${APP_GITHUB_URL:http://localhost:8081}
         org: "github-insights"

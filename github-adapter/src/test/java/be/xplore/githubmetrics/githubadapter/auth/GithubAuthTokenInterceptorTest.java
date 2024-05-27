@@ -43,7 +43,8 @@ class GithubAuthTokenInterceptorTest {
     private final GithubRestClientConfig restClientConfig = new GithubRestClientConfig(
             new GithubUnauthorizedInterceptor(),
             new DebugInterceptor(),
-            githubProperties
+            githubProperties,
+            TestUtility.getRateLimitingInterceptor()
     );
     private GithubAuthTokenInterceptor authTokenInterceptor;
     private HttpRequest mockHttpRequest;

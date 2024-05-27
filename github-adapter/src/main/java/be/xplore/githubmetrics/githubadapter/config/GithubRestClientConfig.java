@@ -3,6 +3,7 @@ package be.xplore.githubmetrics.githubadapter.config;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
+import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitingInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
@@ -14,15 +15,18 @@ public class GithubRestClientConfig {
     private final GithubUnauthorizedInterceptor unauthorizedInterceptor;
     private final DebugInterceptor debugInterceptor;
     private final GithubProperties githubProperties;
+    private final RateLimitingInterceptor rateLimitingInterceptor;
 
     public GithubRestClientConfig(
             GithubUnauthorizedInterceptor unauthorizedInterceptor,
             DebugInterceptor debugInterceptor,
-            GithubProperties githubProperties
+            GithubProperties githubProperties,
+            RateLimitingInterceptor rateLimitingInterceptor
     ) {
         this.unauthorizedInterceptor = unauthorizedInterceptor;
         this.debugInterceptor = debugInterceptor;
         this.githubProperties = githubProperties;
+        this.rateLimitingInterceptor = rateLimitingInterceptor;
     }
 
     @Bean
@@ -30,9 +34,10 @@ public class GithubRestClientConfig {
             GithubAuthTokenInterceptor githubAuthTokenInterceptor
     ) {
         return this.getBasicRestClient()
-                .requestInterceptors(interceptors ->
-                        interceptors.add(githubAuthTokenInterceptor)
-                )
+                .requestInterceptors(interceptors -> {
+                    interceptors.add(githubAuthTokenInterceptor);
+                    interceptors.add(rateLimitingInterceptor);
+                })
                 .build();
     }
 

@@ -39,7 +39,7 @@ public class SelfHostedRunnerCountsExporter implements ScheduledExporter {
     ) {
         this.getAllSelfHostedRunnersUseCase = getAllSelfHostedRunnersUseCase;
         this.registry = registry;
-        this.cronExpression = schedulingProperties.selfHostedRunnersInterval();
+        this.cronExpression = schedulingProperties.selfHostedRunners();
 
         allStateCombinations((os, status) -> {
             var integer = new AtomicInteger(0);
@@ -60,7 +60,7 @@ public class SelfHostedRunnerCountsExporter implements ScheduledExporter {
     }
 
     private void retrieveAndExportSelfHostedRunnerCounts() {
-        LOGGER.info("SelfHostedRunnerCounts scheduled task is running.");
+        LOGGER.trace("SelfHostedRunnerCounts scheduled task is running.");
         List<SelfHostedRunner> selfHostedRunners = this.getAllSelfHostedRunnersUseCase.getAllSelfHostedRunners();
         var runnerStates = this.countSelfHostedRunnerStates(selfHostedRunners);
 
@@ -68,7 +68,7 @@ public class SelfHostedRunnerCountsExporter implements ScheduledExporter {
             this.gauges.get(entry.getKey()).set(entry.getValue());
         }
 
-        LOGGER.debug("SelfHostedRunnerCounts scheduled task finished.");
+        LOGGER.trace("SelfHostedRunnerCounts scheduled task finished.");
     }
 
     private Map<SelfHostedRunnerState, Integer> countSelfHostedRunnerStates(

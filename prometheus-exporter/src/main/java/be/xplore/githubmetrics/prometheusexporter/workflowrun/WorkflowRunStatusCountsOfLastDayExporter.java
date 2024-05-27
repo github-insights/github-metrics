@@ -11,7 +11,6 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -37,12 +36,12 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
     ) {
         this.getAllWorkflowRunsOfLastDayUseCase = getAllWorkflowRunsOfLastDayUseCase;
         this.registry = registry;
-        this.cronExpression = schedulingProperties.workflowRunsInterval();
+        this.cronExpression = schedulingProperties.workflowRuns();
         this.initWorkflowStatusCountsGauges();
     }
 
     private void retrieveAndExportLastDaysWorkflowRunStatusCounts() {
-        LOGGER.info("LastDaysWorkflowRunStatusCounts scheduled task is running.");
+        LOGGER.trace("LastDaysWorkflowRunStatusCounts scheduled task is running.");
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();
 
@@ -53,7 +52,7 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
                 this.statusCountsGauges.get(status).set(count)
         );
 
-        LOGGER.debug(
+        LOGGER.trace(
                 "LastDaysWorkflowRunStatusCounts scheduled task has finished with {} different Status.",
                 workflowRunsStatusCountsMap.size()
         );
@@ -98,7 +97,6 @@ public class WorkflowRunStatusCountsOfLastDayExporter implements ScheduledExport
     }
 
     @Override
-    @CacheEvict(value = "WorkflowRuns", allEntries = true, beforeInvocation = true)
     @FeatureAssociation(value = Features.EXPORTER_WORKFLOW_RUNS_FEATURE)
     public void run() {
         this.retrieveAndExportLastDaysWorkflowRunStatusCounts();

@@ -1,11 +1,16 @@
 package be.xplore.githubmetrics.githubadapter;
 
+import be.xplore.githubmetrics.domain.apistate.ApiRateLimitState;
+import be.xplore.githubmetrics.domain.apistate.ApiRateLimitStatus;
+import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
+import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitResetAwaitScheduler;
+import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitingInterceptor;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +21,35 @@ import java.time.format.DateTimeFormatter;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.mockito.Mockito.mock;
 
 public class TestUtility {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtility.class);
     private static final DebugInterceptor DEBUG_INTERCEPTOR = new DebugInterceptor();
 
+    public static CacheEvictionProperties getCacheEvictionProperties() {
+        var state = new CacheEvictionProperties.EvictionState("", ApiRateLimitStatus.OK);
+        return new CacheEvictionProperties(
+                state, state, state, state, state, state
+        );
+    }
+
+    public static RateLimitingInterceptor getRateLimitingInterceptor() {
+        return new RateLimitingInterceptor(
+                getNoAuthGithubProperties(8080),
+                mock(RateLimitResetAwaitScheduler.class),
+                getApiRateLimitState()
+        );
+    }
+
+    public static ApiRateLimitState getApiRateLimitState() {
+        return new ApiRateLimitState(0.9, 1.2, 0.9, 0.7, 0.5);
+    }
+
     public static GithubAuthTokenInterceptor getAuthTokenInterceptor(GithubProperties githubProperties) {
-        var restClientConfig = new GithubRestClientConfig(new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR, githubProperties);
+        var restClientConfig = new GithubRestClientConfig(
+                new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR, githubProperties, getRateLimitingInterceptor()
+        );
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
         var jwtRestClient = restClientConfig.tokenFetcherRestClient(
                 jwtInterceptor
@@ -56,7 +83,8 @@ public class TestUtility {
                         "123",
                         "123456",
                         "pem-key"
-                )
+                ),
+                getRateLimitingProperties()
         );
     }
 
@@ -68,7 +96,14 @@ public class TestUtility {
                         "123",
                         "123456",
                         validPemKey()
-                )
+                ),
+                getRateLimitingProperties()
+        );
+    }
+
+    public static GithubProperties.RateLimiting getRateLimitingProperties() {
+        return new GithubProperties.RateLimiting(
+                60, 0.9, 1.2, 0.9, 0.7, 0.5
         );
     }
 

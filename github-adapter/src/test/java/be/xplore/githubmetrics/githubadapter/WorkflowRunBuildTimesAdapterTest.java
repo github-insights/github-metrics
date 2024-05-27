@@ -65,7 +65,11 @@ class WorkflowRunBuildTimesAdapterTest {
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var tokenRestClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
 
-        buildTimesAdapter = new WorkflowRunBuildTimesAdapter(githubProperties, tokenRestClient);
+        buildTimesAdapter = new WorkflowRunBuildTimesAdapter(
+                githubProperties, tokenRestClient,
+                TestUtility.getCacheEvictionProperties(),
+                TestUtility.getApiRateLimitState()
+        );
 
         this.workflowRun = new WorkflowRun(
                 8_828_175_949L,

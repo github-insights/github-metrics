@@ -12,7 +12,6 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,12 +44,12 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
         this.getAllWorkflowRunBuildTimesOfLastDayUseCase
                 = getAllWorkflowRunBuildTimesOfLastDayUseCase;
         this.registry = registry;
-        this.cronExpression = schedulingProperties.workflowRunBuildTimesInterval();
+        this.cronExpression = schedulingProperties.workflowRunBuildTimes();
         this.initWorkflowBuildTimesGauges();
     }
 
     private void retrieveAndExportLastDaysWorkflowRunBuildTimes() {
-        LOGGER.info("LastDaysWorkflowRunBuildTimes scheduled task is running.");
+        LOGGER.trace("LastDaysWorkflowRunBuildTimes scheduled task is running.");
         List<WorkflowRun> workflowRuns =
                 getAllWorkflowRunBuildTimesOfLastDayUseCase.getAllWorkflowRunBuildTime();
 
@@ -61,7 +60,7 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
                 this.gaugesMap.get(AVERAGE_GAUGE_NAME).get(status).set(average)
         );
 
-        LOGGER.debug("LastDaysWorkflowRunBuildTimes scheduled task finished.");
+        LOGGER.trace("LastDaysWorkflowRunBuildTimes scheduled task finished.");
     }
 
     private Map<WorkflowRunStatus, Integer> getAverageBuildTimes(
@@ -159,7 +158,6 @@ public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter
     }
 
     @Override
-    @CacheEvict(value = "WorkflowRunBuildTimes", allEntries = true, beforeInvocation = true)
     @FeatureAssociation(value = Features.EXPORTER_WORKFLOW_RUN_BUILD_TIMES_FEATURE)
     public void run() {
         this.retrieveAndExportLastDaysWorkflowRunBuildTimes();
