@@ -4,7 +4,6 @@ import be.xplore.githubmetrics.domain.workflowrun.GetAllWorkflowRunBuildTimesOfL
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import be.xplore.githubmetrics.prometheusexporter.ScheduledExporter;
-import be.xplore.githubmetrics.prometheusexporter.StartupExporter;
 import be.xplore.githubmetrics.prometheusexporter.config.SchedulingProperties;
 import be.xplore.githubmetrics.prometheusexporter.features.FeatureAssociation;
 import be.xplore.githubmetrics.prometheusexporter.features.Features;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 import static java.lang.Math.round;
 
 @Service
-public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter, StartupExporter {
+public class WorkflowRunBuildTimesOfLastDayExporter implements ScheduledExporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunBuildTimesOfLastDayExporter.class);
     private static final String TOTAL_GAUGE_NAME = "workflow_runs_total_build_times";
     private static final String AVERAGE_GAUGE_NAME = "workflow_runs_average_build_times";
