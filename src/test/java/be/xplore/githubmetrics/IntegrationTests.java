@@ -4,6 +4,7 @@ import be.xplore.githubmetrics.prometheusexporter.job.JobsLabelCountsOfLastDayEx
 import be.xplore.githubmetrics.prometheusexporter.pullrequest.PullRequestExporter;
 import be.xplore.githubmetrics.prometheusexporter.repository.RepositoryCountExporter;
 import be.xplore.githubmetrics.prometheusexporter.selfhostedrunner.SelfHostedRunnerCountsExporter;
+import be.xplore.githubmetrics.prometheusexporter.workflowrun.ActiveWorkflowRunStatusCountsExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunBuildTimesOfLastDayExporter;
 import be.xplore.githubmetrics.prometheusexporter.workflowrun.WorkflowRunStatusCountsOfLastDayExporter;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -55,6 +56,9 @@ class IntegrationTests {
     private PullRequestExporter pullRequestExporter;
     @Autowired
     private SelfHostedRunnerCountsExporter selfHostedRunnerCountsExporter;
+
+    @Autowired
+    private ActiveWorkflowRunStatusCountsExporter activeWorkflowRunStatusCountsExporter;
     @Autowired
     private MockMvc mockMvc;
 
@@ -95,6 +99,12 @@ class IntegrationTests {
                                 .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                         )
+        );
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&status=requested&status=queued&status=pending&status=in_progress")
+                .willReturn(ok()
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
+                        .withBodyFile("ActiveWorkFlowRunsValidTestData.json")
+                )
         );
     }
 
@@ -194,6 +204,22 @@ class IntegrationTests {
                 .get(actuatorEndpoint)
         ).andExpect(
                 content().string(Matchers.containsString("workflow_runs{status=\"DONE\"} 2.0"))
+        );
+    }
+
+    @Test
+    void retrieveAndExportActiveWorkflowRunsShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
+        this.activeWorkflowRunStatusCountsExporter.run();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(Matchers.containsString("active_workflow_runs{status=\"IN_PROGRESS\"} 1.0"))
+        );
+        mockMvc.perform(MockMvcRequestBuilders
+                .get(actuatorEndpoint)
+        ).andExpect(
+                content().string(Matchers.containsString("active_workflow_runs{status=\"PENDING\"} 1.0"))
         );
     }
 

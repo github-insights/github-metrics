@@ -23,6 +23,7 @@ app:
         exporters:
             enable: true
             workflow_runs: ${EXPORTERS_SCHEDULING_WORKFLOW_RUNS:*/30 * * * * ?}
+            active_workflow_runs: ${EXPORTERS_SCHEDULING_ACTIVE_WORKFLOW_RUNS:*/30 * * * * ?}
             jobs: ${EXPORTERS_SCHEDULING_JOBS:*/30 * * * * ?}
             workflow_run_build_times: ${EXPORTERS_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:*/30 * * * * ?}
             pull_requests: ${EXPORTERS_SCHEDULING_PULL_REQUESTS:*/30 * * * * ?}
@@ -32,7 +33,10 @@ app:
             enable: true
             workflow_runs:
                 schedule: ${CACHE_EVICTION_SCHEDULING_WORKFLOW_RUNS:30 */5 * * * ?}
-                status: ${CACHE_EVICTION_WORKFLOW_RUNS_STOP_EVICTION_STATUS:}
+                status: ${CACHE_EVICTION_WORKFLOW_RUNS_STOP_EVICTION_STATUS:CONCERNING}
+            active_workflow_runs:
+                schedule: ${CACHE_EVICTION_SCHEDULING_ACTIVE_WORKFLOW_RUNS:30 * * * * ?}
+                status: ${CACHE_EVICTION_ACTIVE_WORKFLOW_RUNS_STOP_EVICTION_STATUS:}
             jobs:
                 schedule: ${CACHE_EVICTION_SCHEDULING_JOBS:0 */5 * * * ?}
                 status: ${CACHE_EVICTION_JOBS_STOP_EVICTION_STATUS:CONCERNING}
@@ -65,6 +69,8 @@ togglz:
             enabled: ${EXPORTER_JOBS_FEATURE:false}
         EXPORTER_WORKFLOW_RUNS_FEATURE:
             enabled: ${EXPORTER_WORKFLOW_RUNS_FEATURE:false}
+        EXPORTER_ACTIVE_WORKFLOW_RUNS_FEATURE:
+            enabled: ${EXPORTER_ACTIVE_WORKFLOW_RUNS_FEATURE:false}
         EXPORTER_SELF_HOSTED_RUNNERS_FEATURE:
             enabled: ${EXPORTER_SELF_HOSTED_RUNNERS_FEATURE:false}
         EXPORTER_REPOSITORIES_FEATURE:

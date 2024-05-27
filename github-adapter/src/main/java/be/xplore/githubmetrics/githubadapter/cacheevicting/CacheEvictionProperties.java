@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.scheduling.cacheeviction")
 public record CacheEvictionProperties(
         EvictionState workflowRuns,
+        EvictionState activeWorkflowRuns,
         EvictionState workflowRunBuildTimes,
         EvictionState jobs,
         EvictionState pullRequests,

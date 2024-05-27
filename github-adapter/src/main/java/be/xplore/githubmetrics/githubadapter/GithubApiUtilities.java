@@ -29,13 +29,13 @@ public class GithubApiUtilities {
 
     public Function<UriBuilder, URI> setPathAndParameters(
             String path,
-            Map<String, String> parameters
+            Map<String, List<String>> parameters
     ) {
         return uriBuilder -> {
             uriBuilder.path(path);
-            for (final var parameter : parameters.entrySet()) {
-                uriBuilder.queryParam(parameter.getKey(), parameter.getValue());
-            }
+            parameters.forEach((key, values) -> values.forEach(value ->
+                    uriBuilder.queryParam(key, value)
+            ));
             return uriBuilder.build();
         };
     }

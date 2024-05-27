@@ -30,7 +30,7 @@ public class TestUtility {
     public static CacheEvictionProperties getCacheEvictionProperties() {
         var state = new CacheEvictionProperties.EvictionState("", ApiRateLimitStatus.OK);
         return new CacheEvictionProperties(
-                state, state, state, state, state, state
+                state, state, state, state, state, state, state
         );
     }
 
