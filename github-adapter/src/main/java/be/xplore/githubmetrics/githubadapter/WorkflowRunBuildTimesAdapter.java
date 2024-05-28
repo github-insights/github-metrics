@@ -3,6 +3,7 @@ package be.xplore.githubmetrics.githubadapter;
 import be.xplore.githubmetrics.domain.apistate.ApiRateLimitState;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRun;
 import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunBuildTimesQueryPort;
+import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
@@ -44,6 +45,12 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
                 "Fetching fresh BuildTimes for WorkflowRun {} {}.",
                 workflowRun.getId(), workflowRun.getName()
         );
+
+        if (workflowRun.getStatus().equals(WorkflowRunStatus.IN_PROGRESS) ||
+                workflowRun.getStatus().equals(WorkflowRunStatus.PENDING)) {
+            LOGGER.debug("Workflow Run {} is in progress or pending so has no build time", workflowRun.getId());
+            return 0;
+        }
 
         var buildTime = this.restClient.get()
                 .uri(this.getBuildTimesApiPath(workflowRun))
