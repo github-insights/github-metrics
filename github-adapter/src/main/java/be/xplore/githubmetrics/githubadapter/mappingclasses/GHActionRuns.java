@@ -14,4 +14,12 @@ public record GHActionRuns(
                 workflowRun.getWorkFlowRun(repository)
         ).toList();
     }
+
+    public List<WorkflowRun> getActiveWorkflowRuns(Repository repository) {
+        return this.workflow_runs.stream().filter(
+                GHActionRun::isActive
+        ).map(workflowRun ->
+                workflowRun.getWorkFlowRun(repository)
+        ).toList();
+    }
 }

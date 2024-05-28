@@ -104,7 +104,7 @@ class IntegrationTests {
                                 .withBodyFile("WorkFlowRunsValidTestData.json")
                         )
         );
-        stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&status=requested&status=queued&status=pending&status=in_progress")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100")
                 .willReturn(ok()
                         .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("ActiveWorkFlowRunsValidTestData.json")

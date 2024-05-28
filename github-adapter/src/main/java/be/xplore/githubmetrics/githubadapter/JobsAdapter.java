@@ -62,8 +62,8 @@ public class JobsAdapter implements JobsQueryPort, ScheduledCacheEvictionPort {
                 workflowRun.getId(), workflowRun.getName()
         );
 
-        var parameters = new HashMap<String, List<String>>();
-        parameters.put("per_page", List.of("100"));
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
 
         ResponseEntity<GHWorkflowRunJobs> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
