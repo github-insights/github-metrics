@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 @Service
 public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryPort, ScheduledCacheEvictionPort {
@@ -52,10 +53,10 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
             return 0;
         }
 
-        var buildTime = this.restClient.get()
-                .uri(this.getBuildTimesApiPath(workflowRun))
-                .retrieve()
-                .body(GHActionRunTiming.class)
+        var buildTime = Objects.requireNonNull(this.restClient.get()
+                        .uri(this.getBuildTimesApiPath(workflowRun))
+                        .retrieve()
+                        .body(GHActionRunTiming.class))
                 .run_duration_ms();
 
         LOGGER.debug(
