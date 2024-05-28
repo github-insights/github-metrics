@@ -60,12 +60,11 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
     public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
         LOGGER.debug("Fetching fresh WorkflowRuns for Repository {} {}.",
                 repository.getId(), repository.getName());
-        var parameters = new HashMap<String, List<String>>();
-        parameters.put("per_page", List.of("100"));
-        parameters.put(
-                "created",
-                List.of(">=" + LocalDate.now().minusDays(1)
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE)));
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
+        parameters.put("created",
+                ">=" + LocalDate.now().minusDays(1)
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE));
 
         ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(

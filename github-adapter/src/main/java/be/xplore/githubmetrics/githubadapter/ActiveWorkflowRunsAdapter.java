@@ -12,14 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, ScheduledCacheEvictionPort {
@@ -60,21 +59,16 @@ public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, S
     @Cacheable(ACTIVE_WORKFLOW_RUNS_CACHE_NAME)
     public List<WorkflowRun> getActiveWorkflowRuns(Repository repository) {
         LOGGER.info("Fetching fresh Active WorkflowRuns for Repository {}.", repository.getId());
-        var parameters = getParameterMap();
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
 
-        ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
+        var workflowRuns = Objects.requireNonNull(this.restClient.get()
                 .uri(utilities.setPathAndParameters(
                         this.getWorkflowRunsApiPath(repository.getName()),
                         parameters
                 ))
                 .retrieve()
-                .toEntity(GHActionRuns.class);
-
-        var workflowRuns = this.utilities.followPaginationLink(
-                responseEntity,
-                actionRun -> actionRun.getWorkFlowRuns(repository),
-                GHActionRuns.class
-        );
+                .body(GHActionRuns.class)).getActiveWorkflowRuns(repository);
 
         LOGGER.debug(
                 "Response for the Active WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",
@@ -82,16 +76,6 @@ public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, S
                 workflowRuns.size()
         );
         return workflowRuns;
-    }
-
-    private Map<String, List<String>> getParameterMap() {
-        var parameters = new HashMap<String, List<String>>();
-        parameters.put("per_page", List.of("100"));
-        parameters.put(
-                "status",
-                List.of("requested", "queued", "pending", "in_progress"));
-
-        return parameters;
     }
 
     @Override

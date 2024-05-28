@@ -91,8 +91,8 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
     private List<SelfHostedRunner> fetchSelfHostedRunners(
             String link
     ) {
-        var parameters = new HashMap<String, List<String>>();
-        parameters.put("per_page", List.of("100"));
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
         ResponseEntity<GHSelfHostedRunners> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
                         link, parameters
