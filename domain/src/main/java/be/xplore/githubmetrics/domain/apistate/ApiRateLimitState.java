@@ -1,5 +1,8 @@
 package be.xplore.githubmetrics.domain.apistate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -7,6 +10,8 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 public class ApiRateLimitState {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiRateLimitState.class);
+
     private final double rateLimitBuffer;
     private final double criticalLimit;
     private final double warningLimit;
@@ -43,13 +48,24 @@ public class ApiRateLimitState {
             this.idealRequestsPerSecond = idealRequestsPerSecond;
 
             var newStatus = this.getNewAbsoluteStatus();
-
+            LOGGER.trace(
+                    "Current status is {} and possible new Status is {}.",
+                    currentStatus, newStatus
+            );
             if (newStatus.isBetterThen(currentStatus)) {
-                this.setActualStatus(currentStatus.getNextBest());
+                this.lowerStatusByOne();
             } else {
                 this.setActualStatus(newStatus);
             }
+
+            LOGGER.debug("New Status is {}.", this.getStatus());
         });
+    }
+
+    public void lowerStatusByOne() {
+        this.status.ifPresent(currentStatus ->
+                this.setActualStatus(currentStatus.getNextBest())
+        );
     }
 
     public ApiRateLimitStatus getNewAbsoluteStatus() {

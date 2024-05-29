@@ -22,7 +22,7 @@ public class FeaturesAspect {
         if (featureAssociation.value().isActive()) {
             return joinPoint.proceed();
         } else {
-            LOGGER.info("Feature {} is not enabled!", featureAssociation.value().name());
+            LOGGER.debug("Feature {} is not enabled!", featureAssociation.value().name());
             return null;
         }
     }

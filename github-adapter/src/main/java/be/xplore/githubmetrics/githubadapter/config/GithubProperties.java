@@ -24,6 +24,7 @@ public record GithubProperties(
     }
 
     public record RateLimiting(
+            String stateControlCheckSchedule,
             long secondsBetweenStateRecalculations,
             double rateLimitBuffer,
             double criticalLimit,
