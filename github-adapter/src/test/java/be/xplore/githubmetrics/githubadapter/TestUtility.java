@@ -117,7 +117,7 @@ public class TestUtility {
 
     public static GithubProperties.RateLimiting getRateLimitingProperties() {
         return new GithubProperties.RateLimiting(
-                60, 0.9, 1.2, 0.9, 0.7, 0.5
+                "0 */5 * * * ?", 60, 0.9, 1.2, 0.9, 0.7, 0.5
         );
     }
 

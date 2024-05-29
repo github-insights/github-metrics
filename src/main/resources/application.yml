@@ -2,8 +2,6 @@ logging:
     level:
         be.xplore.githubmetrics:
             ROOT: ${LOGGING_LEVEL:INFO}
-            githubadapter.config: TRACE
-
 management:
     endpoints:
         web:
@@ -60,6 +58,7 @@ app:
         url: https://api.github.com
         org: "github-insights"
         ratelimiting:
+            state_control_check_schedule: ${APP_GITHUB_RATELIMITING_STATE_CONTROL_CHECK_SCHEDULE:0 */5 * * * ?}
             seconds_between_state_recalculations: ${APP_GITHUB_RATELIMITING_SECONDS_BETWEEN_STATE_RECALCULATIONS:60}
             rate_limit_buffer: ${APP_GHITHUB_RATELIMIT_BUFFER:0.9}
             critical_limit: ${APP_GITHUB_RATELIMITING_CRITICAL_LIMIT:1.2}

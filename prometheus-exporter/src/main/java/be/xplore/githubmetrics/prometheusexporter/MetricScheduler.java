@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
@@ -20,30 +17,18 @@ import java.util.concurrent.ScheduledFuture;
         value = "app.scheduling.exporters.enable", havingValue = "true", matchIfMissing = true
 )
 @Service
-public class MetricScheduler implements SchedulingConfigurer {
+public class MetricScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricScheduler.class);
     private final Map<String, ScheduledFuture<?>> scheduledTasksMap = new HashMap<>();
     private final TaskScheduler taskScheduler;
-    private final List<ScheduledExporter> scheduledExporters;
 
     public MetricScheduler(
             @Qualifier("prometheusExporterTaskScheduler") TaskScheduler taskScheduler,
             List<ScheduledExporter> scheduledExporters
     ) {
         this.taskScheduler = taskScheduler;
-        this.scheduledExporters = scheduledExporters;
-    }
-
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setPoolSize(5);
-        threadPoolTaskScheduler.setThreadNamePrefix("metric-scheduler");
-        threadPoolTaskScheduler.initialize();
-        taskRegistrar.setTaskScheduler(threadPoolTaskScheduler);
-
-        this.scheduledExporters.forEach(exporter ->
+        scheduledExporters.forEach(exporter ->
                 this.addTask(exporter.getClass(), exporter::run, exporter.cronExpression())
         );
     }

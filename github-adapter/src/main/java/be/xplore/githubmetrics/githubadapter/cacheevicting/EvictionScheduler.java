@@ -7,9 +7,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +20,12 @@ import java.util.concurrent.ScheduledFuture;
         value = "app.scheduling.cacheeviction.enable", havingValue = "true", matchIfMissing = true
 )
 @Service
-public class EvictionScheduler implements SchedulingConfigurer {
+public class EvictionScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EvictionScheduler.class);
     private final Map<String, ScheduledFuture<?>> scheduledTasksMap = new HashMap<>();
     private final TaskScheduler taskScheduler;
     private final CacheManager cacheManager;
-    private final List<ScheduledCacheEvictionPort> cacheEvictionPorts;
 
     public EvictionScheduler(
             @Qualifier("githubAdapterTaskScheduler") TaskScheduler taskScheduler,
@@ -38,17 +34,8 @@ public class EvictionScheduler implements SchedulingConfigurer {
     ) {
         this.taskScheduler = taskScheduler;
         this.cacheManager = cacheManager;
-        this.cacheEvictionPorts = cacheEvictionPorts;
-    }
 
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setPoolSize(5);
-        threadPoolTaskScheduler.setThreadNamePrefix("cache-eviction-scheduler");
-        threadPoolTaskScheduler.initialize();
-
-        this.cacheEvictionPorts.forEach(port -> {
+        cacheEvictionPorts.forEach(port -> {
             LOGGER.trace(
                     "Adding scheduled eviction task for {} on startup",
                     port.cacheName()
