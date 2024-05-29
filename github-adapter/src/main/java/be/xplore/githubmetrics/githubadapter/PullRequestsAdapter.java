@@ -15,11 +15,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
-import java.text.MessageFormat;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCacheEvictionPort {
@@ -46,14 +48,6 @@ public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCache
         this.rateLimitState = rateLimitState;
     }
 
-    private String getPullRequestsApiPath(String repoName) {
-        return MessageFormat.format(
-                "/repos/{0}/{1}/pulls",
-                this.githubProperties.org(),
-                repoName
-        );
-    }
-
     @Cacheable(PULL_REQUESTS_CACHE_NAME)
     @Override
     public List<PullRequest> getAllPullRequestsForRepository(Repository repository) {
@@ -61,15 +55,10 @@ public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCache
                 "Fetching fresh PullRequests for Repository {} {}",
                 repository.getId(), repository.getName()
         );
-        var parameters = new HashMap<String, String>();
-        parameters.put("state", "all");
-        parameters.put("per_page", "100");
 
         ResponseEntity<GHPullRequest[]> responseEntity = this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        this.getPullRequestsApiPath(repository.getName()),
-                        parameters
-                ))
+                .uri(pullRequestsUri(repository))
+                .header("path", GHPullRequest.PATH_ALL)
                 .retrieve()
                 .toEntity(GHPullRequest[].class);
 
@@ -86,6 +75,20 @@ public class PullRequestsAdapter implements PullRequestQueryPort, ScheduledCache
         );
 
         return pullRequests;
+    }
+
+    private Function<UriBuilder, URI> pullRequestsUri(Repository repository) {
+        List<Object> pathVars = List.of(
+                this.githubProperties.org(), repository.getName()
+        );
+        var parameters = new HashMap<String, String>();
+        parameters.put("state", "all");
+        parameters.put("per_page", "100");
+
+        return utilities.setPathAndParameters(
+                GHPullRequest.PATH_ALL,
+                pathVars, parameters
+        );
     }
 
     @Override

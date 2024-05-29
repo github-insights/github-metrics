@@ -68,7 +68,8 @@ class WorkflowRunBuildTimesAdapterTest {
         buildTimesAdapter = new WorkflowRunBuildTimesAdapter(
                 githubProperties, tokenRestClient,
                 TestUtility.getCacheEvictionProperties(),
-                TestUtility.getApiRateLimitState()
+                TestUtility.getApiRateLimitState(),
+                new GithubApiUtilities(tokenRestClient)
         );
 
         this.workflowRun = new WorkflowRun(

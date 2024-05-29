@@ -12,6 +12,7 @@ public record GHPullRequest(
         String closed_at,
         String merged_at
 ) {
+    public static final String PATH_ALL = "/repos/{org}/{repo}/pulls";
 
     private ZonedDateTime getZonedDateTime(String date) {
         return Instant.parse(date).atZone(ZoneId.of("Etc/UTC"));

@@ -15,12 +15,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
-import java.text.MessageFormat;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCacheEvictionPort {
@@ -47,30 +49,17 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
         this.evictionProperties = evictionProperties;
     }
 
-    private String getWorkflowRunsApiPath(String repoName) {
-        return MessageFormat.format(
-                "repos/{0}/{1}/actions/runs",
-                this.githubProperties.org(),
-                repoName
-        );
-    }
-
     @Cacheable(WORKFLOW_RUNS_CACHE_NAME)
     @Override
     public List<WorkflowRun> getLastDaysWorkflowRuns(Repository repository) {
-        LOGGER.debug("Fetching fresh WorkflowRuns for Repository {} {}.",
-                repository.getId(), repository.getName());
-        var parameters = new HashMap<String, String>();
-        parameters.put("per_page", "100");
-        parameters.put("created",
-                ">=" + LocalDate.now().minusDays(1)
-                        .format(DateTimeFormatter.ISO_LOCAL_DATE));
+        LOGGER.debug(
+                "Fetching fresh WorkflowRuns for Repository {} {}.",
+                repository.getId(), repository.getName()
+        );
 
         ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        this.getWorkflowRunsApiPath(repository.getName()),
-                        parameters
-                ))
+                .uri(workflowRunsUri(repository))
+                .header("path", GHActionRuns.PATH)
                 .retrieve()
                 .toEntity(GHActionRuns.class);
 
@@ -85,6 +74,21 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
                 repository.getId(), workflowRuns.size()
         );
         return workflowRuns;
+    }
+
+    private Function<UriBuilder, URI> workflowRunsUri(Repository repository) {
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
+        parameters.put("created", ">=" + LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+        List<Object> pathVars = List.of(
+                this.githubProperties.org(),
+                repository.getName()
+        );
+        return utilities.setPathAndParameters(
+                GHActionRuns.PATH,
+                pathVars, parameters
+        );
     }
 
     @Override

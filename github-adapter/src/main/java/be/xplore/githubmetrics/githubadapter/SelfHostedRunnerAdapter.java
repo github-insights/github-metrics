@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -56,10 +55,10 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
 
     private List<SelfHostedRunner> getForOrganization() {
         LOGGER.debug("Fetching fresh SelfHostedRunners for Organization.");
-        var selfHostedRunners = this.fetchSelfHostedRunners(MessageFormat.format(
-                "orgs/{0}/actions/runners",
-                this.githubProperties.org()
-        ));
+        var selfHostedRunners = this.fetchSelfHostedRunners(
+                GHSelfHostedRunners.PATH_ORG,
+                List.of(this.githubProperties.org())
+        );
         LOGGER.debug(
                 "Response for the SelfHostedRunner fetch of Organization returned {} SelfHostedRunners.",
                 selfHostedRunners.size()
@@ -74,11 +73,10 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
 
     private List<SelfHostedRunner> getForRepository(Repository repository) {
         LOGGER.debug("Fetching fresh SelfHostedRunners for Repository {}.", repository.getName());
-        var selfHostedRunners = this.fetchSelfHostedRunners(MessageFormat.format(
-                "repos/{0}/{1}/actions/runners",
-                this.githubProperties.org(),
-                repository.getName()
-        ));
+        var selfHostedRunners = this.fetchSelfHostedRunners(
+                GHSelfHostedRunners.PATH_REPO,
+                List.of(this.githubProperties.org(), repository.getName())
+        );
         LOGGER.debug(
                 "Response for the SelfHostedRunner fetch of Repository {} returned {} SelfHostedRunners.",
                 repository.getName(),
@@ -89,14 +87,16 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
     }
 
     private List<SelfHostedRunner> fetchSelfHostedRunners(
-            String link
+            String link, List<Object> pathVars
     ) {
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
+
         ResponseEntity<GHSelfHostedRunners> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
-                        link, parameters
+                        link, pathVars, parameters
                 ))
+                .header("path", link)
                 .retrieve()
                 .toEntity(GHSelfHostedRunners.class);
 

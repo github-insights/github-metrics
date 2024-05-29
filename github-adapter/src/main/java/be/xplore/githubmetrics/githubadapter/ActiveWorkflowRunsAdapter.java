@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
-import java.text.MessageFormat;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 @Service
 public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, ScheduledCacheEvictionPort {
@@ -47,26 +49,14 @@ public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, S
         this.rateLimitState = rateLimitState;
     }
 
-    private String getWorkflowRunsApiPath(String repoName) {
-        return MessageFormat.format(
-                "repos/{0}/{1}/actions/runs",
-                this.githubProperties.org(),
-                repoName
-        );
-    }
-
     @Override
     @Cacheable(ACTIVE_WORKFLOW_RUNS_CACHE_NAME)
     public List<WorkflowRun> getActiveWorkflowRuns(Repository repository) {
         LOGGER.info("Fetching fresh Active WorkflowRuns for Repository {}.", repository.getId());
-        var parameters = new HashMap<String, String>();
-        parameters.put("per_page", "100");
 
         var workflowRuns = Objects.requireNonNull(this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        this.getWorkflowRunsApiPath(repository.getName()),
-                        parameters
-                ))
+                .uri(workflowRunsUri(repository))
+                .header("path", GHActionRuns.PATH)
                 .retrieve()
                 .body(GHActionRuns.class)).getActiveWorkflowRuns(repository);
 
@@ -76,6 +66,20 @@ public class ActiveWorkflowRunsAdapter implements ActiveWorkflowRunsQueryPort, S
                 workflowRuns.size()
         );
         return workflowRuns;
+    }
+
+    private Function<UriBuilder, URI> workflowRunsUri(Repository repository) {
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
+
+        List<Object> pathVars = List.of(
+                this.githubProperties.org(),
+                repository.getName()
+        );
+        return utilities.setPathAndParameters(
+                GHActionRuns.PATH,
+                pathVars, parameters
+        );
     }
 
     @Override

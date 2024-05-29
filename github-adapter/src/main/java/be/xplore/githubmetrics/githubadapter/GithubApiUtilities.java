@@ -23,8 +23,31 @@ public class GithubApiUtilities {
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubApiUtilities.class);
     private final RestClient restClient;
 
-    public GithubApiUtilities(@Qualifier("defaultRestClient") RestClient restClient) {
+    public GithubApiUtilities(
+            @Qualifier("defaultRestClient") RestClient restClient
+    ) {
         this.restClient = restClient;
+    }
+
+    public Function<UriBuilder, URI> setPathAndParameters(
+            String path,
+            List<Object> uriVariables
+    ) {
+        return uriBuilder ->
+                uriBuilder.path(path)
+                        .build(uriVariables.toArray(new Object[0]));
+    }
+
+    public Function<UriBuilder, URI> setPathAndParameters(
+            String path,
+            List<Object> uriVariables,
+            Map<String, String> parameters
+    ) {
+        return uriBuilder -> {
+            uriBuilder.path(path);
+            parameters.forEach(uriBuilder::queryParam);
+            return uriBuilder.build(uriVariables.toArray(new Object[0]));
+        };
     }
 
     public Function<UriBuilder, URI> setPathAndParameters(
