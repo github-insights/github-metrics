@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCacheEvictionPort {
     private static final String REPOSITORIES_CACHE_NAME = "Repositories";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoriesAdapter.class);
 
     private final RestClient restClient;
@@ -52,9 +53,10 @@ public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCach
 
         ResponseEntity<GHRepositories> responseEntity = this.restClient.get()
                 .uri(utilities.setPathAndParameters(
-                        "/installation/repositories",
+                        GHRepositories.PATH,
                         parameters
                 ))
+                .header("path", GHRepositories.PATH)
                 .retrieve()
                 .toEntity(GHRepositories.class);
 

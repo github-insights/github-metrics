@@ -6,12 +6,14 @@ import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperti
 import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientRequestObservationConvention;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitResetAwaitScheduler;
 import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitingInterceptor;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClient;
@@ -48,7 +50,9 @@ public class TestUtility {
 
     public static GithubAuthTokenInterceptor getAuthTokenInterceptor(GithubProperties githubProperties) {
         var restClientConfig = new GithubRestClientConfig(
-                new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR, githubProperties, getRateLimitingInterceptor()
+                new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR,
+                githubProperties, getRateLimitingInterceptor(), mock(ObservationRegistry.NOOP),
+                mock(GithubRestClientRequestObservationConvention.class)
         );
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
         var jwtRestClient = restClientConfig.tokenFetcherRestClient(

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.time.ZonedDateTime;
 
 @Component
@@ -47,20 +46,17 @@ public class GithubAuthTokenInterceptor implements ClientHttpRequestInterceptor 
 
         LOGGER.debug("Access token has expired getting a new one.");
         var accessToken = this.tokenFetcherRestClient.post()
-                .uri(this.getAccessTokenApiPath())
+                .uri(uriBuilder -> uriBuilder.path(GHAppInstallationAccessToken.PATH)
+                        .build(githubProperties.application().installId())
+                )
+                .header("path", GHAppInstallationAccessToken.PATH)
                 .retrieve()
                 .body(GHAppInstallationAccessToken.class);
         assert accessToken != null;
+
         this.currentAccessToken = accessToken.token();
         this.tokenExpirationDateTime = accessToken.getActualDate();
         return this.currentAccessToken;
-    }
-
-    private String getAccessTokenApiPath() {
-        return MessageFormat.format(
-                "/app/installations/{0}/access_tokens",
-                githubProperties.application().installId()
-        );
     }
 
     private ZonedDateTime now() {

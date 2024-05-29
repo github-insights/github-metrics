@@ -4,11 +4,13 @@ import be.xplore.githubmetrics.githubadapter.TestUtility;
 import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClientRequestObservationConvention;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubJwtTokenInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubUnauthorizedInterceptor;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -44,7 +46,9 @@ class GithubAuthTokenInterceptorTest {
             new GithubUnauthorizedInterceptor(),
             new DebugInterceptor(),
             githubProperties,
-            TestUtility.getRateLimitingInterceptor()
+            TestUtility.getRateLimitingInterceptor(),
+            ObservationRegistry.NOOP,
+            mock(GithubRestClientRequestObservationConvention.class)
     );
 
     private GithubAuthTokenInterceptor authTokenInterceptor;

@@ -14,29 +14,36 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
-import java.text.MessageFormat;
+import java.net.URI;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 @Service
 public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryPort, ScheduledCacheEvictionPort {
+
     private static final String WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME = "WorkflowRunBuildTimes";
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunBuildTimesAdapter.class);
     private final GithubProperties githubProperties;
     private final RestClient restClient;
     private final CacheEvictionProperties evictionProperties;
     private final ApiRateLimitState rateLimitState;
+    private final GithubApiUtilities utilities;
 
     public WorkflowRunBuildTimesAdapter(
             GithubProperties githubProperties,
             @Qualifier("defaultRestClient") RestClient restClient,
             CacheEvictionProperties evictionProperties,
-            ApiRateLimitState rateLimitState
+            ApiRateLimitState rateLimitState,
+            GithubApiUtilities utilities
     ) {
         this.githubProperties = githubProperties;
         this.restClient = restClient;
         this.evictionProperties = evictionProperties;
         this.rateLimitState = rateLimitState;
+        this.utilities = utilities;
     }
 
     @Cacheable(WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME)
@@ -53,10 +60,13 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
             return 0;
         }
 
-        var buildTime = Objects.requireNonNull(this.restClient.get()
-                        .uri(this.getBuildTimesApiPath(workflowRun))
-                        .retrieve()
-                        .body(GHActionRunTiming.class))
+        var buildTime = Objects.requireNonNull(
+                        this.restClient.get()
+                                .uri(buildTimesUri(workflowRun))
+                                .header("path", GHActionRunTiming.PATH)
+                                .retrieve()
+                                .body(GHActionRunTiming.class)
+                )
                 .run_duration_ms();
 
         LOGGER.debug(
@@ -68,12 +78,15 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
         return buildTime;
     }
 
-    private String getBuildTimesApiPath(WorkflowRun workflowRun) {
-        return MessageFormat.format(
-                "repos/{0}/{1}/actions/runs/{2,number,#}/timing",
+    private Function<UriBuilder, URI> buildTimesUri(WorkflowRun workflowRun) {
+        List<Object> uriVars = List.of(
                 this.githubProperties.org(),
                 workflowRun.getRepository().getName(),
                 workflowRun.getId()
+        );
+        return this.utilities.setPathAndParameters(
+                GHActionRunTiming.PATH,
+                uriVars
         );
     }
 

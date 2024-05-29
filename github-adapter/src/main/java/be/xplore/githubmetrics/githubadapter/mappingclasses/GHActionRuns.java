@@ -9,6 +9,8 @@ public record GHActionRuns(
         int total_count,
         List<GHActionRun> workflow_runs
 ) {
+    public static final String PATH = "repos/{org}/{repo}/actions/runs";
+
     public List<WorkflowRun> getWorkFlowRuns(Repository repository) {
         return this.workflow_runs.stream().map(workflowRun ->
                 workflowRun.getWorkFlowRun(repository)

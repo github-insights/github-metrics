@@ -8,6 +8,8 @@ import java.util.List;
 public record GHRepositories(
         List<GHRepository> repositories
 ) {
+    public static final String PATH = "/installation/repositories";
+
     public List<Repository> getRepositories() {
         List<Repository> repositoryList = new ArrayList<>();
         repositories.forEach(repository -> repositoryList.add(repository.getRepository()));

@@ -15,10 +15,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
-import java.text.MessageFormat;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 @Component
 public class JobsAdapter implements JobsQueryPort, ScheduledCacheEvictionPort {
@@ -45,15 +47,6 @@ public class JobsAdapter implements JobsQueryPort, ScheduledCacheEvictionPort {
         this.rateLimitState = rateLimitState;
     }
 
-    private String getJobsApiPath(String repoName, long workflowRunId) {
-        return MessageFormat.format(
-                "repos/{0}/{1}/actions/runs/{2,number,#}/jobs",
-                this.githubProperties.org(),
-                repoName,
-                workflowRunId
-        );
-    }
-
     @Cacheable(JOBS_CACHE_NAME)
     @Override
     public List<Job> getAllJobsForWorkflowRun(WorkflowRun workflowRun) {
@@ -62,14 +55,9 @@ public class JobsAdapter implements JobsQueryPort, ScheduledCacheEvictionPort {
                 workflowRun.getId(), workflowRun.getName()
         );
 
-        var parameters = new HashMap<String, String>();
-        parameters.put("per_page", "100");
-
         ResponseEntity<GHWorkflowRunJobs> responseEntity = this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        getJobsApiPath(workflowRun.getRepository().getName(), workflowRun.getId()),
-                        parameters
-                ))
+                .uri(jobsUri(workflowRun))
+                .header("path", GHWorkflowRunJobs.PATH)
                 .retrieve()
                 .toEntity(GHWorkflowRunJobs.class);
 
@@ -85,6 +73,22 @@ public class JobsAdapter implements JobsQueryPort, ScheduledCacheEvictionPort {
                 jobs.size()
         );
         return jobs;
+    }
+
+    private Function<UriBuilder, URI> jobsUri(WorkflowRun workflowRun) {
+        var parameters = new HashMap<String, String>();
+        parameters.put("per_page", "100");
+
+        List<Object> pathVars = List.of(
+                this.githubProperties.org(),
+                workflowRun.getRepository().getName(),
+                workflowRun.getId()
+        );
+
+        return utilities.setPathAndParameters(
+                GHWorkflowRunJobs.PATH,
+                pathVars, parameters
+        );
     }
 
     @Override
