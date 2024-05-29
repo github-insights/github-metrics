@@ -102,7 +102,7 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
 
         return this.utilities.followPaginationLink(
                 responseEntity,
-                GHSelfHostedRunners::getRunners,
+                ghSelfHostedRunners -> ghSelfHostedRunners.getRunners(this.githubProperties.parsing().selfHostedRunnerOsKeywords()),
                 GHSelfHostedRunners.class
         );
     }

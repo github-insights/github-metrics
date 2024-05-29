@@ -88,7 +88,12 @@ public class TestUtility {
                         "123456",
                         "pem-key"
                 ),
-                getRateLimitingProperties()
+                getRateLimitingProperties(),
+                new GithubProperties.Parsing(
+                        new GithubProperties.Parsing.SelfHostedRunnerOsKeywords(
+                                "", "", "vmapple"
+                        )
+                )
         );
     }
 
@@ -101,7 +106,12 @@ public class TestUtility {
                         "123456",
                         validPemKey()
                 ),
-                getRateLimitingProperties()
+                getRateLimitingProperties(),
+                new GithubProperties.Parsing(
+                        new GithubProperties.Parsing.SelfHostedRunnerOsKeywords(
+                                "", "", "vmapple"
+                        )
+                )
         );
     }
 

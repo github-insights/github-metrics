@@ -64,9 +64,7 @@ public class GithubRestClientRequestObservationConvention implements ClientReque
             return out;
         }).orElse("");
 
-        var val = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, statusCode);
-        LOGGER.error("{}", val);
-        return val;
+        return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, statusCode);
     }
 
 }
