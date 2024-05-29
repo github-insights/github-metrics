@@ -42,8 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 class IntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
+    private static final String ACTUATOR_ENDPOINT = "/actuator/prometheus";
     private static WireMockServer wireMockServer;
-    private final String actuatorEndpoint = "/actuator/prometheus";
     @Value("classpath:__files/PullRequestsValidData.json")
     private Resource pullRequestJson;
     @Autowired
@@ -172,7 +172,7 @@ class IntegrationTests {
     void retrieveAndExportRepositoriesShouldCorrectlyDisplayOnActuatorEndpoint() throws Exception {
         this.repositoryCountExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("repositories_count{organization=\"github-insights\"} 1.0"));
     }
 
@@ -181,7 +181,7 @@ class IntegrationTests {
         this.pullRequestExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("pull_requests_count_of_last_2_days{organization=\"github-insights\",state=\"OPEN\"} 1.0"));
     }
 
@@ -190,7 +190,7 @@ class IntegrationTests {
         this.jobsLabelCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("workflow_run_jobs{conclusion=\"SUCCESS\",organization=\"github-insights\",status=\"DONE\"} 2.0"));
     }
 
@@ -199,7 +199,7 @@ class IntegrationTests {
         this.workflowRunStatusCountsOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(
                 content().string(Matchers.containsString("workflow_runs{organization=\"github-insights\",status=\"DONE\"} 2.0"))
         );
@@ -210,10 +210,10 @@ class IntegrationTests {
         this.activeWorkflowRunStatusCountsExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("active_workflow_runs{organization=\"github-insights\",status=\"IN_PROGRESS\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("active_workflow_runs{organization=\"github-insights\",status=\"PENDING\"} 1.0"));
     }
 
@@ -222,12 +222,12 @@ class IntegrationTests {
         this.workflowRunBuildTimesOfLastDayExporter.run();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr(
                 "workflow_runs_total_build_times{organization=\"github-insights\",status=\"DONE\"} 272000.0"
         ));
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr(
                 "workflow_runs_average_build_times{organization=\"github-insights\",status=\"DONE\"} 136000.0"
         ));
@@ -237,21 +237,21 @@ class IntegrationTests {
     void retrieveAndExportSelfHostedRunnersShouldCorrectlyDisplayStatusesAndOss() throws Exception {
         this.selfHostedRunnerCountsExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"LINUX\",status=\"BUSY\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
-                .get(actuatorEndpoint)
+                .get(ACTUATOR_ENDPOINT)
         ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"MAC_OS\",status=\"IDLE\"} 1.0"));
     }
 
     @Test
-    void retriveAndExportApiRateLimitStateShouldCorrecltyExportData() throws Exception {
+    void retrieveAndExportApiRateLimitStateShouldCorrectlyExportData() throws Exception {
         this.apiRateLimitStateExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
-                        .get(actuatorEndpoint)
+                        .get(ACTUATOR_ENDPOINT)
                 )
                 .andExpect(containsStr("api_ratelimit_state_actual_req{organization=\"github-insights\"} 0.0"))
                 .andExpect(containsStr("api_ratelimit_state_ideal_req{organization=\"github-insights\"} 0.0"))

@@ -66,6 +66,11 @@ app:
             warning_limit: ${APP_GITHUB_RATELIMITING_WARNING_LIMIT:0.9}
             concerning_limit: ${APP_GITHUB_RATELIMITING_CONCERNING_LIMIT:0.7}
             good_limit: ${APP_GITHUB_RATELIMITING_GOOD_LIMIT:0.5}
+        parsing:
+            selfhosted_runner_os_keywords:
+                linux: ${APP_GITHUB_LINUX_SELFHOSTED_RUNNER_OS_KEYWORDS:}
+                windows: ${APP_GITHUB_WINDOWS_SELFHOSTED_RUNNER_OS_KEYWORDS:}
+                macos: ${APP_GITHUB_MACOS_SELFHOSTED_RUNNER_OS_KEYWORDS:vmapple}
 togglz:
     feature-enums: be.xplore.githubmetrics.prometheusexporter.features.Features
     features:
