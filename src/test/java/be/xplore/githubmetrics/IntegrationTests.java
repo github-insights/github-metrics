@@ -173,7 +173,7 @@ class IntegrationTests {
         this.repositoryCountExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("repositories_count 1.0"));
+        ).andExpect(containsStr("repositories_count{organization=\"github-insights\"} 1.0"));
     }
 
     @Test
@@ -182,7 +182,7 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("pull_requests_count_of_last_2_days{state=\"OPEN\"} 1.0"));
+        ).andExpect(containsStr("pull_requests_count_of_last_2_days{organization=\"github-insights\",state=\"OPEN\"} 1.0"));
     }
 
     @Test
@@ -191,7 +191,7 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("workflow_run_jobs{conclusion=\"SUCCESS\",status=\"DONE\"} 2.0"));
+        ).andExpect(containsStr("workflow_run_jobs{conclusion=\"SUCCESS\",organization=\"github-insights\",status=\"DONE\"} 2.0"));
     }
 
     @Test
@@ -201,7 +201,7 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(
-                content().string(Matchers.containsString("workflow_runs{status=\"DONE\"} 2.0"))
+                content().string(Matchers.containsString("workflow_runs{organization=\"github-insights\",status=\"DONE\"} 2.0"))
         );
     }
 
@@ -211,10 +211,10 @@ class IntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("active_workflow_runs{status=\"IN_PROGRESS\"} 1.0"));
+        ).andExpect(containsStr("active_workflow_runs{organization=\"github-insights\",status=\"IN_PROGRESS\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("active_workflow_runs{status=\"PENDING\"} 1.0"));
+        ).andExpect(containsStr("active_workflow_runs{organization=\"github-insights\",status=\"PENDING\"} 1.0"));
     }
 
     @Test
@@ -224,12 +224,12 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(containsStr(
-                "workflow_runs_total_build_times{status=\"DONE\"} 272000.0"
+                "workflow_runs_total_build_times{organization=\"github-insights\",status=\"DONE\"} 272000.0"
         ));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
         ).andExpect(containsStr(
-                "workflow_runs_average_build_times{status=\"DONE\"} 136000.0"
+                "workflow_runs_average_build_times{organization=\"github-insights\",status=\"DONE\"} 136000.0"
         ));
     }
 
@@ -238,13 +238,13 @@ class IntegrationTests {
         this.selfHostedRunnerCountsExporter.run();
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("self_hosted_runners{os=\"LINUX\",status=\"BUSY\"} 1.0"));
+        ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"LINUX\",status=\"BUSY\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("self_hosted_runners{os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"));
+        ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"WINDOWS\",status=\"OFFLINE\"} 1.0"));
         mockMvc.perform(MockMvcRequestBuilders
                 .get(actuatorEndpoint)
-        ).andExpect(containsStr("self_hosted_runners{os=\"MAC_OS\",status=\"IDLE\"} 1.0"));
+        ).andExpect(containsStr("self_hosted_runners{organization=\"github-insights\",os=\"MAC_OS\",status=\"IDLE\"} 1.0"));
     }
 
     @Test
@@ -253,14 +253,14 @@ class IntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders
                         .get(actuatorEndpoint)
                 )
-                .andExpect(containsStr("api_ratelimit_state_actual_req 0.0"))
-                .andExpect(containsStr("api_ratelimit_state_ideal_req 0.0"))
-                .andExpect(containsStr("api_ratelimit_state_limit 4500.0"))
-                .andExpect(containsStr("api_ratelimit_state_paused 0.0"))
-                .andExpect(containsStr("api_ratelimit_state_remaining 5000.0"))
-                .andExpect(containsStr("api_ratelimit_state_reset"))
-                .andExpect(containsStr("api_ratelimit_state_status 4.0"))
-                .andExpect(containsStr("api_ratelimit_state_used 0.0"));
+                .andExpect(containsStr("api_ratelimit_state_actual_req{organization=\"github-insights\"} 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_ideal_req{organization=\"github-insights\"} 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_limit{organization=\"github-insights\"} 4500.0"))
+                .andExpect(containsStr("api_ratelimit_state_paused{organization=\"github-insights\"} 0.0"))
+                .andExpect(containsStr("api_ratelimit_state_remaining{organization=\"github-insights\"} 5000.0"))
+                .andExpect(containsStr("api_ratelimit_state_reset{organization=\"github-insights\"}"))
+                .andExpect(containsStr("api_ratelimit_state_status{organization=\"github-insights\"} 4.0"))
+                .andExpect(containsStr("api_ratelimit_state_used{organization=\"github-insights\"} 0.0"));
 
     }
 
