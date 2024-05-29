@@ -26,6 +26,7 @@ dependencies {
     testImplementation("org.wiremock:wiremock-jetty12:$wiremockVersion")
     testImplementation("org.mockito:mockito-core")
 
+    testImplementation("org.awaitility:awaitility:4.2.1")
 }
 
 tasks.getByName<BootJar>("bootJar") {

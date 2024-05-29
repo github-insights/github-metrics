@@ -50,6 +50,7 @@ public class GithubAuthTokenInterceptor implements ClientHttpRequestInterceptor 
                 .uri(this.getAccessTokenApiPath())
                 .retrieve()
                 .body(GHAppInstallationAccessToken.class);
+        assert accessToken != null;
         this.currentAccessToken = accessToken.token();
         this.tokenExpirationDateTime = accessToken.getActualDate();
         return this.currentAccessToken;

@@ -46,6 +46,7 @@ class GithubAuthTokenInterceptorTest {
             githubProperties,
             TestUtility.getRateLimitingInterceptor()
     );
+
     private GithubAuthTokenInterceptor authTokenInterceptor;
     private HttpRequest mockHttpRequest;
     private HttpHeaders mockHttpHeaders;
@@ -118,7 +119,7 @@ class GithubAuthTokenInterceptorTest {
                         .withBody("")));
 
         assertThrows(
-                NullPointerException.class,
+                AssertionError.class,
                 () -> this.authTokenInterceptor.intercept(
                         this.mockHttpRequest,
                         new byte[1],

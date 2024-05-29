@@ -18,7 +18,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
@@ -75,7 +77,7 @@ class RateLimitingInterceptorTest {
     }
 
     @Test
-    void resettingRemainingRequestsShouldNotCauseSecondStatusRecalculation() throws IOException, InterruptedException {
+    void resettingRemainingRequestsShouldNotCauseSecondStatusRecalculation() throws IOException {
         this.rateLimitingInterceptor = new RateLimitingInterceptor(
                 mockProperties, awaitScheduler, mockRateLimitState
         );
@@ -85,7 +87,7 @@ class RateLimitingInterceptorTest {
                 .thenReturn(1L)
                 .thenReturn(5000L);
 
-        Thread.sleep(1000L);
+        await().pollDelay(1000L, TimeUnit.MILLISECONDS).until(() -> true);
 
         this.createHeadersAndCallIntercept(
                 this.rateLimitingInterceptor,
@@ -96,7 +98,7 @@ class RateLimitingInterceptorTest {
                 5000, 1, getInOneMinuteEpochSeconds(), 4999
         );
 
-        Thread.sleep(1000L);
+        await().pollDelay(1000L, TimeUnit.MILLISECONDS).until(() -> true);
 
         this.createHeadersAndCallIntercept(
                 this.rateLimitingInterceptor,
