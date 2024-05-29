@@ -11,6 +11,8 @@ management:
     metrics:
         enable:
             all: true
+        tags:
+            organization: ${app.github.org}
     health:
         probes:
             enabled: true
