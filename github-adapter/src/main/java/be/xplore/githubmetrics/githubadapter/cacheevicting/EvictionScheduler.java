@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -48,12 +47,14 @@ public class EvictionScheduler {
         var name = port.cacheName();
 
         if (!port.freshDataCanWait()) {
-            LOGGER.debug("Evicting {}", name);
             Optional.ofNullable(
                     this.cacheManager.getCache(name)
-            ).ifPresent(Cache::clear);
+            ).ifPresent(cache -> {
+                LOGGER.info("Evicting the cache with name: {}", name);
+                cache.clear();
+            });
         } else {
-            LOGGER.debug("Did not evict {}", name);
+            LOGGER.info("Did not evict the cache with name: {}", name);
         }
     }
 

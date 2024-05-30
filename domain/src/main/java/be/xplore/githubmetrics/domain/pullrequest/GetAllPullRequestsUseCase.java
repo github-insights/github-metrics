@@ -25,7 +25,7 @@ public class GetAllPullRequestsUseCase {
 
     public List<PullRequest> getAllPullRequests() {
         List<Repository> repositories = repositoriesQuery.getAllRepositories();
-        LOGGER.info("Exporting pull requests for {} repositories.", repositories.size());
+        LOGGER.debug("Exporting pull requests for {} repositories.", repositories.size());
         return repositories.stream().map(
                 pullRequestQuery::getAllPullRequestsForRepository
         ).flatMap(List::stream).toList();

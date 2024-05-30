@@ -24,7 +24,7 @@ public class GetAllSelfHostedRunnersUseCase {
 
     public List<SelfHostedRunner> getAllSelfHostedRunners() {
         var repositories = this.repositoriesQuery.getAllRepositories();
-        LOGGER.info(
+        LOGGER.debug(
                 "Exporting self hosted runners for organization and {} repositories",
                 repositories.size()
         );

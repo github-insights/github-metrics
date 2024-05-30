@@ -24,7 +24,7 @@ public class GetAllWorkflowRunsOfLastDayUseCase {
 
     public List<WorkflowRun> getAllWorkflowRunsOfLastDay() {
         List<Repository> repositories = repositoriesQuery.getAllRepositories();
-        LOGGER.info(
+        LOGGER.debug(
                 "Exporting workflow runs of last day for {} repositories.",
                 repositories.size()
         );

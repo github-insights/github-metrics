@@ -17,7 +17,7 @@ public class GetAllRepositoriesUseCase {
     }
 
     public List<Repository> getAllRepositories() {
-        LOGGER.info("Exporting all available Repositories.");
+        LOGGER.debug("Exporting all available Repositories.");
         return this.repositoriesQueryPort.getAllRepositories();
     }
 }
