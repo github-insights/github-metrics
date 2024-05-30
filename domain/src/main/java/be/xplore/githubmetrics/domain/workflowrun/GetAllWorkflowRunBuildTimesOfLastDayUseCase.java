@@ -24,7 +24,7 @@ public class GetAllWorkflowRunBuildTimesOfLastDayUseCase {
     public List<WorkflowRun> getAllWorkflowRunBuildTime() {
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();
-        LOGGER.info("Exporting build times for {} workflow runs.", workflowRuns.size());
+        LOGGER.debug("Exporting build times for {} workflow runs.", workflowRuns.size());
         workflowRuns.forEach(workflowRun ->
                 workflowRun.setBuildTime(
                         workflowRunBuildTimesQueryPort.getWorkflowRunBuildTimes(workflowRun)

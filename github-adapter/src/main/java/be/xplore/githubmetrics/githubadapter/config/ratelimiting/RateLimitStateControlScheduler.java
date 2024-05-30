@@ -26,7 +26,7 @@ public class RateLimitStateControlScheduler {
 
         String controlSchedule = githubProperties.ratelimiting().stateControlCheckSchedule();
 
-        LOGGER.error("Rate-limit state control scheduler is on schedule {}.", controlSchedule);
+        LOGGER.info("Rate-limit state control scheduler is on schedule {}.", controlSchedule);
 
         taskScheduler.schedule(
                 this::controlApiRateLimitState,
@@ -36,9 +36,19 @@ public class RateLimitStateControlScheduler {
     }
 
     private void controlApiRateLimitState() {
+        LOGGER.info(
+                "Rate limit control scheduler ran with previous used {} and current used {}.",
+                this.lastRemainingRequests,
+                this.rateLimitState.getUsed()
+        );
         if (this.rateLimitState.getUsed() == this.lastRemainingRequests) {
+            var previousStatus = this.rateLimitState.getStatus();
             this.rateLimitState.lowerStatusByOne();
+            LOGGER.debug(
+                    "Since previous used and current used are not equal status will be lowered from {} to {}.",
+                    previousStatus, this.rateLimitState.getStatus()
+            );
         }
-        this.lastRemainingRequests = rateLimitState.getUsed();
+        this.lastRemainingRequests = this.rateLimitState.getUsed();
     }
 }

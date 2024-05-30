@@ -25,7 +25,7 @@ public class GetAllJobsOfLastDayUseCase {
     public List<Job> getAllJobsOfLastDay() {
         List<WorkflowRun> workflowRuns
                 = getAllWorkflowRunsOfLastDayUseCase.getAllWorkflowRunsOfLastDay();
-        LOGGER.info("Exporting Jobs of {} workflow runs.", workflowRuns.size());
+        LOGGER.debug("Exporting Jobs of {} workflow runs.", workflowRuns.size());
         return workflowRuns.stream().map(
                 jobsQuery::getAllJobsForWorkflowRun
         ).flatMap(List::stream).toList();

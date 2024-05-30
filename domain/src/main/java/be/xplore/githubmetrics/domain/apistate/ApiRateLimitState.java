@@ -47,24 +47,52 @@ public class ApiRateLimitState {
             this.actualRequestsPerSecond = actualRequestsPerSecond;
             this.idealRequestsPerSecond = idealRequestsPerSecond;
 
-            var newStatus = this.getNewAbsoluteStatus();
-            LOGGER.trace(
-                    "Current status is {} and possible new Status is {}.",
-                    currentStatus, newStatus
-            );
-            if (newStatus.isBetterThen(currentStatus)) {
-                this.lowerStatusByOne();
-            } else {
-                this.setActualStatus(newStatus);
-            }
+            this.changeStatusAccordingToExpectedStatus(currentStatus);
 
             LOGGER.debug("New Status is {}.", this.getStatus());
         });
     }
 
+    private void changeStatusAccordingToExpectedStatus(ApiRateLimitStatus currentStatus) {
+        var idealNewStatus = this.getNewAbsoluteStatus();
+
+        var statusComparison = idealNewStatus.compareTo(currentStatus);
+        if (statusComparison > 0) {
+            this.lowerStatusByOne();
+        } else if (statusComparison < 0) {
+            this.raiseStatusByOne();
+        }
+
+        logStatusChange(currentStatus, idealNewStatus);
+    }
+
+    private void logStatusChange(
+            ApiRateLimitStatus oldStatus,
+            ApiRateLimitStatus idealNewStatus
+    ) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                    "Status has been recalculated with actual {} / ideal {} and would ideally become {}",
+                    String.format("%.2f", this.actualRequestsPerSecond),
+                    String.format("%.2f", this.idealRequestsPerSecond),
+                    idealNewStatus
+            );
+            LOGGER.info(
+                    "Status will instead be changed from [{}] to {}.",
+                    oldStatus, this.getStatus()
+            );
+        }
+    }
+
     public void lowerStatusByOne() {
         this.status.ifPresent(currentStatus ->
                 this.setActualStatus(currentStatus.getNextBest())
+        );
+    }
+
+    public void raiseStatusByOne() {
+        this.status.ifPresent(currentStatus ->
+                this.setActualStatus(currentStatus.getNextWorst())
         );
     }
 

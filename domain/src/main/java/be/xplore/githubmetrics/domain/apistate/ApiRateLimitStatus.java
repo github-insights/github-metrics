@@ -1,12 +1,10 @@
 package be.xplore.githubmetrics.domain.apistate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.function.IntUnaryOperator;
 
 public enum ApiRateLimitStatus {
     CRITICAL, WARNING, CONCERNING, GOOD, OK;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiRateLimitStatus.class);
 
     public boolean isCritical() {
         return this.equals(CRITICAL);
@@ -25,21 +23,26 @@ public enum ApiRateLimitStatus {
     }
 
     public ApiRateLimitStatus getNextBest() {
-        return switch (this) {
-            case CRITICAL -> WARNING;
-            case WARNING -> CONCERNING;
-            case CONCERNING -> GOOD;
-            case GOOD, OK -> OK;
-        };
+        return this.newStatus(ordinal -> ordinal + 1);
     }
 
-    public boolean isBetterThen(ApiRateLimitStatus other) {
-        var better = this.ordinal() > other.ordinal();
-        LOGGER.debug(
-                "The status {} is better then the status {}: {}",
-                this, other, better
+    public ApiRateLimitStatus getNextWorst() {
+        return this.newStatus(ordinal -> ordinal - 1);
+    }
+
+    private ApiRateLimitStatus newStatus(IntUnaryOperator function) {
+        var newStatus = Math.clamp(
+                function.applyAsInt(this.ordinal()), min().ordinal(), max().ordinal()
         );
-        return better;
+        return values()[newStatus];
+    }
+
+    public ApiRateLimitStatus max() {
+        return Arrays.stream(values()).max(ApiRateLimitStatus::compareTo).orElseThrow();
+    }
+
+    public ApiRateLimitStatus min() {
+        return Arrays.stream(values()).min(ApiRateLimitStatus::compareTo).orElseThrow();
     }
 }
 

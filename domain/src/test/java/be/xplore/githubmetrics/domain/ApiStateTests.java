@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ApiStateTests {
@@ -29,38 +30,63 @@ class ApiStateTests {
         return this.state.getStatus().get();
     }
 
-    @Test
-    void actualToIdealRatioThatDoesntExceedGoodLimitShouldStayOk() {
-        this.state.recalculateStatus(GOOD_LIMIT, 1);
-        assertEquals(ApiRateLimitStatus.OK, getStatus());
+    private ApiRateLimitStatus getAbsNewStatus() {
+        return this.state.getNewAbsoluteStatus();
     }
 
     @Test
-    void actualToIdealRatioThatDoesntExceedConcerningLimitShouldBecomeOk() {
-        this.state.recalculateStatus(CONCERNING_LIMIT, 1);
+    void drasticRequestRatioWorseningShouldOnlyWorsenStatusByOne() {
+        this.state.recalculateStatus(2, 1);
         assertEquals(ApiRateLimitStatus.GOOD, getStatus());
     }
 
     @Test
-    void actualToIdealRatioThatDoesntExceedWarningLimitShouldBecomeConcerning() {
-        this.state.recalculateStatus(WARNING_LIMIT, 1);
+    void consistentRatioWorseningShouldSlowlyIncreaseStatus() {
+        this.state.recalculateStatus(2, 1);
+        assertEquals(ApiRateLimitStatus.GOOD, getStatus());
+        this.state.recalculateStatus(2, 1);
         assertEquals(ApiRateLimitStatus.CONCERNING, getStatus());
-    }
-
-    @Test
-    void actualToIdealRatioThatDoesntExceedCriticalLimitShouldBecomeConcerning() {
-        this.state.recalculateStatus(CRITICAL_LIMIT, 1);
+        this.state.recalculateStatus(2, 1);
         assertEquals(ApiRateLimitStatus.WARNING, getStatus());
-    }
-
-    @Test
-    void actualToIdealRatioThatExceedsCriticalLimitShouldBecomeCritical() {
         this.state.recalculateStatus(2, 1);
         assertEquals(ApiRateLimitStatus.CRITICAL, getStatus());
     }
 
     @Test
+    void actualToIdealRatioThatDoesntExceedGoodLimitShouldStayOk() {
+        this.state.recalculateStatus(GOOD_LIMIT, 1);
+        assertEquals(ApiRateLimitStatus.OK, getAbsNewStatus());
+    }
+
+    @Test
+    void actualToIdealRatioThatDoesntExceedConcerningLimitShouldBecomeOk() {
+        this.state.recalculateStatus(CONCERNING_LIMIT, 1);
+        assertEquals(ApiRateLimitStatus.GOOD, getAbsNewStatus());
+    }
+
+    @Test
+    void actualToIdealRatioThatDoesntExceedWarningLimitShouldBecomeConcerning() {
+        this.state.recalculateStatus(WARNING_LIMIT, 1);
+        assertEquals(ApiRateLimitStatus.CONCERNING, getAbsNewStatus());
+    }
+
+    @Test
+    void actualToIdealRatioThatDoesntExceedCriticalLimitShouldBecomeConcerning() {
+        this.state.recalculateStatus(CRITICAL_LIMIT, 1);
+        assertEquals(ApiRateLimitStatus.WARNING, getAbsNewStatus());
+    }
+
+    @Test
+    void actualToIdealRatioThatExceedsCriticalLimitShouldBecomeCritical() {
+        this.state.recalculateStatus(2, 1);
+        assertEquals(ApiRateLimitStatus.CRITICAL, getAbsNewStatus());
+    }
+
+    @Test
     void drasticRequestRatioImprovementShouldOnlyImproveStatusByOne() {
+        this.state.recalculateStatus(2, 1);
+        this.state.recalculateStatus(2, 1);
+        this.state.recalculateStatus(2, 1);
         this.state.recalculateStatus(2, 1);
         assertEquals(ApiRateLimitStatus.CRITICAL, getStatus());
         this.state.recalculateStatus(GOOD_LIMIT, 1);
@@ -74,5 +100,44 @@ class ApiStateTests {
         assertTrue(this.state.getStatus().isEmpty());
         resetFn.run();
         assertEquals(ApiRateLimitStatus.CRITICAL, getStatus());
+    }
+
+    @Test
+    void completelyStoppingRequestingShouldAlwaysCauseDataWaitToReturnTrue() {
+        this.state.stopRequestsAndGetResetFunction();
+
+        shouldWaitAndRaise(ApiRateLimitStatus.GOOD);
+        shouldWaitAndRaise(ApiRateLimitStatus.CONCERNING);
+        shouldWaitAndRaise(ApiRateLimitStatus.WARNING);
+        shouldWaitAndRaise(ApiRateLimitStatus.CONCERNING);
+        shouldWaitAndRaise(null);
+    }
+
+    @Test
+    void dataShouldWaitWhenActualStatusIsOnSameLevelAsLimit() {
+        shouldWaitAndRaise(ApiRateLimitStatus.OK);
+        shouldWaitAndRaise(ApiRateLimitStatus.GOOD);
+        shouldWaitAndRaise(ApiRateLimitStatus.CONCERNING);
+        shouldWaitAndRaise(ApiRateLimitStatus.WARNING);
+        shouldWaitAndRaise(ApiRateLimitStatus.CRITICAL);
+    }
+
+    @Test
+    void nullLimitShouldNeverAskDataToWait() {
+        shouldNotWaitAndRaise(null);
+        shouldNotWaitAndRaise(null);
+        shouldNotWaitAndRaise(null);
+        shouldNotWaitAndRaise(null);
+        shouldNotWaitAndRaise(null);
+    }
+
+    private void shouldNotWaitAndRaise(ApiRateLimitStatus status) {
+        assertFalse(this.state.shouldDataWait(status));
+        this.state.raiseStatusByOne();
+    }
+
+    private void shouldWaitAndRaise(ApiRateLimitStatus status) {
+        assertTrue(this.state.shouldDataWait(status));
+        this.state.raiseStatusByOne();
     }
 }

@@ -195,7 +195,7 @@ public class RateLimitingInterceptor implements ClientHttpRequestInterceptor {
     }
 
     private void logRateLimitStateBefore() {
-        LOGGER.info("State before is {}", this.rateLimitState.getStatus());
+        LOGGER.debug("State before is {}", this.rateLimitState.getStatus());
         LOGGER.trace(
                 "Rate limit used requests was {} and now is {}",
                 usedRequestsAtCountingStart.get(), this.rateLimitState.getUsed()
@@ -218,6 +218,6 @@ public class RateLimitingInterceptor implements ClientHttpRequestInterceptor {
                 "Remaining minutes until limit reset {}",
                 ChronoUnit.MINUTES.between(now(), this.rateLimitState.getReset(now().getOffset()))
         );
-        LOGGER.info("State after is {}", this.rateLimitState.getStatus());
+        LOGGER.debug("State after is {}", this.rateLimitState.getStatus());
     }
 }
