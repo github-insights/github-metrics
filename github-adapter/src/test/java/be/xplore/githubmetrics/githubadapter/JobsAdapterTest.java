@@ -43,7 +43,7 @@ class JobsAdapterTest {
 
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var tokenRestClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
-        var utilities = new GithubApiUtilities(tokenRestClient);
+        var utilities = new GithubApiUtilities();
         jobsAdapter = new JobsAdapter(
                 githubProperties, tokenRestClient, utilities,
                 TestUtility.getCacheEvictionProperties(),
@@ -60,7 +60,7 @@ class JobsAdapterTest {
     void workflowRunJobsAdapterShouldReturnCorrectNumberOfJobs() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100")
+                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100&page=0")
                 ).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +76,7 @@ class JobsAdapterTest {
     void assertExceptionWhenWorkFlowRunJobsReceivesInvalidResponseTest() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100"
+                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -85,11 +85,9 @@ class JobsAdapterTest {
         );
         assertThrows(
                 NullPointerException.class,
-                () -> {
-                    jobsAdapter.getAllJobsForWorkflowRun(
-                            this.workflowRun
-                    );
-                }
+                () -> jobsAdapter.getAllJobsForWorkflowRun(
+                        this.workflowRun
+                )
         );
     }
 
@@ -97,7 +95,7 @@ class JobsAdapterTest {
     void workflowRunJobsAdapterShouldContainAnActionRequiredJob() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100")
+                        "/repos/github-insights/github-metrics/actions/runs/8828175949/jobs?per_page=100&page=0")
                 ).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

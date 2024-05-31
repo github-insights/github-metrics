@@ -7,22 +7,17 @@ import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunsQueryPort;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
-import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRuns;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 
 @Service
 public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCacheEvictionPort {
@@ -31,20 +26,20 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunsAdapter.class);
     private final GithubProperties githubProperties;
     private final ApiRateLimitState rateLimitState;
-    private final RestClient restClient;
+    private final GithubRestClient restClient;
     private final GithubApiUtilities utilities;
     private final CacheEvictionProperties evictionProperties;
 
     public WorkflowRunsAdapter(
             GithubProperties githubProperties,
             ApiRateLimitState rateLimitState,
-            @Qualifier("defaultRestClient") RestClient restClient,
+            GithubRestClient githubRestClient,
             GithubApiUtilities utilities,
             CacheEvictionProperties evictionProperties
     ) {
         this.githubProperties = githubProperties;
         this.rateLimitState = rateLimitState;
-        this.restClient = restClient;
+        this.restClient = githubRestClient;
         this.utilities = utilities;
         this.evictionProperties = evictionProperties;
     }
@@ -57,17 +52,8 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
                 repository.getId(), repository.getName()
         );
 
-        ResponseEntity<GHActionRuns> responseEntity = this.restClient.get()
-                .uri(workflowRunsUri(repository))
-                .header("path", GHActionRuns.PATH)
-                .retrieve()
-                .toEntity(GHActionRuns.class);
-
-        var workflowRuns = this.utilities.followPaginationLink(
-                responseEntity,
-                actionRun -> actionRun.getWorkFlowRuns(repository),
-                GHActionRuns.class
-        );
+        var workflowRuns = this.makeRequestAndFollowPagination(
+                this.getParameters(), repository);
 
         LOGGER.debug(
                 "Response for the WorkflowRuns fetch of Repository {} returned {} WorkflowRuns.",
@@ -76,18 +62,32 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
         return workflowRuns;
     }
 
-    private Function<UriBuilder, URI> workflowRunsUri(Repository repository) {
+    private Map<String, String> getParameters() {
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
+        parameters.put("page", "0");
         parameters.put("created", ">=" + LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        return parameters;
+    }
 
-        List<Object> pathVars = List.of(
-                this.githubProperties.org(),
-                repository.getName()
+    private List<WorkflowRun> makeRequestAndFollowPagination(Map<String, String> parameters, Repository repository) {
+        var responseEntity = this.restClient.getWorkflowRuns(
+                githubProperties.org(),
+                repository.getName(),
+                parameters
         );
-        return utilities.setPathAndParameters(
-                GHActionRuns.PATH,
-                pathVars, parameters
+
+        return this.utilities.followPaginationLink(
+                responseEntity,
+                1,
+                pageNumber -> {
+                    parameters.put("page", String.valueOf(pageNumber));
+                    return this.restClient.getWorkflowRuns(
+                            githubProperties.org(),
+                            repository.getName(),
+                            parameters);
+                },
+                ghActionRuns -> ghActionRuns.getWorkFlowRuns(repository)
         );
     }
 

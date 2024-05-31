@@ -36,7 +36,7 @@ class PullRequestsAdapterTest {
         this.wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
-        var utilities = new GithubApiUtilities(restClient);
+        var utilities = new GithubApiUtilities();
         this.pullRequestsAdapter = new PullRequestsAdapter(
                 githubProperties, restClient, utilities,
                 TestUtility.getCacheEvictionProperties(),
@@ -53,7 +53,7 @@ class PullRequestsAdapterTest {
     void pullRequestQueryWithValidResponseShouldReceiveData() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
+                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -70,7 +70,7 @@ class PullRequestsAdapterTest {
     void pullRequestWithInvalidDataShouldThrowException() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
+                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -86,7 +86,7 @@ class PullRequestsAdapterTest {
     void pullRequestQueryShouldReturnCorrectStates() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
+                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

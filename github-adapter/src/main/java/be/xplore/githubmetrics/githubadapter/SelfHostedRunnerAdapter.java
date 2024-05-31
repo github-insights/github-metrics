@@ -7,17 +7,17 @@ import be.xplore.githubmetrics.domain.selfhostedrunner.SelfHostedRunnersQueryPor
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClient;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHSelfHostedRunners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
@@ -26,20 +26,20 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
     private static final String SELF_HOSTED_RUNNERS_CACHE_NAME = "SelfHostedRunners";
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfHostedRunnerAdapter.class);
     private final GithubProperties githubProperties;
-    private final RestClient restClient;
+    private final GithubRestClient restClient;
     private final GithubApiUtilities utilities;
     private final CacheEvictionProperties evictionProperties;
     private final ApiRateLimitState rateLimitState;
 
     public SelfHostedRunnerAdapter(
             GithubProperties githubProperties,
-            @Qualifier("defaultRestClient") RestClient restClient,
+            GithubRestClient githubRestClient,
             GithubApiUtilities utilities,
             CacheEvictionProperties evictionProperties,
             ApiRateLimitState rateLimitState
     ) {
         this.githubProperties = githubProperties;
-        this.restClient = restClient;
+        this.restClient = githubRestClient;
         this.utilities = utilities;
         this.evictionProperties = evictionProperties;
         this.rateLimitState = rateLimitState;
@@ -55,16 +55,32 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
 
     private List<SelfHostedRunner> getForOrganization() {
         LOGGER.debug("Fetching fresh SelfHostedRunners for Organization.");
-        var selfHostedRunners = this.fetchSelfHostedRunners(
-                GHSelfHostedRunners.PATH_ORG,
-                List.of(this.githubProperties.org())
+        var parameters = getParameters();
+
+        var responseEntity = this.restClient.getOrgSelfHostedRunners(
+                githubProperties.org(),
+                parameters
+        );
+        var orgSelfHostedRunners = this.utilities.followPaginationLink(
+                responseEntity,
+                0,
+                pageNumber -> {
+                    parameters.put("page", String.valueOf(pageNumber));
+                    return this.restClient.getOrgSelfHostedRunners(
+                            githubProperties.org(),
+                            parameters
+                    );
+                },
+                ghSelfHostedRunners -> ghSelfHostedRunners.getRunners(
+                        this.githubProperties.parsing().selfHostedRunnerOsKeywords()
+                )
         );
         LOGGER.debug(
                 "Response for the SelfHostedRunner fetch of Organization returned {} SelfHostedRunners.",
-                selfHostedRunners.size()
+                orgSelfHostedRunners.size()
         );
 
-        return selfHostedRunners;
+        return orgSelfHostedRunners;
     }
 
     private List<SelfHostedRunner> getForRepositories(List<Repository> repositories) {
@@ -73,38 +89,41 @@ public class SelfHostedRunnerAdapter implements SelfHostedRunnersQueryPort, Sche
 
     private List<SelfHostedRunner> getForRepository(Repository repository) {
         LOGGER.debug("Fetching fresh SelfHostedRunners for Repository {}.", repository.getName());
-        var selfHostedRunners = this.fetchSelfHostedRunners(
-                GHSelfHostedRunners.PATH_REPO,
-                List.of(this.githubProperties.org(), repository.getName())
+        var parameters = getParameters();
+        ResponseEntity<GHSelfHostedRunners> responseEntity
+                = this.restClient.getRepoSelfHostedRunners(
+                githubProperties.org(),
+                repository.getName(),
+                this.getParameters()
         );
+        var repoSelfHostedRunners = this.utilities.followPaginationLink(
+                responseEntity,
+                1,
+                pageNumber -> {
+                    parameters.put("page", String.valueOf(pageNumber));
+                    return this.restClient.getRepoSelfHostedRunners(
+                            githubProperties.org(),
+                            repository.getName(),
+                            parameters
+                    );
+                },
+                ghSelfHostedRunners -> ghSelfHostedRunners.getRunners(
+                        this.githubProperties.parsing().selfHostedRunnerOsKeywords()
+                )
+        );
+
         LOGGER.debug(
                 "Response for the SelfHostedRunner fetch of Repository {} returned {} SelfHostedRunners.",
-                repository.getName(),
-                selfHostedRunners.size()
+                repository.getName(), repoSelfHostedRunners.size()
         );
-
-        return selfHostedRunners;
+        return repoSelfHostedRunners;
     }
 
-    private List<SelfHostedRunner> fetchSelfHostedRunners(
-            String link, List<Object> pathVars
-    ) {
+    private Map<String, String> getParameters() {
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
-
-        ResponseEntity<GHSelfHostedRunners> responseEntity = this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        link, pathVars, parameters
-                ))
-                .header("path", link)
-                .retrieve()
-                .toEntity(GHSelfHostedRunners.class);
-
-        return this.utilities.followPaginationLink(
-                responseEntity,
-                ghSelfHostedRunners -> ghSelfHostedRunners.getRunners(this.githubProperties.parsing().selfHostedRunnerOsKeywords()),
-                GHSelfHostedRunners.class
-        );
+        parameters.put("page", "0");
+        return parameters;
     }
 
     @Override

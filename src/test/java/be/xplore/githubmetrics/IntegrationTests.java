@@ -83,7 +83,7 @@ class IntegrationTests {
                 .withHeaders(TestUtility.getRateLimitingHeaders())
                 .withBodyFile("GithubAuthorizationResponse.json")));
 
-        stubFor(get("/installation/repositories?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("GithubMetricsRepositoryTestData.json")));
@@ -97,7 +97,7 @@ class IntegrationTests {
 
     private void stubForWorkflowRunEndpoints() {
         stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
-                        + TestUtility.yesterday()
+                        + TestUtility.yesterday() + "&page=0"
                 )
                         .willReturn(ok()
                                 .withHeaders(TestUtility.getRateLimitingHeaders())
@@ -113,11 +113,11 @@ class IntegrationTests {
     }
 
     private void stubForJobsEndpoints() {
-        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784314559/jobs?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("JobsValidTestData.json")));
-        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100")
+        stubFor(get("/repos/github-insights/github-metrics/actions/runs/8784267977/jobs?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeaders(TestUtility.getRateLimitingHeaders())
                         .withBodyFile("JobsValidTestData.json")));
@@ -144,7 +144,7 @@ class IntegrationTests {
 
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all"
+                        "/repos/github-insights/github-metrics/pulls?per_page=100&state=all&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeaders(TestUtility.getRateLimitingHeaders())
@@ -154,14 +154,14 @@ class IntegrationTests {
     private void stubForSelfHostedRunnersEndpoints() {
         stubFor(
                 get(urlEqualTo(
-                        "/orgs/github-insights/actions/runners?per_page=100"
+                        "/orgs/github-insights/actions/runners?per_page=100&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeaders(TestUtility.getRateLimitingHeaders())
                                 .withBodyFile("SelfHostedRunnersMacData.json")));
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runners?per_page=100"
+                        "/repos/github-insights/github-metrics/actions/runners?per_page=100&page=0"
                 )).willReturn(
                         aResponse()
                                 .withHeaders(TestUtility.getRateLimitingHeaders())

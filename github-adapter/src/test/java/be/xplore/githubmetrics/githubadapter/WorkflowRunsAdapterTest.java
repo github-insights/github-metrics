@@ -33,7 +33,7 @@ class WorkflowRunsAdapterTest {
         this.wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
-        var utilities = new GithubApiUtilities(restClient);
+        var utilities = new GithubApiUtilities();
         workflowRunsAdapter = new WorkflowRunsAdapter(
                 githubProperties,
                 TestUtility.getApiRateLimitState(),
@@ -52,7 +52,7 @@ class WorkflowRunsAdapterTest {
     void workFlowRunsTest() {
         stubFor(
                 get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday()))
+                        "/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
                         .willReturn(
                                 aResponse()
                                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -67,7 +67,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workFlowRunsInvalidResponseTest() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday()))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
                 .willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -82,7 +82,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workflowRunsQueryShouldHaveCorrectStatus() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday()))
+        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
                 .willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

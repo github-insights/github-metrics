@@ -7,19 +7,13 @@ import be.xplore.githubmetrics.domain.workflowrun.WorkflowRunStatus;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
-import be.xplore.githubmetrics.githubadapter.mappingclasses.GHActionRunTiming;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
 
-import java.net.URI;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 @Service
 public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryPort, ScheduledCacheEvictionPort {
@@ -27,20 +21,20 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
     private static final String WORKFLOW_RUN_BUILD_TIMES_CACHE_NAME = "WorkflowRunBuildTimes";
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRunBuildTimesAdapter.class);
     private final GithubProperties githubProperties;
-    private final RestClient restClient;
+    private final GithubRestClient restClient;
     private final CacheEvictionProperties evictionProperties;
     private final ApiRateLimitState rateLimitState;
     private final GithubApiUtilities utilities;
 
     public WorkflowRunBuildTimesAdapter(
             GithubProperties githubProperties,
-            @Qualifier("defaultRestClient") RestClient restClient,
+            GithubRestClient githubRestClient,
             CacheEvictionProperties evictionProperties,
             ApiRateLimitState rateLimitState,
             GithubApiUtilities utilities
     ) {
         this.githubProperties = githubProperties;
-        this.restClient = restClient;
+        this.restClient = githubRestClient;
         this.evictionProperties = evictionProperties;
         this.rateLimitState = rateLimitState;
         this.utilities = utilities;
@@ -61,13 +55,11 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
         }
 
         var buildTime = Objects.requireNonNull(
-                        this.restClient.get()
-                                .uri(buildTimesUri(workflowRun))
-                                .header("path", GHActionRunTiming.PATH)
-                                .retrieve()
-                                .body(GHActionRunTiming.class)
-                )
-                .run_duration_ms();
+                this.restClient.getWorkflowRunBuildTime(
+                                githubProperties.org(),
+                                workflowRun.getRepository().getName(),
+                                String.valueOf(workflowRun.getId()))
+                        .getBody()).run_duration_ms();
 
         LOGGER.debug(
                 "Response for the BuildTimes fetch of WorkflowRun {} returned BuildTime of {}",
@@ -76,18 +68,6 @@ public class WorkflowRunBuildTimesAdapter implements WorkflowRunBuildTimesQueryP
         );
 
         return buildTime;
-    }
-
-    private Function<UriBuilder, URI> buildTimesUri(WorkflowRun workflowRun) {
-        List<Object> uriVars = List.of(
-                this.githubProperties.org(),
-                workflowRun.getRepository().getName(),
-                workflowRun.getId()
-        );
-        return this.utilities.setPathAndParameters(
-                GHActionRunTiming.PATH,
-                uriVars
-        );
     }
 
     @Override

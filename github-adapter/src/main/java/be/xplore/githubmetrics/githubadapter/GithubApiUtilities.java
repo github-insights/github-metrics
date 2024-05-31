@@ -2,18 +2,13 @@ package be.xplore.githubmetrics.githubadapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -21,50 +16,13 @@ import java.util.function.Function;
 public class GithubApiUtilities {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubApiUtilities.class);
-    private final RestClient restClient;
 
-    public GithubApiUtilities(
-            @Qualifier("defaultRestClient") RestClient restClient
-    ) {
-        this.restClient = restClient;
-    }
-
-    public Function<UriBuilder, URI> setPathAndParameters(
-            String path,
-            List<Object> uriVariables
-    ) {
-        return uriBuilder ->
-                uriBuilder.path(path)
-                        .build(uriVariables.toArray(new Object[0]));
-    }
-
-    public Function<UriBuilder, URI> setPathAndParameters(
-            String path,
-            List<Object> uriVariables,
-            Map<String, String> parameters
-    ) {
-        return uriBuilder -> {
-            uriBuilder.path(path);
-            parameters.forEach(uriBuilder::queryParam);
-            return uriBuilder.build(uriVariables.toArray(new Object[0]));
-        };
-    }
-
-    public Function<UriBuilder, URI> setPathAndParameters(
-            String path,
-            Map<String, String> parameters
-    ) {
-        return uriBuilder -> {
-            uriBuilder.path(path);
-            parameters.forEach(uriBuilder::queryParam);
-            return uriBuilder.build();
-        };
-    }
-
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public <D, A> List<D> followPaginationLink(
             ResponseEntity<A> responseEntity,
-            Function<A, List<D>> conversionFunction,
-            Class<A> clazz
+            int page,
+            Function<Integer, ResponseEntity<A>> fetchFunction,
+            Function<A, List<D>> conversionFunction
     ) {
         List<D> objects = new ArrayList<>(conversionFunction.apply(
                 responseEntity.getBody()
@@ -74,9 +32,10 @@ public class GithubApiUtilities {
             LOGGER.trace("Parsed link was: {}", link);
 
             List<D> nextObjects = this.followPaginationLink(
-                    getNextResponseEntity(link, clazz),
-                    conversionFunction,
-                    clazz
+                    fetchFunction.apply(page),
+                    page + 1,
+                    fetchFunction,
+                    conversionFunction
             );
 
             LOGGER.trace(
@@ -88,16 +47,6 @@ public class GithubApiUtilities {
             return objects;
         }).orElse(objects);
 
-    }
-
-    private <A> ResponseEntity<A> getNextResponseEntity(
-            String link,
-            Class<A> clazz
-    ) {
-        return this.restClient.get()
-                .uri(link)
-                .retrieve()
-                .toEntity(clazz);
     }
 
     private Optional<String> getNextPageLink(HttpHeaders headers) {

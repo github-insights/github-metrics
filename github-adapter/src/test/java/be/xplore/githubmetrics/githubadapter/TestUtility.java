@@ -5,6 +5,7 @@ import be.xplore.githubmetrics.domain.apistate.ApiRateLimitStatus;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.config.DebugInterceptor;
 import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClient;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientConfig;
 import be.xplore.githubmetrics.githubadapter.config.GithubRestClientRequestObservationConvention;
 import be.xplore.githubmetrics.githubadapter.config.auth.GithubAuthTokenInterceptor;
@@ -16,10 +17,11 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestClient;
+import org.springframework.core.convert.support.GenericConversionService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -55,28 +57,21 @@ public class TestUtility {
                 mock(GithubRestClientRequestObservationConvention.class)
         );
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
-        var jwtRestClient = restClientConfig.tokenFetcherRestClient(
-                jwtInterceptor
+        var jwtRestClient = restClientConfig.githubAuthRestClient(
+                jwtInterceptor,
+                new GenericConversionService()
         );
-        jwtRestClient.mutate()
-                .requestInterceptors(interceptors -> {
-                    interceptors.add(jwtInterceptor);
-                    interceptors.add(DEBUG_INTERCEPTOR);
-                });
+
         return new GithubAuthTokenInterceptor(githubProperties, jwtRestClient);
     }
 
-    public static RestClient getDefaultRestClientNoAuth(GithubProperties githubProperties) {
-        return RestClient.builder()
-                .baseUrl(githubProperties.url())
-                .defaultHeaders(
-                        httpHeaders -> {
-                            httpHeaders.set("X-Github-Api-Version", "2022-11-28");
-                            httpHeaders.set("Accept", "application/vnd.github+json");
-                        }
-                )
-                .requestInterceptor(DEBUG_INTERCEPTOR)
-                .build();
+    public static GithubRestClient getDefaultRestClientNoAuth(GithubProperties githubProperties) {
+        var restClientConfig = new GithubRestClientConfig(
+                new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR,
+                githubProperties, getRateLimitingInterceptor(), ObservationRegistry.NOOP,
+                mock(GithubRestClientRequestObservationConvention.class)
+        );
+        return restClientConfig.getGithubRestClient(new ArrayList<>(), new GenericConversionService());
     }
 
     public static GithubProperties getNoAuthGithubProperties(int port) {

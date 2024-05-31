@@ -7,8 +7,18 @@ import be.xplore.githubmetrics.githubadapter.config.ratelimiting.RateLimitingInt
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+
+import java.net.http.HttpClient;
+import java.time.Duration;
+import java.util.List;
 
 @Configuration
 public class GithubRestClientConfig {
@@ -19,6 +29,8 @@ public class GithubRestClientConfig {
     private final RateLimitingInterceptor rateLimitingInterceptor;
     private final ObservationRegistry observationRegistry;
     private final GithubRestClientRequestObservationConvention githubRestClientRequestObservationConvention;
+
+    private final Duration timeout = Duration.ofSeconds(30L);
 
     public GithubRestClientConfig(
             GithubUnauthorizedInterceptor unauthorizedInterceptor,
@@ -37,30 +49,40 @@ public class GithubRestClientConfig {
     }
 
     @Bean
-    public RestClient defaultRestClient(
-            GithubAuthTokenInterceptor githubAuthTokenInterceptor
+    @Primary
+    public GithubRestClient defaultGithubRestClient(
+            GithubAuthTokenInterceptor githubAuthTokenInterceptor,
+            GenericConversionService conversionService
     ) {
-        return this.getBasicRestClient()
-                .requestInterceptors(interceptors -> {
-                    interceptors.add(githubAuthTokenInterceptor);
-                    interceptors.add(rateLimitingInterceptor);
-                })
-                .build();
+        return getGithubRestClient(
+                List.of(githubAuthTokenInterceptor, this.rateLimitingInterceptor),
+                conversionService
+        );
     }
 
     @Bean
-    public RestClient tokenFetcherRestClient(
-            GithubJwtTokenInterceptor githubJwtTokenInterceptor
+    public GithubRestClient githubAuthRestClient(
+            GithubJwtTokenInterceptor githubJwtTokenInterceptor,
+            GenericConversionService conversionService
     ) {
-        return this.getBasicRestClient()
-                .requestInterceptors(interceptors ->
-                        interceptors.add(githubJwtTokenInterceptor)
-                )
-                .build();
+        return this.getGithubRestClient(
+                List.of(githubJwtTokenInterceptor),
+                conversionService
+        );
     }
 
-    private RestClient.Builder getBasicRestClient() {
-        return RestClient.builder()
+    @SuppressWarnings("PMD.CloseResource")
+    public GithubRestClient getGithubRestClient(
+            List<ClientHttpRequestInterceptor> interceptorsToAdd,
+            GenericConversionService conversionService
+    ) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(this.timeout).build();
+        JdkClientHttpRequestFactory requestFactory
+                = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(this.timeout);
+
+        var restClient = RestClient.builder()
                 .baseUrl(githubProperties.url())
                 .observationRegistry(this.observationRegistry)
                 .observationConvention(this.githubRestClientRequestObservationConvention)
@@ -71,8 +93,16 @@ public class GithubRestClientConfig {
                         }
                 )
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, this.unauthorizedInterceptor)
-                .requestInterceptors(interceptors ->
-                        interceptors.add(debugInterceptor)
-                );
+                .requestInterceptors(
+                        interceptors -> {
+                            interceptors.addAll(interceptorsToAdd);
+                            interceptors.add(this.debugInterceptor);
+                        }).build();
+
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+                .builderFor(RestClientAdapter.create(restClient))
+                .conversionService(conversionService)
+                .build();
+        return factory.createClient(GithubRestClient.class);
     }
 }

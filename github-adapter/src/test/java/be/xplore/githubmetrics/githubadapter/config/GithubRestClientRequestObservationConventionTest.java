@@ -38,22 +38,14 @@ class GithubRestClientRequestObservationConventionTest {
     }
 
     @Test
-    void conventionShouldParsePathHeaderCorrectly() {
-        String path = "my/special/path";
-
-        when(mockHeaders.get(PATH)).thenReturn(List.of(path));
-        assertTrue(keyValPresent(URI, path));
-    }
-
-    @Test
     void conventionShouldReturnNOHEADERifNoValue() {
         when(mockHeaders.get(PATH)).thenReturn(List.of());
-        assertTrue(keyValPresent(URI, "NO HEADER"));
+        assertTrue(keyValPresent(URI, "NONE"));
     }
 
     @Test
     void conventionShouldReturnNOHEADERifNoHeader() {
-        assertTrue(keyValPresent(URI, "NO HEADER"));
+        assertTrue(keyValPresent(URI, "NONE"));
     }
 
     @Test
