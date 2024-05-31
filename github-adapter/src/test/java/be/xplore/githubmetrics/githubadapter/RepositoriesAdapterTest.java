@@ -24,10 +24,10 @@ class RepositoriesAdapterTest {
         wireMockServer = TestUtility.getWireMockServer();
         var githubProperties = TestUtility.getNoAuthGithubProperties(wireMockServer.port());
         var restClient = TestUtility.getDefaultRestClientNoAuth(githubProperties);
-        var utilities = new GithubApiUtilities(restClient);
+        var utilities = new GithubApiUtilities();
 
         repositoriesAdapter = new RepositoriesAdapter(
-                githubProperties, restClient, utilities,
+                restClient, utilities,
                 TestUtility.getCacheEvictionProperties(),
                 TestUtility.getApiRateLimitState()
         );
@@ -41,7 +41,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldReturnListOfRepositories() {
-        stubFor(get("/installation/repositories?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("100RepositoriesTestData.json")));
@@ -52,7 +52,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldFollowLinkHeader() {
-        stubFor(get("/installation/repositories?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
@@ -62,7 +62,7 @@ class RepositoriesAdapterTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
 
-        stubFor(get("/installation/repositories?since=369")
+        stubFor(get("/installation/repositories?per_page=100&page=1")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
@@ -73,7 +73,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesShouldThrowExceptionOnInvalidResponseBody() {
-        stubFor(get("/installation/repositories?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody("invalid body")));
@@ -86,7 +86,7 @@ class RepositoriesAdapterTest {
 
     @Test
     void getAllRepositoriesStopsRecursionWhenRelNextNotPresent() {
-        stubFor(get("/installation/repositories?per_page=100")
+        stubFor(get("/installation/repositories?per_page=100&page=0")
                 .willReturn(ok()
                         .withHeader(
                                 "link",
@@ -95,7 +95,7 @@ class RepositoriesAdapterTest {
                         )
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("2RepositoriesTestData.json")));
-        stubFor(get("/installation/repositories?since=1")
+        stubFor(get("/installation/repositories?per_page=100&page=1")
                 .willReturn(ok()
                         .withHeader(
                                 "link",

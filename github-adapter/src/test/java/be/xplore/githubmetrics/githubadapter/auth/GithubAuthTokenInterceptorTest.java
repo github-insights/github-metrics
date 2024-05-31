@@ -13,6 +13,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -60,8 +61,9 @@ class GithubAuthTokenInterceptorTest {
         GithubJwtTokenInterceptor jwtTokenInterceptor = new GithubJwtTokenInterceptor(this.githubProperties);
         this.authTokenInterceptor = new GithubAuthTokenInterceptor(
                 this.githubProperties,
-                this.restClientConfig.tokenFetcherRestClient(
-                        jwtTokenInterceptor
+                this.restClientConfig.githubAuthRestClient(
+                        jwtTokenInterceptor,
+                        new GenericConversionService()
                 )
         );
 

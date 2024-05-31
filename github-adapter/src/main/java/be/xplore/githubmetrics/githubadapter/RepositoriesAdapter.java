@@ -5,18 +5,17 @@ import be.xplore.githubmetrics.domain.repository.RepositoriesQueryPort;
 import be.xplore.githubmetrics.domain.repository.Repository;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.CacheEvictionProperties;
 import be.xplore.githubmetrics.githubadapter.cacheevicting.ScheduledCacheEvictionPort;
-import be.xplore.githubmetrics.githubadapter.config.GithubProperties;
+import be.xplore.githubmetrics.githubadapter.config.GithubRestClient;
 import be.xplore.githubmetrics.githubadapter.mappingclasses.GHRepositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCacheEvictionPort {
@@ -24,21 +23,18 @@ public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCach
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoriesAdapter.class);
 
-    private final RestClient restClient;
-    private final GithubProperties config;
+    private final GithubRestClient restClient;
     private final GithubApiUtilities utilities;
     private final CacheEvictionProperties evictionProperties;
     private final ApiRateLimitState rateLimitState;
 
     public RepositoriesAdapter(
-            GithubProperties config,
-            @Qualifier("defaultRestClient") RestClient restClient,
+            GithubRestClient githubRestClient,
             GithubApiUtilities utilities,
             CacheEvictionProperties evictionProperties,
             ApiRateLimitState rateLimitState
     ) {
-        this.restClient = restClient;
-        this.config = config;
+        this.restClient = githubRestClient;
         this.utilities = utilities;
         this.evictionProperties = evictionProperties;
         this.rateLimitState = rateLimitState;
@@ -49,30 +45,31 @@ public class RepositoriesAdapter implements RepositoriesQueryPort, ScheduledCach
     public List<Repository> getAllRepositories() {
         LOGGER.debug("Fetching fresh Repositories.");
         var parameters = new HashMap<String, String>();
+        parameters.put("page", "0");
         parameters.put("per_page", "100");
 
-        ResponseEntity<GHRepositories> responseEntity = this.restClient.get()
-                .uri(utilities.setPathAndParameters(
-                        GHRepositories.PATH,
-                        parameters
-                ))
-                .header("path", GHRepositories.PATH)
-                .retrieve()
-                .toEntity(GHRepositories.class);
-
-        LOGGER.trace("Initial repositories query succeeded, about to follow pagination.");
-
-        var repositories = this.utilities.followPaginationLink(
-                responseEntity,
-                GHRepositories::getRepositories,
-                GHRepositories.class
-        );
+        var repositories = this.makeRequestAndFollowPagination(parameters);
 
         LOGGER.debug(
                 "Response for the Repositories fetch returned {} repositories",
                 repositories.size()
         );
         return repositories;
+    }
+
+    private List<Repository> makeRequestAndFollowPagination(Map<String, String> parameters) {
+        ResponseEntity<GHRepositories> responseEntity
+                = this.restClient.getRepositories(parameters);
+
+        return this.utilities.followPaginationLink(
+                responseEntity,
+                1,
+                pageNumber -> {
+                    parameters.put("page", String.valueOf(pageNumber));
+                    return this.restClient.getRepositories(parameters);
+                },
+                GHRepositories::getRepositories
+        );
     }
 
     @Override

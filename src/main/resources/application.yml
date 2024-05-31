@@ -2,6 +2,7 @@ logging:
     level:
         be.xplore.githubmetrics:
             ROOT: ${LOGGING_LEVEL:INFO}
+
 management:
     endpoints:
         web:

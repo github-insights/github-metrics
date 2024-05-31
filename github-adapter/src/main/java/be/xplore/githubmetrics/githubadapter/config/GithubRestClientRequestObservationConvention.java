@@ -28,14 +28,9 @@ public class GithubRestClientRequestObservationConvention implements ClientReque
     }
 
     protected KeyValue uri(ClientRequestObservationContext context) {
-        String uri = Optional.ofNullable(context.getCarrier().getHeaders().get("path")).map(list -> {
-            if (!list.isEmpty()) {
-                return list.getFirst();
-            } else {
-                return "NO HEADER";
-            }
-        }).orElse("NO HEADER");
-        return KeyValue.of("uri", uri);
+        return KeyValue.of("uri", Optional.ofNullable(context.getUriTemplate())
+                .map(uri -> uri.split("\\?", 2)[0])
+                .orElse("NONE"));
     }
 
     protected KeyValue method(ClientRequestObservationContext context) {
