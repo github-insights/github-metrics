@@ -257,7 +257,7 @@ class IntegrationTests {
                 .andExpect(containsStr("api_ratelimit_state_ideal_req{organization=\"github-insights\"} 0.0"))
                 .andExpect(containsStr("api_ratelimit_state_limit{organization=\"github-insights\"} 4500.0"))
                 .andExpect(containsStr("api_ratelimit_state_paused{organization=\"github-insights\"} 0.0"))
-                .andExpect(containsStr("api_ratelimit_state_remaining{organization=\"github-insights\"} 5000.0"))
+                .andExpect(containsStr("api_ratelimit_state_remaining{organization=\"github-insights\"} 4500.0"))
                 .andExpect(containsStr("api_ratelimit_state_reset{organization=\"github-insights\"}"))
                 .andExpect(containsStr("api_ratelimit_state_status{organization=\"github-insights\"} 4.0"))
                 .andExpect(containsStr("api_ratelimit_state_used{organization=\"github-insights\"} 0.0"));

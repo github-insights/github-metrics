@@ -99,7 +99,7 @@ class ApiStateTests {
         Runnable resetFn = this.state.stopRequestsAndGetResetFunction();
         assertTrue(this.state.getStatus().isEmpty());
         resetFn.run();
-        assertEquals(ApiRateLimitStatus.CRITICAL, getStatus());
+        assertEquals(ApiRateLimitStatus.WARNING, getStatus());
     }
 
     @Test

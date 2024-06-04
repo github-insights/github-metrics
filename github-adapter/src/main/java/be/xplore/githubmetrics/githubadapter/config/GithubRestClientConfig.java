@@ -26,7 +26,6 @@ public class GithubRestClientConfig {
     private final GithubUnauthorizedInterceptor unauthorizedInterceptor;
     private final DebugInterceptor debugInterceptor;
     private final GithubProperties githubProperties;
-    private final RateLimitingInterceptor rateLimitingInterceptor;
     private final ObservationRegistry observationRegistry;
     private final GithubRestClientRequestObservationConvention githubRestClientRequestObservationConvention;
 
@@ -36,14 +35,12 @@ public class GithubRestClientConfig {
             GithubUnauthorizedInterceptor unauthorizedInterceptor,
             DebugInterceptor debugInterceptor,
             GithubProperties githubProperties,
-            RateLimitingInterceptor rateLimitingInterceptor,
             ObservationRegistry observationRegistry,
             GithubRestClientRequestObservationConvention githubRestClientRequestObservationConvention
     ) {
         this.unauthorizedInterceptor = unauthorizedInterceptor;
         this.debugInterceptor = debugInterceptor;
         this.githubProperties = githubProperties;
-        this.rateLimitingInterceptor = rateLimitingInterceptor;
         this.observationRegistry = observationRegistry;
         this.githubRestClientRequestObservationConvention = githubRestClientRequestObservationConvention;
     }
@@ -52,10 +49,11 @@ public class GithubRestClientConfig {
     @Primary
     public GithubRestClient defaultGithubRestClient(
             GithubAuthTokenInterceptor githubAuthTokenInterceptor,
+            RateLimitingInterceptor rateLimitingInterceptor,
             GenericConversionService conversionService
     ) {
         return getGithubRestClient(
-                List.of(githubAuthTokenInterceptor, this.rateLimitingInterceptor),
+                List.of(githubAuthTokenInterceptor, rateLimitingInterceptor),
                 conversionService
         );
     }

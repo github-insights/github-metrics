@@ -3,7 +3,6 @@ package be.xplore.githubmetrics.domain.apistate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -18,6 +17,7 @@ public class ApiRateLimitState {
     private final double concerningLimit;
     private final double goodLimit;
     private long limit;
+    @SuppressWarnings("PMD:UnusedPrivateField")
     private long remaining;
     private long reset;
     private long used;
@@ -49,7 +49,7 @@ public class ApiRateLimitState {
 
             this.changeStatusAccordingToExpectedStatus(currentStatus);
 
-            LOGGER.debug("New Status is {}.", this.getStatus());
+            LOGGER.info("New Status is {}.", this.getStatus());
         });
     }
 
@@ -113,12 +113,7 @@ public class ApiRateLimitState {
     }
 
     public boolean limitHasBeenHit() {
-        return this.getRemaining() == 0;
-    }
-
-    public Duration getDurationToReset() {
-        var now = ZonedDateTime.now();
-        return Duration.between(now, this.getReset(now.getOffset()));
+        return this.getUsed() >= this.getLimit();
     }
 
     private void setActualStatus(ApiRateLimitStatus status) {
@@ -140,11 +135,11 @@ public class ApiRateLimitState {
 
     public Runnable stopRequestsAndGetResetFunction() {
         this.status = Optional.empty();
-        return this::resetStatusToCritical;
+        return this::setStatusAfterLimitReset;
     }
 
-    private void resetStatusToCritical() {
-        this.status = Optional.of(ApiRateLimitStatus.CRITICAL);
+    private void setStatusAfterLimitReset() {
+        this.status = Optional.of(ApiRateLimitStatus.WARNING);
     }
 
     public long getLimit() {
@@ -156,7 +151,7 @@ public class ApiRateLimitState {
     }
 
     public long getRemaining() {
-        return remaining;
+        return this.getLimit() - this.getUsed();
     }
 
     public void setRemaining(long remaining) {
@@ -193,5 +188,9 @@ public class ApiRateLimitState {
 
     public Optional<ApiRateLimitStatus> getStatus() {
         return status;
+    }
+
+    public Instant getInstantToReset() {
+        return Instant.ofEpochSecond(this.getReset());
     }
 }

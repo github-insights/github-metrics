@@ -79,9 +79,10 @@ public class RateLimitingInterceptor implements ClientHttpRequestInterceptor {
 
     private void handleHittingRateLimit() {
         if (this.rateLimitState.limitHasBeenHit()) {
+            LOGGER.warn("Rate Limit Has been Hit");
             var resetFunction = this.rateLimitState.stopRequestsAndGetResetFunction();
             this.resetAwaitScheduler.createStopAllRequestsTask(
-                    resetFunction, this.rateLimitState.getDurationToReset()
+                    resetFunction, this.rateLimitState.getInstantToReset()
             );
         }
     }
@@ -107,7 +108,7 @@ public class RateLimitingInterceptor implements ClientHttpRequestInterceptor {
             var resetHasNotHappened = previousRemainingRequests > this.rateLimitState.getRemaining();
             if (!resetHasNotHappened) {
                 LOGGER.error(
-                        "Rate limit reset seems to have happend. Remaining jumped form {} to {}",
+                        "Rate limit reset seems to have happened. Remaining jumped from {} to {}",
                         previousRemainingRequests, this.rateLimitState.getRemaining()
                 );
                 this.resetInterceptor();

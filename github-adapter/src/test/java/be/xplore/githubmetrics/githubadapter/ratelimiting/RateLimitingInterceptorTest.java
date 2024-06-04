@@ -72,7 +72,7 @@ class RateLimitingInterceptorTest {
         );
 
         verify(awaitScheduler).createStopAllRequestsTask(
-                any(Runnable.class), any(Duration.class)
+                any(Runnable.class), any(Instant.class)
         );
     }
 

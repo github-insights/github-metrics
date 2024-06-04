@@ -53,7 +53,7 @@ public class TestUtility {
     public static GithubAuthTokenInterceptor getAuthTokenInterceptor(GithubProperties githubProperties) {
         var restClientConfig = new GithubRestClientConfig(
                 new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR,
-                githubProperties, getRateLimitingInterceptor(), mock(ObservationRegistry.NOOP),
+                githubProperties, mock(ObservationRegistry.NOOP),
                 mock(GithubRestClientRequestObservationConvention.class)
         );
         var jwtInterceptor = new GithubJwtTokenInterceptor(githubProperties);
@@ -68,7 +68,7 @@ public class TestUtility {
     public static GithubRestClient getDefaultRestClientNoAuth(GithubProperties githubProperties) {
         var restClientConfig = new GithubRestClientConfig(
                 new GithubUnauthorizedInterceptor(), DEBUG_INTERCEPTOR,
-                githubProperties, getRateLimitingInterceptor(), ObservationRegistry.NOOP,
+                githubProperties, ObservationRegistry.NOOP,
                 mock(GithubRestClientRequestObservationConvention.class)
         );
         return restClientConfig.getGithubRestClient(new ArrayList<>(), new GenericConversionService());

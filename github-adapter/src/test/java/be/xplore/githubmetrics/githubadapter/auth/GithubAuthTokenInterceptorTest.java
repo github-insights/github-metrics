@@ -47,7 +47,6 @@ class GithubAuthTokenInterceptorTest {
             new GithubUnauthorizedInterceptor(),
             new DebugInterceptor(),
             githubProperties,
-            TestUtility.getRateLimitingInterceptor(),
             ObservationRegistry.NOOP,
             mock(GithubRestClientRequestObservationConvention.class)
     );
