@@ -28,7 +28,8 @@ public record GHActionRun(
 
     WorkflowRunStatus convertStatus() {
         return switch (this.conclusion) {
-            case "failure", "cancelled" -> WorkflowRunStatus.FAILED;
+            case "failure", "cancelled", "startup_failure" ->
+                    WorkflowRunStatus.FAILED;
             case "success" -> WorkflowRunStatus.DONE;
             case "neutral", "in_progress" -> this.statusFromStatus();
             case null -> this.statusFromStatus();
