@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
@@ -24,20 +24,22 @@ public class RateLimitResetAwaitScheduler {
     }
 
     public void createStopAllRequestsTask(
-            Runnable reset, Duration restartTime
+            Runnable reset, Instant restartTime
     ) {
-        this.stopEvicting = Optional.of(this.taskScheduler.scheduleWithFixedDelay(
-                () -> {
-                    reset.run();
-                    this.stopEvicting.get().cancel(false);
-                    this.stopEvicting = Optional.empty();
-                    LOGGER.trace("Finished reset await task. Remove the future.");
-                },
-                restartTime
-        ));
-        LOGGER.debug(
-                "Reset await task has been created, will run reset in {}s.",
-                restartTime.toSeconds()
-        );
+        if (this.stopEvicting.isEmpty()) {
+            this.stopEvicting = Optional.of(this.taskScheduler.schedule(
+                    () -> {
+                        reset.run();
+                        this.stopEvicting.get().cancel(false);
+                        this.stopEvicting = Optional.empty();
+                        LOGGER.info("Finished reset await task. Remove the future.");
+                    },
+                    restartTime
+            ));
+            LOGGER.warn(
+                    "Reset await task has been created, will run reset at {}.",
+                    restartTime
+            );
+        }
     }
 }

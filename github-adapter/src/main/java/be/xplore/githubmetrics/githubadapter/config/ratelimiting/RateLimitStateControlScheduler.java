@@ -14,7 +14,7 @@ public class RateLimitStateControlScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RateLimitStateControlScheduler.class);
     private final ApiRateLimitState rateLimitState;
-    private long lastRemainingRequests;
+    private long lastUsedRequests;
 
     public RateLimitStateControlScheduler(
             GithubProperties githubProperties,
@@ -22,7 +22,7 @@ public class RateLimitStateControlScheduler {
             ApiRateLimitState rateLimitState
     ) {
         this.rateLimitState = rateLimitState;
-        this.lastRemainingRequests = rateLimitState.getRemaining();
+        this.lastUsedRequests = rateLimitState.getUsed();
 
         String controlSchedule = githubProperties.ratelimiting().stateControlCheckSchedule();
 
@@ -38,17 +38,17 @@ public class RateLimitStateControlScheduler {
     private void controlApiRateLimitState() {
         LOGGER.info(
                 "Rate limit control scheduler ran with previous used {} and current used {}.",
-                this.lastRemainingRequests,
+                this.lastUsedRequests,
                 this.rateLimitState.getUsed()
         );
-        if (this.rateLimitState.getUsed() == this.lastRemainingRequests) {
+        if (this.lastUsedRequests == this.rateLimitState.getUsed()) {
             var previousStatus = this.rateLimitState.getStatus();
             this.rateLimitState.lowerStatusByOne();
-            LOGGER.debug(
-                    "Since previous used and current used are not equal status will be lowered from {} to {}.",
+            LOGGER.info(
+                    "Since previous used and current used are equal status will be lowered from {} to {}.",
                     previousStatus, this.rateLimitState.getStatus()
             );
         }
-        this.lastRemainingRequests = this.rateLimitState.getUsed();
+        this.lastUsedRequests = this.rateLimitState.getUsed();
     }
 }
