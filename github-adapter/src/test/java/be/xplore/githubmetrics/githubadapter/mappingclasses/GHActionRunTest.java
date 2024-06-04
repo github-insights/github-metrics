@@ -3,6 +3,7 @@ package be.xplore.githubmetrics.githubadapter.mappingclasses;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,12 +15,17 @@ class GHActionRunTest {
             "waiting", "pending"
     );
 
+    private final List<String> allConclusions = List.of(
+            "failure", "success", "neutral", "in_progress"
+    );
+
     @Test
     void convertingStatusCanHandleAllPossibleGithubStatuses() {
         assertDoesNotThrow(
-                () -> allStatuses.forEach(status ->
-                        new GHActionRun(0, "", status, 0, "", "")
-                                .convertStatus()
+                () -> allStatusCombinations((status, conclusion) ->
+                        new GHActionRun(
+                                0, "", status, conclusion, 0, "", ""
+                        ).convertStatus()
                 )
         );
     }
@@ -29,11 +35,34 @@ class GHActionRunTest {
         var actionRun = new GHActionRun(
                 0, "",
                 "radom unknown status that definetly does not exist",
+                null,
                 0, "", ""
         );
         assertThrows(
                 IllegalStateException.class,
                 actionRun::convertStatus
+        );
+    }
+
+    @Test
+    void convertingUnknownConclusionShouldThrowIllegalStateExeption() {
+        var actionRun = new GHActionRun(
+                0, "",
+                allStatuses.getFirst(),
+                "random conclusion that is not known",
+                0, "", ""
+        );
+        assertThrows(
+                IllegalStateException.class,
+                actionRun::convertStatus
+        );
+    }
+
+    void allStatusCombinations(BiConsumer<String, String> consumer) {
+        allStatuses.forEach(status ->
+                allConclusions.forEach(
+                        conclusion -> consumer.accept(status, conclusion)
+                )
         );
     }
 }
