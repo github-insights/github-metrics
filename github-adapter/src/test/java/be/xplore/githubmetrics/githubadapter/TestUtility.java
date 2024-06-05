@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.support.GenericConversionService;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -163,7 +163,7 @@ public class TestUtility {
     }
 
     public static String yesterday() {
-        return LocalDate.now().minusDays(1)
-                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return OffsetDateTime.now().minusDays(1)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 }

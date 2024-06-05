@@ -32,6 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -96,13 +97,11 @@ class IntegrationTests {
     }
 
     private void stubForWorkflowRunEndpoints() {
-        stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D"
-                        + TestUtility.yesterday() + "&page=0"
+        stubFor(get(urlMatching("/repos/github-insights/github-metrics/actions/runs\\?per_page=100&(.*)"))
+                .willReturn(ok()
+                        .withHeaders(TestUtility.getRateLimitingHeaders())
+                        .withBodyFile("WorkFlowRunsValidTestData.json")
                 )
-                        .willReturn(ok()
-                                .withHeaders(TestUtility.getRateLimitingHeaders())
-                                .withBodyFile("WorkFlowRunsValidTestData.json")
-                        )
         );
         stubFor(get("/repos/github-insights/github-metrics/actions/runs?per_page=100")
                 .willReturn(ok()
