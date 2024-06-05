@@ -27,8 +27,8 @@ app:
             workflow_runs: ${EXPORTERS_SCHEDULING_WORKFLOW_RUNS:*/30 * * * * ?}
             active_workflow_runs: ${EXPORTERS_SCHEDULING_ACTIVE_WORKFLOW_RUNS:*/30 * * * * ?}
             jobs: ${EXPORTERS_SCHEDULING_JOBS:*/30 * * * * ?}
-            workflow_run_build_times: ${EXPORTERS_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:*/30 * * * * ?}
-            pull_requests: ${EXPORTERS_SCHEDULING_PULL_REQUESTS:*/30 * * * * ?}
+            workflow_run_build_times: ${EXPORTERS_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:45 */30 * * * ?}
+            pull_requests: ${EXPORTERS_SCHEDULING_PULL_REQUESTS:30 */30 * * * ?}
             self_hosted_runners: ${EXPORTERS_SCHEDULING_SELF_HOSTED_RUNNERS:*/30 * * * * ?}
             repository_count: ${EXPORTERS_SCHEDULING_REPOSITORY_COUNT:*/30 * * * * ?}
             api_ratelimit_state: ${EXPORTERS_SCHEDULING_API_RATELIMIT_STATE:*/15 * * * * ?}
@@ -77,7 +77,7 @@ togglz:
         EXPORTER_JOBS_FEATURE:
             enabled: ${EXPORTER_JOBS_FEATURE:false}
         EXPORTER_WORKFLOW_RUNS_FEATURE:
-            enabled: ${EXPORTER_WORKFLOW_RUNS_FEATURE:false}
+            enabled: ${EXPORTER_WORKFLOW_RUNS_FEATURE:true}
         EXPORTER_ACTIVE_WORKFLOW_RUNS_FEATURE:
             enabled: ${EXPORTER_ACTIVE_WORKFLOW_RUNS_FEATURE:false}
         EXPORTER_WORKFLOW_RUN_BUILD_TIMES_FEATURE:
@@ -85,6 +85,6 @@ togglz:
         EXPORTER_SELF_HOSTED_RUNNERS_FEATURE:
             enabled: ${EXPORTER_SELF_HOSTED_RUNNERS_FEATURE:false}
         EXPORTER_REPOSITORIES_FEATURE:
-            enabled: ${EXPORTER_REPOSITORIES_FEATURE:false}
+            enabled: ${EXPORTER_REPOSITORIES_FEATURE:true}
         EXPORTER_PULL_REQUESTS_FEATURE:
             enabled: ${EXPORTER_PULL_REQUESTS_FEATURE:false}
