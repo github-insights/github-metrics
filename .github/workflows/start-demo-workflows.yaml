@@ -1,6 +1,6 @@
-name: Demo Workflows Trigger
+name: Build Process Workflows Trigger
 
-on: 
+on:
     workflow_dispatch:
 
 jobs:
