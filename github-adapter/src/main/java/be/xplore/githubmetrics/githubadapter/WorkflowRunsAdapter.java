@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +66,7 @@ public class WorkflowRunsAdapter implements WorkflowRunsQueryPort, ScheduledCach
         var parameters = new HashMap<String, String>();
         parameters.put("per_page", "100");
         parameters.put("page", "0");
-        parameters.put("created", ">=" + LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        parameters.put("created", ">=" + OffsetDateTime.now().minusDays(1).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         return parameters;
     }
 

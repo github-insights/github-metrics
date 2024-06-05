@@ -16,7 +16,7 @@ import java.util.List;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,8 +51,8 @@ class WorkflowRunsAdapterTest {
     @Test
     void workFlowRunsTest() {
         stubFor(
-                get(urlEqualTo(
-                        "/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
+                get(urlMatching(
+                        "/repos/github-insights/github-metrics/actions/runs\\?per_page=100&(.*)"))
                         .willReturn(
                                 aResponse()
                                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -67,7 +67,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workFlowRunsInvalidResponseTest() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
+        stubFor(get(urlMatching("/repos/github-insights/github-metrics/actions/runs\\?per_page=100&(.*)"))
                 .willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -82,7 +82,7 @@ class WorkflowRunsAdapterTest {
 
     @Test
     void workflowRunsQueryShouldHaveCorrectStatus() {
-        stubFor(get(urlEqualTo("/repos/github-insights/github-metrics/actions/runs?per_page=100&created=%3E%3D" + TestUtility.yesterday() + "&page=0"))
+        stubFor(get(urlMatching("/repos/github-insights/github-metrics/actions/runs\\?per_page=100&(.*)"))
                 .willReturn(
                         aResponse()
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
