@@ -41,7 +41,7 @@ app:
                 schedule: ${CACHE_EVICTION_SCHEDULING_ACTIVE_WORKFLOW_RUNS:30 * * * * ?}
                 status: ${CACHE_EVICTION_ACTIVE_WORKFLOW_RUNS_STOP_EVICTION_STATUS:}
             jobs:
-                schedule: ${CACHE_EVICTION_SCHEDULING_JOBS:0 */5 * * * ?}
+                schedule: ${CACHE_EVICTION_SCHEDULING_JOBS:0 */1 * * * ?}
                 status: ${CACHE_EVICTION_JOBS_STOP_EVICTION_STATUS:CONCERNING}
             workflow_run_build_times:
                 schedule: ${CACHE_EVICTION_SCHEDULING_WORKFLOW_RUN_BUILD_TIMES:10 0 * * * ?}
