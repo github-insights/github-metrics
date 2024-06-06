@@ -1,8 +1,8 @@
-name: Prep Dog Food
+name: Update Documentation
 
 on:
     workflow_run:
-        workflows: ["Demo Workflows Trigger"]
+        workflows: ["Begin Build Workflows Trigger"]
         types:
             -  completed
 
@@ -13,21 +13,21 @@ jobs:
             contents: read
 
         steps:
-            -   name: Cut Beef
+            -   name: Download Tooling
                 run: sleep $((RANDOM % 200))
                 shell: bash
             -   name: Success?
                 run: test $((RANDOM % 20 )) -ge 1
                 shell: bash
 
-            -   name: Cut Chicken
+            -   name: Compile Doc Files
                 run: sleep $((RANDOM % 200))
                 shell: bash
             -   name: Success?
                 run: test $((RANDOM % 20 )) -ge 1
                 shell: bash
 
-            -   name: cut Herbs
+            -   name: Upload
                 run: sleep $((RANDOM % 200))
                 shell: bash
             -   name: Success?

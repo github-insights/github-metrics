@@ -1,26 +1,27 @@
-name: Create Beef Dog Food
+name: Build and Test
 
 on:
     workflow_run:
-        workflows: ["Demo Workflows Trigger"]
+        workflows: ["Begin Build Workflows Trigger"]
         types:
             -  completed
 
 jobs:
-    cook:
+    prepare:
 
         runs-on: ubuntu-latest
         permissions:
             contents: read
 
         steps:
-            -   name: Cook Beef
-                run: sleep $((RANDOM % 100))
+            -   name: Cook Chicken
+                run: sleep $((RANDOM % 400))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 40 )) -ge 1
+                run: test $((RANDOM % 30 )) -ge 1
                 shell: bash
-    herbs:
+    build:
+        needs: prepare
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -30,22 +31,22 @@ jobs:
                 run: sleep $((RANDOM % 150))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 40 )) -ge 1
+                run: test $((RANDOM % 30 )) -ge 1
                 shell: bash
-    cool:
-        needs: cook
+    test1:
+        needs: build
         runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
             -   name: Let Cool
-                run: sleep $((RANDOM % 300))
+                run: sleep $((RANDOM % 400))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 40 )) -ge 1
+                run: test $((RANDOM % 30 )) -ge 1
                 shell: bash
-    can:
-        needs: cool
+    test2:
+        needs: build
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -54,5 +55,5 @@ jobs:
                 run: sleep $((RANDOM % 300))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 40 )) -ge 1
+                run: test $((RANDOM % 30 )) -ge 1
                 shell: bash
