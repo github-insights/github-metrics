@@ -1,6 +1,6 @@
-name: Build Process Workflows Trigger
+name: Begin Build Workflows Trigger
 
-on:
+on: 
     workflow_dispatch:
 
 jobs:

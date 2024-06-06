@@ -1,26 +1,26 @@
-name: Create Chicken Dog Food
+name: Deploy and Publish
 
 on:
     workflow_run:
-        workflows: ["Demo Workflows Trigger"]
+        workflows: ["Build and Test"]
         types:
             -  completed
 
 jobs:
-    cook:
+    get-information:
 
         runs-on: ubuntu-latest
         permissions:
             contents: read
 
         steps:
-            -   name: Cook Chicken
-                run: sleep $((RANDOM % 400))
+            -   name: Cook Beef
+                run: sleep $((RANDOM % 100))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 30 )) -ge 1
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
-    herbs:
+    download-buildfile:
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -30,22 +30,22 @@ jobs:
                 run: sleep $((RANDOM % 150))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 30 )) -ge 1
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
-    cool:
-        needs: cook
+    verify:
+        needs: "download-buildfile"
         runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
             -   name: Let Cool
-                run: sleep $((RANDOM % 400))
+                run: sleep $((RANDOM % 300))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 30 )) -ge 1
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
-    can:
-        needs: cool
+    publish:
+        needs: verify
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -54,5 +54,5 @@ jobs:
                 run: sleep $((RANDOM % 300))
                 shell: bash
             -   name: Success?
-                run: test $((RANDOM % 30 )) -ge 1
+                run: test $((RANDOM % 40 )) -ge 1
                 shell: bash
