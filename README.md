@@ -26,3 +26,6 @@ Looking for a list of all exposed data, check out the [metrics page](https://git
 Through environment variables Our service is is highly configurable, many of the values can be configured to your
 liking. To find out what exactly can be configured go [here](https://github-insights.github.io/configuration/configuration/) to find a list of
 all environment variables.
+
+
+# dummy
