@@ -5,7 +5,7 @@ val togglzTestVersion: String by project
 
 plugins {
     id("org.springframework.boot") version "3.3.0"
-    id("io.spring.dependency-management") version "1.1.5"
+    id("io.spring.dependency-management") version "1.1.6"
     id("org.sonarqube") version "5.0.0.4638"
     id("jacoco-report-aggregation")
     id("pmd")
